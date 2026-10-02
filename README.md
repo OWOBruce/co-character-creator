@@ -8,7 +8,9 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 - **Windows**, with **Champions Online** installed (Steam or Arc).
 - About **320 MB** of free space: the editor itself, plus the data it builds from your game.
-- Nothing else to install: the program carries everything it needs.
+- An **internet connection** while the editor is open: the page loads its 3D engine and fonts from the web (see [Dependencies](#dependencies)).
+- Microsoft Edge (part of Windows) or Google Chrome, for the editor's own window. Any other browser works too.
+- Nothing else to install: the program carries everything else it needs.
 
 ## Starting it
 
@@ -27,9 +29,9 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 Starting it again while the editor is already open just opens another editor window. The editor stops about 10 seconds after its last window closes.
 
-### Starting it with Python instead (`start.bat`)
+### Starting it from the source code, with Python (`start.bat`)
 
-`start.bat` starts the same editor with an installed Python (3.10 or newer, from [python.org](https://www.python.org/downloads/) with **"Add python.exe to PATH"** ticked). It installs Pillow and numpy the first time. It keeps a black window open that shows what the editor is doing; closing that window stops the editor. `start.bat --browser` opens a normal browser tab instead of the editor window. This is handy for testing, or for an AI assistant that needs to start the editor.
+Download the source from [GitHub](https://github.com/codexheroes/co-character-creator) (**Code → Download ZIP**, or `git clone`). `start.bat` starts the same editor with an installed Python (3.10 or newer, from [python.org](https://www.python.org/downloads/) with **"Add python.exe to PATH"** ticked). It installs Pillow and numpy the first time. It keeps a black window open that shows what the editor is doing; closing that window stops the editor. `start.bat --browser` opens a normal browser tab instead of the editor window. This is handy for testing, or for an AI assistant that needs to start the editor.
 
 ## Using it
 
@@ -83,6 +85,10 @@ You can give these files to an AI assistant and ask for a costume ("a noir detec
 
 The editor then checks the costume. It fixes what it can (for example, it snaps every colour to the creator's palette) and shows a short report before loading it. There is an example in `examples\night_courier.json`.
 
+### With Claude Code
+
+The editor comes with a skill for [Claude Code](https://claude.com/claude-code), **build-costume** (in `.claude\skills`). Open Claude Code in the editor's folder (with the installer, `%LOCALAPPDATA%\Programs\CO Costume Editor`) and describe a character: "make me a cowgirl", "make her a space cowboy", "more glow". Claude picks pieces from the index, writes and checks the costume, loads it into the editor in its browser pane, and looks at it close up for pieces poking through each other before showing you. It can also restyle a character from a `Costume_*.jpg` you drop in. Start the editor once first, so the index is built. When you like the result, use **Save** in the editor to put it into the game.
+
 ## If something goes wrong
 
 - **The program doesn't start, or closes straight away:** its log is in `%LOCALAPPDATA%\CO Costume Editor\editor.log` (paste that into File Explorer's address bar).
@@ -100,6 +106,29 @@ The editor then checks the costume. It fixes what it can (for example, it snaps 
   - custom reflection and shine settings saved in a costume are kept but not shown yet.
 - About 1,000 pieces the game downloads on demand aren't in a fresh install, so they can't be shown.
 
-## Sharing it
+## Dependencies
 
-Send people to the [releases page](https://github.com/codexheroes/co-character-creator/releases/latest). To make a release yourself: `python make_release.py` makes a zip of the editor with `CO Costume Editor.exe` in it (this needs PyInstaller: `python -m pip install pyinstaller`), `--installer` also makes the Setup.exe (this needs [Inno Setup 6](https://jrsoftware.org/isdl.php)), and `--source-only` makes a small zip without the program, for people who use `start.bat`. Either way it includes only the editor itself (with the piece descriptions and the costume-building skill for AI assistants), never data built from your game: each person's copy builds its own from their install. Your own costumes in `my_costumes/` stay out.
+- **Inside the program and the installer:** Python 3.10, [Pillow](https://python-pillow.org/) and [NumPy](https://numpy.org/) (reading the game's images and building the index), and tkinter (the folder and file pickers).
+- **Loaded by the editor page when it opens** (this is why it needs the internet): [three.js](https://threejs.org/) 0.160 for the 3D view, from the jsDelivr CDN, and the Bangers and Comic Neue fonts from Google Fonts.
+- **Running from the source code:** Python 3.10 or newer, plus Pillow and NumPy (`requirements.txt`; `start.bat` installs them).
+- **For developers only:** [PyInstaller](https://pyinstaller.org/) and [Inno Setup 6](https://jrsoftware.org/isinfo.php) to make the program and installer, the `anthropic` package for writing the piece descriptions (`describe.py`), `capstone` for `tools\disasm.py`, and Node.js for one test. See [DEVELOPER.md](DEVELOPER.md).
+
+## Privacy
+
+Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above. Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` in its own folder.
+
+## Feedback and source code
+
+Found a bug, or have an idea? Open an [issue](https://github.com/codexheroes/co-character-creator/issues). The source code is at [github.com/codexheroes/co-character-creator](https://github.com/codexheroes/co-character-creator), and [DEVELOPER.md](DEVELOPER.md) explains how it works.
+
+## Credits
+
+Made by **@sadders1**. Feel free to hit me up in-game!
+
+Special thanks to the **[Adventurers](https://codexheroes.com/co/adventurers/)** supergroup for their help with testing.
+
+## License and legal
+
+The CO Costume Editor is free software under the [GNU General Public License v3.0](LICENSE).
+
+Champions Online, its characters, costume pieces, artwork and other game content are the property of their respective owners. The CO Costume Editor is an unofficial fan project. It is not affiliated with, endorsed by or supported by Cryptic Studios, Arc Games or any owner of Champions Online. It reads the game files from your own installation and does not include or redistribute them. Use it at your own risk.
