@@ -20,6 +20,31 @@ function labelled(label, buttons) {
 }
 const GROUP_NAMES = { Player_Body_Scales_1: 'Face', Player_Body_Scales_2: 'Upper Body', Player_Body_Scales_3: 'Lower Body',
                       Player_Body_Scales_4: 'Tail & Wings' };
+// The names the game's creator shows where the data's differ: by slider (the data calls both female hand
+// sliders "Hands"), else by the data's name.
+const GAME_NAMES_BY_SLIDER = { Player_Arm_Length: 'Arm Length', Player_Hand_Size: 'Hand Length', Player_Hand_Thick: 'Hands',
+                               Player_Leg_Length: 'Leg Length', Player_Tail_Thickness: 'Tail' };
+const GAME_NAMES = { 'Arm Thickness': 'Arms', 'Leg Thickness': 'Legs', Neck: 'Neck Thickness', 'Eye Size': 'Eyes',
+                     'Cheek Height': 'Cheeks Height', Wrist: 'Wrists', 'Chin Size': 'Chin' };
+const gameName = (slider, name) => GAME_NAMES_BY_SLIDER[slider] || GAME_NAMES[name] || name;
+// The game creator's order within each group (read left to right, top to bottom), by the game's names;
+// anything not listed keeps its place after these. The face's BodyScale tracks (mouth, brow, jaw) come
+// first, as the game puts the mouth.
+const GAME_ORDER = {
+  Player_Body_Scales_1: ['Mouth', 'Brow', 'Jaw Length', 'Jaw Width', 'Mouth Width', 'Head', 'Head Height', 'Head Width',
+                         'Head Depth', 'Eyes', 'Eye Height', 'Eye Position', 'Cheeks', 'Cheeks Height', 'Ears', 'Ear Points',
+                         'Nose Width', 'Nose Length', 'Nose Height', 'Nose Position', 'Chin', 'Chin Width'],
+  Player_Body_Scales_2: ['Neck Thickness', 'Neck Length', 'Shoulders', 'Chest Width', 'Chest Depth', 'Chest Length', 'Arm Length',
+                         'Arms', 'Bicep', 'Forearm', 'Wrists', 'Hand Length', 'Hands', 'Breasts'],
+  Player_Body_Scales_3: ['Waist', 'Waist Length', 'Leg Length', 'Legs', 'Upper Leg', 'Lower Leg', 'Feet Length', 'Feet Width'],
+  Player_Body_Scales_4: ['Tail Length', 'Tail', 'Wings', 'Wings (insect)', 'Wings (butterfly)'],
+};
+const gameOrder = (group, items, name) => {
+  const order = GAME_ORDER[group] || [], at = x => { const i = order.indexOf(name(x)); return i < 0 ? order.length : i; };
+  return items.map((x, i) => [x, i]).sort((a, b) => at(a[0]) - at(b[0]) || a[1] - b[1]).map(([x]) => x);
+};
+// feet as the game shows height: 5' 4"
+const feetInches = ft => { const inches = Math.round(ft * 12); return `${Math.floor(inches / 12)}' ${inches % 12}"`; };
 
 export class BodyPanel {
   // bodyRoot: presets and sliders; stanceRoot: stance, mood and pose
@@ -103,10 +128,13 @@ export class BodyPanel {
   }
 
   // ---- sliders -------------------------------------------------------------------------------------
-  slider(label, min, max, step, value, def, onInput, title) {
+  // The number shown counts from 0 at the slider's left end, as the game's creator shows it (the game's
+  // values can run from below 0, e.g. -100 to 100); the value kept is the game's. show: another way to
+  // show it (height in feet and inches).
+  slider(label, min, max, step, value, def, onInput, title, show = null) {
     const row = el('div', 'slider');
     const l = el('span', null, label); l.title = (title ? title + '\n' : '') + 'Double-click to reset';
-    const fmt = v => (+v).toFixed(step < 1 ? 2 : 0);
+    const fmt = v => show ? show(+v) : (+v - min).toFixed(step < 1 ? 2 : 0);
     const out = el('span', 'val', fmt(value));
     const s = gameSlider({ min, max, step, value, onInput: v => { out.textContent = fmt(v); onInput(v); } });
     l.ondblclick = () => { s.value = def; out.textContent = fmt(def); onInput(def); };
@@ -124,9 +152,9 @@ export class BodyPanel {
     const { cat, ch } = this, body = cat.body, vals = ch.bodyValues;
     const wrap = el('div', 'sliders');
     const changed = () => ch.updateBody();
-    // Body: height, body mass, muscle
-    const bodyRows = [this.slider('Height (ft)', body.heightRange[0], body.heightRange[1], 0.01, vals.height, body.heightBase,
-                                  v => { vals.height = v; changed(); })];
+    // Body: height, muscle, body mass (the game's Basics)
+    const bodyRows = [this.slider('Height', body.heightRange[0], body.heightRange[1], 0.01, vals.height, body.heightBase,
+                                  v => { vals.height = v; changed(); }, '', feetInches)];
     const scaleRow = i => {
       const b = vals.bodyScales[i], lo = body.bodyScaleRange[0]?.[i] ?? 0, hi = body.bodyScaleRange[1]?.[i] ?? 100;
       const label = (body.bodyScaleNames?.[i] || b.name) + (b.fallback ? ' (approx.)' : b.track ? '' : ' (no data)');
@@ -135,19 +163,22 @@ export class BodyPanel {
                          b.fallback ? 'Game track not installed; using scale channels of ' + b.fallback : '');
     };
     const mass = vals.bodyScales.findIndex(b => b.name.toLowerCase() === 'bodymass');
-    if (mass >= 0) bodyRows.push(scaleRow(mass));
     if (!body.noMuscle) bodyRows.push(this.slider('Muscle', body.muscleRange[0], body.muscleRange[1], 1, vals.muscle, body.defaultMuscle, v => ch.setMuscle(v)));
+    if (mass >= 0) bodyRows.push(scaleRow(mass));
     wrap.append(this.group('Body', bodyRows));
     // the skeleton's player groups; the face group also gets the face BodyScale tracks
     const worn = new Set(ch.subs().map(s => s.name));
     for (const g of body.sliderGroups) {
       const list = g.sliders.filter(s => !body.sliders[s.name].subSkeleton || worn.has(body.sliders[s.name].subSkeleton));
-      const rows = list.map(s => {
+      const items = list.map(s => ({ name: gameName(s.name, s.displayName), row: () => {
         const def = body.sliders[s.name];
-        return this.slider(s.displayName, def.min, def.max, 1, vals.scaleValues[s.name] ?? 0, 0,
+        return this.slider(gameName(s.name, s.displayName), def.min, def.max, 1, vals.scaleValues[s.name] ?? 0, 0,
                            v => { vals.scaleValues[s.name] = v; changed(); });
+      } }));
+      if (g.name === 'Player_Body_Scales_1') vals.bodyScales.forEach((b, i) => {
+        if (i !== mass) items.push({ name: body.bodyScaleNames?.[i] || b.name, row: () => scaleRow(i) });
       });
-      if (g.name === 'Player_Body_Scales_1') vals.bodyScales.forEach((b, i) => { if (i !== mass) rows.push(scaleRow(i)); });
+      const rows = gameOrder(g.name, items, x => x.name).map(x => x.row());
       if (rows.length) wrap.append(this.group(GROUP_NAMES[g.name] || g.displayName, rows));
     }
     return wrap;
