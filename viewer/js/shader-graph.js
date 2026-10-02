@@ -13,14 +13,37 @@
 //   colour  = albedo (diffuse + ambient) + SpecularValue SpecularColor x pow(dot(L, R), 128 SpecularExponent)
 //             + lerp(Unlit, Unlit refl, reflection_weight) + add refl
 // Colours are computed in the game's (gamma) space and converted to linear for three's lighting.
-// Not the game's: the reflection cube (the game's comes from the map's sky), screen refraction (drawn as
-// additive over the background), and the runtime values of oscillators / scrolling (1 + A sin / rate x time).
+// The reflection cube is the game's own default, TerrainTest_cube: the game uses it whenever the sky names
+// none, and the creator's (Sky_Player_Costume_Creator) doesn't (sky blending 0xf396c0, material binding
+// 0xfaf4c0). setGameReflections(false) puts back the plain sky / ground gradient used before (kept, not
+// offered on the page).
+// Not the game's: screen refraction (drawn as additive over the background), and the runtime values of
+// oscillators / scrolling (1 + A sin / rate x time).
 import * as THREE from 'three';
+import { ddsCubeTexture } from './dds.js';
+import { ASSET_ROOT } from './catalog.js';
 
 export const graphTime = { value: 0 };  // seconds, advanced by tickShaders()
 export function tickShaders(now) { graphTime.value = (now / 1000) % 3600; }
 
-// A simple sky / ground cube for reflections
+// What every material reflects (one uniform, shared, so switching it changes them all)
+const ENV = { value: null };
+const GAME_REFLECTION = 'dds/system/cubemaps/TerrainTest_cube.dds';
+let gameCube = null;  // the game's map, once asked for: a promise of the texture (null if it can't be read)
+let useGame = false;
+// The game's reflection map (the default), or the gradient: off, until the map has loaded, or if it can't be read.
+export function setGameReflections(on) {
+  useGame = on;
+  ENV.value = environment();
+  if (!on) return;
+  gameCube ||= fetch(ASSET_ROOT + GAME_REFLECTION)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+    .then(ddsCubeTexture)
+    .catch(e => { console.warn('reflection map', e); return null; });
+  gameCube.then(t => { if (t && useGame) ENV.value = t; });
+}
+
+// A simple sky / ground cube for reflections (the stand-in from before the game's was found)
 let envCube = null;
 function environment() {
   if (envCube) return envCube;
@@ -39,6 +62,8 @@ function environment() {
   envCube.needsUpdate = true;
   return envCube;
 }
+
+setGameReflections(true);
 
 const V = (x) => `vec4(${[0, 1, 2, 3].map(i => (+(x[i] ?? x[x.length - 1] ?? 0)).toFixed(6)).join(', ')})`;
 
@@ -190,7 +215,7 @@ export function createGraphMaterial(shaders, shaderName) {
   mat.normalMap = FLAT_NORMAL;  // turns on three's tangent frame (tbn); the graph supplies the normal
   const u = {
     coTime: graphTime, coColor0: { value: new THREE.Vector4(1, 1, 1, 1) }, coTint: { value: new THREE.Vector4(1, 1, 1, 1) },
-    coEnv: { value: environment() },
+    coEnv: ENV,
     coRawMask: { value: false }, coNormals: { value: true },
   };
   for (const [name, spec] of Object.entries(prog.uniforms)) {
@@ -220,7 +245,9 @@ export function createGraphMaterial(shaders, shaderName) {
         float coReflW = co_reflectionweight.x * ( 1.0 - clamp( co_reflectionaddpercent.x, 0.0, 1.0 ) );
         float coReflAdd = co_reflectionweight.x * clamp( co_reflectionaddpercent.x, 0.0, 1.0 );
         vec3 coRefl = vec3( 0.0 );
-        ${prog.reflection ? `coRefl = textureCube( coEnv, ( vec4( reflect( -coView, normal ), 0.0 ) * viewMatrix ).xyz ).rgb * co_reflectioncolormask.xyz;` : 'coReflW = 0.0; coReflAdd = 0.0;'}
+        // the reflection direction in world space, then in the game's (left-handed: the viewer mirrors X)
+        ${prog.reflection ? `{ vec3 r = ( vec4( reflect( -coView, normal ), 0.0 ) * viewMatrix ).xyz;
+          coRefl = textureCube( coEnv, vec3( -r.x, r.yz ) ).rgb * co_reflectioncolormask.xyz; }` : 'coReflW = 0.0; coReflAdd = 0.0;'}
         vec3 coAlbedo = mix( co_litcolor.xyz, co_litcolor.xyz * coRefl, coReflW );
         vec3 coUnlit = mix( co_unlitcolor.xyz, co_unlitcolor.xyz * coRefl, coReflW ) + coReflAdd * coRefl;
         coAlpha = clamp( co_alpha.w, 0.0, 1.0 );
