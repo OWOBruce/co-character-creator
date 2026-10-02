@@ -4,6 +4,8 @@ A costume creator for **Champions Online** that runs in your web browser. You ca
 
 The editor reads everything (pieces, materials, colours, animations) straight from your own copy of the game. It contains no game files, and it never changes your install.
 
+**[⬇ Download the installer for Windows](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version) · [All releases](https://github.com/codexheroes/co-character-creator/releases)
+
 ## What you need
 
 - **Windows**, with **Champions Online** installed (Steam or Arc).
