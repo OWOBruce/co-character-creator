@@ -110,9 +110,8 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 
 - Weapons aren't offered. A loaded costume keeps its weapons when you save it.
 - The preview is close to the game but not identical:
-  - reflections, see-through effects, glow and cape movement are approximations;
+  - see-through effects and glow are approximations, and there's no bloom;
   - custom reflection and shine settings saved in a costume are kept but not shown yet.
-- About 1,000 pieces the game downloads on demand aren't in a fresh install, so they can't be shown.
 
 ## Dependencies
 
