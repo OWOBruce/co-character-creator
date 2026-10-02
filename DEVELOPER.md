@@ -293,16 +293,85 @@ Capes, cloth skirts, scarves and similar pieces (214 player pieces) use the game
   - In the step, the wind is a steady acceleration `direction × speed × 10`, alongside gravity.
   - It also makes a travelling ripple: each particle gets a push along its normal of `sin((dot(p − root, D) − 20·WaveTimeScale·t)·WavePeriodScale) × |N| × dt × 0.05 × WindRippleScale`.
   - `NormalWindFromMovement` and `FakeWindFromMovement` add wind from the character's own motion (both 0 on player capes).
-  - The world wind comes from each map's sky (Speed 0–10, variation, direction, change rate). The creator's sky (`Master_Exterior`) isn't in the client data, so View → Wind / Direction / Gusts set it. The default is no wind (capes hang still), and the gust pattern is the viewer's own.
-- **Written here (the game's constraint/collision solvers, attachment harness and tessellation are not ported):**
+  - The world wind comes from each map's sky (Speed 0–10, variation, direction, change rate). View → Wind / Direction / Gusts set it here. (The skies are in `bin/Skies.bin` after all, and `Master_Exterior` has a wind: see "Creator lighting" below.) The default is no wind (capes hang still), and the gust pattern is the viewer's own.
+- **Two solvers** share the particles, skinning, wind and drawing (`ClothBase` in `cloth.js`). The editor uses `GameClothSim` (`viewer/js/cloth-game.js`), which follows the game's solver as traced below. The earlier `ClothSim` is kept but no longer offered on the page (it had a View → Game cloth switch while the two were compared): `Character.options.gameCloth = false` picks it for new pieces, and `Character.setClothSolver(false)` rebuilds the loaded cloth with it.
+- **The earlier solver (`ClothSim`), written here before the game's was traced:**
   - distance constraints on mesh edges, plus bending constraints across edge-sharing triangles at strength `Stiffness`;
   - particles at or below `MinWeight` follow the skinned body; between Min and Max they are pulled toward it by `(1 − t)^exponent`;
   - cylinder and sphere push-out with the particle radius;
   - `MovingBackwards` shapes are skipped (the creator character stands still);
   - a particle that starts inside a shape (e.g. the cape's top edge inside the "ceiling" cylinder above the shoulders) is exempt from that shape;
   - it runs in world space at a fixed 1/60 s step and settles for 1.5 s when a piece is loaded;
-  - **tessellation:** pieces whose `DynClothInfo` has `Tessellate` set (Cape_Default, Cape_Heavy…) are drawn through two levels of Loop subdivision (`viewer/js/cloth-tess.js`). A cape goes from 128 to 2048 triangles. The simulation still runs on the coarse particles: the fine vertices are a fixed weighted sum of them, and normals are welded across UV seams so the surface shades smoothly. The game's own tessellator is not ported; Loop is a standard scheme with a similar result. `Notessellate` pieces are drawn coarse, as in the game.
-- **Cost:** three cloth pieces take 0.2 ms per frame. View → Cloth turns it off for pieces loaded afterwards; they then keep their modelled shape.
+- **Drawing (both solvers):** pieces whose `DynClothInfo` has `Tessellate` set (Cape_Default, Cape_Heavy…) are drawn through two levels of Loop subdivision (`viewer/js/cloth-tess.js`). A cape goes from 128 to 2048 triangles. The simulation still runs on the coarse particles: the fine vertices are a fixed weighted sum of them, and normals are welded across UV seams so the surface shades smoothly. The game's own tessellator is not ported; Loop is a standard scheme with a similar result. `Notessellate` pieces are drawn coarse, as in the game.
+- **Cost:** three cloth pieces take 0.2 ms per frame with the earlier solver, about 0.12 ms with the game's (one constraint pass). View → Cloth turns it off for pieces loaded afterwards; they then keep their modelled shape.
+
+#### The game's solver, traced 2026-10-02 (`cloth-game.js`)
+
+Read from `GameClient.exe` (`dynCloth*.c`) and described here in our own words. `cloth-game.js` is written fresh from these notes, not copied. It departs from the game in two ways: a steady 60 steps a second (the game takes one per frame, so its cloth runs faster at high frame rates), and no sleep. The drawing is still our Loop smoothing.
+- **Corrects the "ported" note above:** gravity is `GravityScale × 32` ft/s² (`0x15ff1d0` stores −32 at cloth `+0x174`; `+0x1c0` is GravityScale). The ×10 is the wind only. Each step lasts a fixed `0.01 × TimeScale / NumIterations` s of cloth time, whatever the frame time (`0x169f660`).
+  - Steps per frame: `round(frameTime × 60)`, at least 1 and at most 4 (`0x15ff560`). Each step runs NumIterations sub-iterations, clamped to 1–8 (`0x15ff450`).
+  - So at 60 fps a cape gets one 0.01 s step per frame, and gravity moves a particle `3 × 32 × 0.01²` = 0.0096 ft per step². Ours, 30 ft/s² at 1/60 s, gives 0.0083, which is close by chance.
+- **Particles** (`dynClothBuild` `0x16b9650`, `0x16b87b0`):
+  - Each vertex's weight `w` on the `Cloth` bone is its mass, and its inverse mass is `1/w`. A vertex with no Cloth weight has inverse mass 0 and is pinned.
+  - **MinWeight and MaxWeight aren't read** by any code traced.
+  - Every particle is hooked to its own skinned vertex (the "attach harness", `0x16b9030`: one eyelet per particle).
+- **Per step:**
+  1. **Targets** (`0x169da00`). Each particle is pulled toward its skinned position by `(1 − w)^ClothBoneInfluenceExponent`: fully for pinned particles, not at all for `w = 1`. Its velocity is cut by the same fraction. During sub-steps the target is interpolated across the frame.
+  2. **Verlet** (`0x169d550`). The velocity is multiplied by `(1 − Drag/NumIterations) × w^exponent`, so partly held particles move sluggishly. The step then adds gravity and wind. `Stiffness > 1` (only possible with `AllowExtraStiffness`, which no player cloth has) would also blend toward the rest shape.
+  3. **Collision** (`0x169d2d0`), before the constraints:
+     - Each shape is applied up to 5 times.
+     - The push-out is scaled by `w`, so partly held particles give way only partly.
+     - Contact depth over the particle radius, capped at 1, is kept per particle (`+0xc4`). It reduces that particle's inverse mass in the constraint pass by `1/(1 + 0.1·depth²)`.
+  4. **Constraints** (`0x169eb80` → `0x16c73e0`):
+     - One Gauss–Seidel pass over every constraint, with no extra iterations.
+     - The correction is weighted by inverse mass (`1/w`, so particles near the pins are the light ones) and scaled by `Stiffness`, clamped to 0.001–1, and by `1/NumIterations`.
+     - Rest lengths are multiplied by the character's scale relative to the scale at build time (average of x, y, z).
+  5. **Seam duplicates** (UV splits within 0.001 ft) are averaged together after the constraint pass.
+- **Constraints built** (`0x169c3a0`, `0x16c7310`):
+  - Every triangle edge, at **0.99×** its modelled length (×1.1, then ×0.9 for all).
+  - The two vertices opposite each shared edge ("stiffness connections", LOD 0–1 only), at **1.089×** their modelled distance. A flat panel can't reach that, so these links keep pushing the cloth open and flat. That is the game's resistance to folding: the cloth flares rather than creases.
+  - All constraints are two-sided. The solver also supports one-sided "keep apart" constraints (negative rest length), but the build doesn't create any.
+- **Collision shapes** (`0x16af0c0`, `dynClothCollide.c`):
+  - They are built each frame from `Point1`/`Point2` (`Offset ∓ Direction × Exten`) on the bone. The radius is scaled by the bone's scale across the axis, and the previous frame's shape is interpolated through sub-steps.
+  - **Cylinder (3)** is a capped cylinder. A particle inside is pushed out through the nearest surface, side or end cap, whichever is closer. So the big cylinder above the shoulders acts as a ceiling that cloth can't rise into. Ours pushes sideways only, which is why we needed the "exempt" rule.
+  - **Baloon (4)** is a capsule. **Sphere (1)** pushes out radially.
+  - `MovingBackwards` shapes are switched on only while moving backwards. Player sets use only types 1 and 3, and none of them uses `InsideVolume`.
+- **Sleep:** when the average particle movement stays under 0.0001 for 0.2 s, physics and constraints stop and only collision runs (`0x15ff560`).
+- **Drawing:**
+  - `Tessellate` splits each triangle into four at its edge midpoints. The midpoints sit on the straight edge, with averaged normals (`0xf2b370`). It smooths the shading, not the silhouette.
+  - Normals are an equal-weight average of the face normals.
+  - D3D11 builds also have hardware PN-triangle tessellation (`standard_hull_shader.hhl`). Whether cloth uses it wasn't traced.
+- **Differences from ours that matter for the look:**
+  - We pin `c ≤ MinWeight` hard and ignore the `w^exponent` damping.
+  - We run 4+ relaxation passes on two-sided bends at 1.0×. The game runs one pass, with edges at 0.99× and opening links at 1.089×.
+  - We push out of cylinders radially only, and collide inside each iteration rather than once before the constraints.
+  - We ignore the character's scale, and our Loop subdivision rounds off and slightly shrinks the outline.
+
+### Creator lighting, traced 2026-10-02 (not ported yet)
+
+- **The creator's sky is in the client data:** `bin/Skies.bin`, table `SkyInfo`, holds 450 skies, including `Sky_Player_Costume_Creator`, `Headshot_Sky` and `Master_Exterior`. The exe names it as the costume editor sky (`CostumeCreation_SetSky`). Its values (HSV, where V can exceed 1 as an intensity):
+  - ambient (0, 0, 0.5);
+  - sky light (219°, 0.5, 1.0); no ground or side light;
+  - key "diffuse" (26°, 0.2, **1.7**), a warm white;
+  - secondary diffuse (32°, 0.75, 0.5), an orange fill on the side facing away from the key;
+  - specular (219°, 0.33, 1.0);
+  - character backlight (220°, 0.6, **1.8**);
+  - background (211°, 0.68, 0.5);
+  - **Exposure 1.3**, LightRange 3, LightAdaptation 0.4;
+  - bloom (rate 1.1, range 8);
+  - one luminary, the sun: SkyDome `default_sun`, Angle 150°, RotationAxis (10, −2.5, −3). How that becomes a direction hasn't been traced.
+- **`Master_Exterior` also has wind:** speed 1.5 ± 1.5, direction (0.707, 0, 0.707), turbulence 0.5. The creator sky sets no wind, so this may be what the creator uses.
+- **Light model** (`LightingModels/Standard.LightingModel`, `light_inc.hlsl`, `vs_inc.hlsl`):
+  - **Key light:** `d = N·L` is wrapped by the material's light bleed (`d·bleed.y + bleed.x`). The lit side gets `key × saturate(d')`; the side facing away gets `secondary × saturate(−d')`.
+  - **Specular:** `pow(saturate(L·R), 128·SpecularExponent) × specular colour`.
+  - **Hemisphere:** `lerp(ground, sky, 0.5 + 0.5·N·up)`, plus `side × (1 − |N·up|)`.
+  - **Ambient:** `ambient × AO × albedo`, faded by `1 − saturate(0.5 × key intensity × exposure)`.
+  - **Backlight:** `BacklightInShadow` materials add `in_shadow × backlight × lerp(1, albedo, 0.5) × a view-angle term`.
+- **Exposure** (`0xf8cdf0`, `0xf8d090`) is auto-exposure:
+  - The target is `lerp(base, 2 × measured scene luminance, LightAdaptation) / Exposure`, approached at `LightAdaptationRate`.
+  - The output is multiplied by `1/target` (`exposure_transform.x`).
+  - With the creator's values the picture comes out roughly 1.3× brighter than the raw lighting. The base luminance (`+0x304`) hasn't been traced.
+- **Ours today:** three.js Phong with a white hemisphere light (1.4), a white key (2.2) and a blue rim (1.0). It has no light bleed, no secondary fill, no ambient fade, no backlight and no exposure.
 
 ## File formats
 
@@ -365,8 +434,8 @@ These are exported by `body_json()` in `rig_data.py` and applied by `computeBody
 
 - 59 geometries have no mesh: 57 weapons, an NPC barrel and an empty placeholder. None of them is in the patcher's manifest (`Live/.patch/FightclubClient.manifest`), so the game doesn't ship them either. About ten are naming slips that a file with an `_01` suffix (or without a leading `_`) would answer, e.g. `Weapon_Dagger` → `weapon_dagger_01.mset`; the rest look like retired weapon definitions. Every texture is found (the one without an image is the `None` placeholder).
 - Item definitions (reward and store item names) are server-side, so unlock sources come from the unlock-costume folder names. Costume sets use `PermTokenTypePlayer(...)` expressions.
-- Cloth is simulated with the game's settings but not its exact solver; tessellation uses Loop subdivision rather than the game's own scheme, with the particles held by the body and the mesh's corners kept in place (plain Loop smoothing rounds the cape's top corners off the shoulders). The cloth's response to wind is ported, but the wind itself (speed, heading, gusts) is set in the viewer, since the creator map's sky isn't in the client data. Sub-skeleton bouncers (`Core_Tail_Lizzard_Bouncer`) are not run; no player mesh is weighted to them.
-- Materials use the game's shader graphs, but the reflection environment is a stand-in (the creator's sky isn't in the client data), screen refraction is approximated by additive blending, and backlighting / light bleed and the runtime formulas of oscillators and scrolling aren't ported. The per-part custom reflection / specularity a saved costume can carry (kept as-is in `customExtra`) isn't applied yet; the material's defaults are.
+- Cloth is simulated with the game's settings but not its exact solver; tessellation uses Loop subdivision rather than the game's own scheme, with the particles held by the body and the mesh's corners kept in place (plain Loop smoothing rounds the cape's top corners off the shoulders). The cloth's response to wind is ported, but the wind itself (speed, heading, gusts) is set in the viewer, since the creator's sky wasn't found at first; it's in `bin/Skies.bin` (see "Creator lighting"). Sub-skeleton bouncers (`Core_Tail_Lizzard_Bouncer`) are not run; no player mesh is weighted to them.
+- Materials use the game's shader graphs, but the reflection environment is a stand-in (the creator's lights are in `bin/Skies.bin` but not used yet; see "Creator lighting"), screen refraction is approximated by additive blending, and backlighting / light bleed and the runtime formulas of oscillators and scrolling aren't ported. The per-part custom reflection / specularity a saved costume can carry (kept as-is in `customExtra`) isn't applied yet; the material's defaults are.
 - Weapons are left out: the Weapons region and the 'Attachment Weapon' slots aren't offered or drawn (`rules.isWeaponBone`). A loaded costume's weapon parts stay in the document, so saving keeps them.
 - `ExcludedCategories` (used only by deprecated categories) is not enforced.
 - Pieces weighted to helper bones follow the body sliders as the game computes them (ported 2026-09-30). The earlier model cancelled CounterScale only for the bone itself, and left the body-mass track's scale uninherited. With that model, Webwork's `M_Back_Holoforce_Arachnid_02_F` (blended `Ribs` / `Muscle_Lat01_L/R` / `HeadBouncer`) came apart under her waist and head sliders. What remains is `Player_Chest_Length −50` squashing `Ribs` to 0.8 height, which is also what the game computes. This hasn't been compared with an in-game screenshot.

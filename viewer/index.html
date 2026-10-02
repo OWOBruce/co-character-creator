@@ -40,6 +40,7 @@
   .windOpts { display:grid; grid-template-columns:auto 1fr 3.5em; gap:4px 8px; align-items:center; margin-top:8px; }
   .windOpts .gslider { width:100%; }
   .windVal { text-align:right; font-variant-numeric:tabular-nums; }
+  .windNote { grid-column:1 / -1; font-size:12px; opacity:.75; line-height:1.3; }
   .titleRow { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
   .titleRow h1 { margin:0; }
   .titleRow button { font-size:14px; padding:2px 7px; }
@@ -333,10 +334,11 @@
         <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
         <button id="shake" type="button" title="Sway the character to see the bouncers move">Shake</button>
       </div>
-      <div class="windOpts" title="Wind on the cloth. The game takes it from each map's sky; the creator's isn't in the client data, so set it here.">
+      <div class="windOpts" title="Wind on the cloth. The game takes it from each map's sky; its outdoor wind blows at about 1.5.">
         <span>Wind</span><span id="windSpeed"></span><span class="windVal" id="windSpeedVal"></span>
         <span>Direction</span><span id="windHeading"></span><span class="windVal" id="windHeadingVal"></span>
         <span>Gusts</span><span id="windGusts"></span><span class="windVal" id="windGustsVal"></span>
+        <span class="windNote">The game's outdoor wind is about 1.5. Stronger wind makes cloth flutter hard, as in the game.</span>
       </div>
     </details>
   </div>

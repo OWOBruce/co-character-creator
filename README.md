@@ -65,7 +65,7 @@ The **View** options under the 3D view control the preview only; none of them ch
 
 - the floor grid;
 - cloth and jiggle physics, plus **Shake** to see them move;
-- wind on capes (off by default).
+- wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
 - **Show hidden psionics**: effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
 
 Drag in the 3D view to turn the camera, and scroll to zoom.

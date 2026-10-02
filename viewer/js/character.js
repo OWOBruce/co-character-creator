@@ -13,6 +13,7 @@ import { createGraphMaterial, shaderTextureSlots, setGraphTexture, setGraphValue
 import { initShared } from './colors.js';
 import { Bouncers } from './bouncers.js';
 import { ClothSim } from './cloth.js';
+import { GameClothSim } from './cloth-game.js';
 import { Wind } from './wind.js';
 import { isWeaponBone } from './rules.js';
 import { buildRig, resetPose, setFrame, stanceAnimation, loadPose, computeBody, applyBodyMatrices } from './rig.js';
@@ -160,7 +161,7 @@ export class Character {
     this.tokens = new Map();  // bone -> latest request (so a slow load can't overwrite a newer pick)
     this.anim = null;
     this.options = { rawMask: false, normals: true, wireframe: false, body: true, mirror: true, bounce: true, cloth: true,
-                     showHidden: false, loopWings: false };
+                     gameCloth: true, showHidden: false, loopWings: false };
     this.wind = new Wind(); this.windTime = 0; this.lastRoot = null;
   }
 
@@ -462,9 +463,11 @@ export class Character {
     const vel = this.lastRoot && dt > 0 ? root.map((x, i) => (x - this.lastRoot[i]) / Math.max(dt, 1 / 240)) : [0, 0, 0];
     this.lastRoot = root;
     let toLocal = null;
+    const scale = this.options.body && this.bodyState ? this.bodyState.height : 1;  // cloth-game.js sizes the cloth by it
     for (const p of this.parts.values()) {
       const sim = p.mesh?.userData.cloth; if (!sim) continue;
       toLocal ||= new THREE.Matrix4().copy(this.group.matrixWorld).invert();
+      sim.scale = scale;
       sim.setWind(wind, root, vel);
       sim.step(dt);
       sim.write(p.mesh.geometry, toLocal);
@@ -474,8 +477,22 @@ export class Character {
     const info = this.cat.clothInfos?.[cloth.info] || this.cat.clothInfos?.Cape_Default || {};
     const shapes = (this.cat.clothCollisions?.[cloth.collision] || [])
       .map(s => ({ ...s, node: this.rig.byName.get(s.Bone.toLowerCase()) }));
-    return new ClothSim({ positions: mesh.positions, tris: mesh.tris, skinIndex: geo.attributes.skinIndex.array,
-                          skinWeight: geo.attributes.skinWeight.array, clothWeight, bones, inverses, info, shapes });
+    const Sim = this.options.gameCloth ? GameClothSim : ClothSim;
+    return new Sim({ positions: mesh.positions, tris: mesh.tris, uv: mesh.uv0, skinIndex: geo.attributes.skinIndex.array,
+                     skinWeight: geo.attributes.skinWeight.array, clothWeight, bones, inverses, info, shapes });
+  }
+  // The game's solver (cloth-game.js, options.gameCloth) or the editor's earlier one (cloth.js), which
+  // has no switch on the page any more but is kept. The loaded cloth switches at once, falling into place
+  // again from the body's current pose.
+  setClothSolver(game) {
+    this.options.gameCloth = game;
+    for (const p of this.parts.values()) {
+      const mesh = p.mesh, old = mesh?.userData.cloth;
+      if (!old || old instanceof GameClothSim === game) continue;
+      const sim = new (game ? GameClothSim : ClothSim)(old.args);
+      const geo = sim.renderGeometry(old.args.tris, old.args.uv);
+      mesh.geometry.dispose(); mesh.geometry = geo; mesh.userData.cloth = sim;
+    }
   }
   worldMatrices() {
     if (this.bodyState && this.options.body) {

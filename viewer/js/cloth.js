@@ -1,4 +1,9 @@
 // Cloth for capes, skirts and scarves: a particle simulation driven by the game's own cloth data.
+// Two solvers share the particles and the drawing (ClothBase): GameClothSim in cloth-game.js, which
+// follows the game's solver as traced from GameClient.exe and is the one used, and ClothSim below, the
+// editor's earlier one, kept but no longer offered (Character options.gameCloth = false picks it). The
+// notes below are for ClothSim; cloth-game.js corrects some of them (gravity is GravityScale x 32 ft/s^2
+// over 0.01 s steps in the game).
 //
 // From the game (see README "Cloth"):
 //  * a cloth piece is a coarse mesh whose vertices carry a weight on the "Cloth" pseudo-bone
@@ -29,13 +34,17 @@ import { tessellate } from './cloth-tess.js';
 const STEP = 1 / 60;
 const _v = new THREE.Vector3();
 
-export class ClothSim {
+// What both solvers share (this one and cloth-game.js): the particles (mesh vertices welded across UV
+// seams), their skinned (body-driven) positions, the wind they're given, and drawing them. A solver adds
+// held(p), true for a particle the body holds outright (kept exactly in place by the tessellation).
+export class ClothBase {
   // mesh: decoded mesh (positions, tris); skin: { index, weight } per vertex x4 over `bones` (cloth excluded,
   // normalised); cloth: per-vertex cloth weight; bones / inverses: the skinning bones; info: DynClothInfo;
   // shapes: DynClothCollision shapes with resolved `node` (THREE.Bone)
-  constructor({ positions, tris, skinIndex, skinWeight, clothWeight, bones, inverses, info, shapes }) {
+  constructor(args) {
+    const { positions, tris, skinIndex, skinWeight, bones, inverses, info } = args;
+    this.args = args;  // to build the other solver on the same piece (Character.setClothSolver)
     this.info = info; this.bones = bones; this.inverses = inverses;
-    this.shapes = shapes.filter(s => s.node && !s.MovingBackwards && [1, 3, 4].includes(s.type));
     const nv = positions.length / 3;
     // weld vertices split at UV seams into one particle
     const key = i => `${positions[i * 3].toFixed(4)},${positions[i * 3 + 1].toFixed(4)},${positions[i * 3 + 2].toFixed(4)}`;
@@ -49,6 +58,106 @@ export class ClothSim {
     this.rep = Int32Array.from(reps);
     this.pos = new Float32Array(n * 3); this.prev = new Float32Array(n * 3); this.target = new Float32Array(n * 3);
     this.skinIndex = skinIndex; this.skinWeight = skinWeight; this.bind = positions;
+    this.wtris = [];  // welded triangles, for particle normals (wind ripples)
+    for (let t = 0; t < tris.length; t += 3) {
+      const a = this.vp[tris[t]], b = this.vp[tris[t + 1]], c = this.vp[tris[t + 2]];
+      if (a !== b && b !== c && c !== a) this.wtris.push(a, b, c);
+    }
+    this.nrm = new Float32Array(n * 3);
+    this.wind = { dir: [0, 0, -1], speed: 0 }; this.root = [0, 0, 0]; this.vel = [0, 0, 0]; this.time = 0;
+    this.started = false; this.acc = 0;
+  }
+
+  // skinned (body-driven) position of every particle, in world space
+  updateTargets() {
+    const mats = this.bones.map((b, i) => new THREE.Matrix4().multiplyMatrices(b.matrixWorld, this.inverses[i]));
+    for (let p = 0; p < this.n; p++) {
+      const v = this.rep[p];
+      let x = 0, y = 0, z = 0;
+      for (let j = 0; j < 4; j++) {
+        const w = this.skinWeight[v * 4 + j]; if (!w) continue;
+        _v.set(this.bind[v * 3], this.bind[v * 3 + 1], this.bind[v * 3 + 2]).applyMatrix4(mats[this.skinIndex[v * 4 + j]]);
+        x += _v.x * w; y += _v.y * w; z += _v.z * w;
+      }
+      this.target[p * 3] = x; this.target[p * 3 + 1] = y; this.target[p * 3 + 2] = z;
+    }
+  }
+
+  // wind: { dir (unit, world), speed } from wind.js; root: the character's world position; vel: its velocity
+  setWind(wind, root, vel) { this.wind = wind; this.root = root; this.vel = vel; }
+
+  // unit normal per particle (area-weighted over its triangles)
+  normals() {
+    const { pos, nrm, wtris: t } = this;
+    nrm.fill(0);
+    for (let k = 0; k < t.length; k += 3) {
+      const a = t[k] * 3, b = t[k + 1] * 3, c = t[k + 2] * 3;
+      const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
+      const vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      for (const q of [a, b, c]) { nrm[q] += nx; nrm[q + 1] += ny; nrm[q + 2] += nz; }
+    }
+    for (let i = 0; i < nrm.length; i += 3) {
+      const l = Math.hypot(nrm[i], nrm[i + 1], nrm[i + 2]) || 1;
+      nrm[i] /= l; nrm[i + 1] /= l; nrm[i + 2] /= l;
+    }
+  }
+
+  // The mesh to draw: the cloth mesh itself, or its Loop subdivision (2 levels) when Tessellate is set.
+  // Positions are rows of weights over the particles; normals are computed on the welded mesh so they
+  // stay smooth across UV seams.
+  renderGeometry(tris, uv) {
+    const r = this.render = this.info.Tessellate
+      ? tessellate(tris, this.vp, this.n, uv || new Float32Array(this.vp.length * 2), 2, p => this.held(p))
+      : { tris: Uint32Array.from(tris), rv2w: Int32Array.from(this.vp), uv: uv || new Float32Array(this.vp.length * 2),
+          start: Int32Array.from({ length: this.n + 1 }, (_, i) => i), idx: Int32Array.from({ length: this.n }, (_, i) => i),
+          w: new Float32Array(this.n).fill(1), nW: this.n };
+    r.wpos = new Float32Array(r.nW * 3); r.wnrm = new Float32Array(r.nW * 3); r.local = new Float32Array(this.n * 3);
+    const nR = r.rv2w.length, geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nR * 3), 3).setUsage(THREE.DynamicDrawUsage));
+    geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(nR * 3), 3).setUsage(THREE.DynamicDrawUsage));
+    geo.setAttribute('uv', new THREE.BufferAttribute(r.uv, 2));
+    geo.setIndex(new THREE.BufferAttribute(r.tris, 1));
+    return geo;
+  }
+
+  // particle positions (world) -> the render geometry (character-local)
+  write(geo, toLocal) {
+    const r = this.render, L = r.local, P = r.wpos, N = r.wnrm;
+    for (let p = 0; p < this.n; p++) {
+      _v.set(this.pos[p * 3], this.pos[p * 3 + 1], this.pos[p * 3 + 2]).applyMatrix4(toLocal);
+      L[p * 3] = _v.x; L[p * 3 + 1] = _v.y; L[p * 3 + 2] = _v.z;
+    }
+    for (let v = 0; v < r.nW; v++) {
+      let x = 0, y = 0, z = 0;
+      for (let k = r.start[v]; k < r.start[v + 1]; k++) { const p = r.idx[k] * 3, w = r.w[k]; x += L[p] * w; y += L[p + 1] * w; z += L[p + 2] * w; }
+      P[v * 3] = x; P[v * 3 + 1] = y; P[v * 3 + 2] = z;
+    }
+    N.fill(0);
+    const t = r.tris, m = r.rv2w;
+    for (let i = 0; i < t.length; i += 3) {
+      const a = m[t[i]] * 3, b = m[t[i + 1]] * 3, c = m[t[i + 2]] * 3;
+      const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];
+      const vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      for (const q of [a, b, c]) { N[q] += nx; N[q + 1] += ny; N[q + 2] += nz; }
+    }
+    const pa = geo.attributes.position.array, na = geo.attributes.normal.array;
+    for (let v = 0; v < m.length; v++) {
+      const q = m[v] * 3, l = Math.hypot(N[q], N[q + 1], N[q + 2]) || 1;
+      pa[v * 3] = P[q]; pa[v * 3 + 1] = P[q + 1]; pa[v * 3 + 2] = P[q + 2];
+      na[v * 3] = N[q] / l; na[v * 3 + 1] = N[q + 1] / l; na[v * 3 + 2] = N[q + 2] / l;
+    }
+    geo.attributes.position.needsUpdate = true; geo.attributes.normal.needsUpdate = true;
+  }
+}
+
+// The editor's earlier solver (not offered on the page; see above).
+export class ClothSim extends ClothBase {
+  constructor(args) {
+    super(args);
+    const { positions, tris, clothWeight, info, shapes } = args, n = this.n, reps = this.rep;
+    this.shapes = shapes.filter(s => s.node && !s.MovingBackwards && [1, 3, 4].includes(s.type));
     // pinning from the cloth weight
     const lo = info.MinWeight ?? 0.1, hi = info.MaxWeight ?? 0.9, e = info.ClothBoneInfluenceExponent ?? 2;
     this.pin = new Float32Array(n);
@@ -77,30 +186,9 @@ export class ClothSim {
     const bend = Math.min(1, info.Stiffness ?? 0.6);
     for (const [k, opp] of opposite) if (opp.length === 2 && opp[0] !== opp[1]) cons.push([opp[0], opp[1], rest(opp[0], opp[1]), bend]);
     this.cons = cons;
-    this.wtris = [];  // welded triangles, for particle normals (wind ripples)
-    for (let t = 0; t < tris.length; t += 3) {
-      const a = this.vp[tris[t]], b = this.vp[tris[t + 1]], c = this.vp[tris[t + 2]];
-      if (a !== b && b !== c && c !== a) this.wtris.push(a, b, c);
-    }
-    this.nrm = new Float32Array(n * 3);
-    this.wind = { dir: [0, 0, -1], speed: 0 }; this.root = [0, 0, 0]; this.vel = [0, 0, 0]; this.time = 0;
-    this.started = false; this.acc = 0;
   }
 
-  // skinned (body-driven) position of every particle, in world space
-  updateTargets() {
-    const mats = this.bones.map((b, i) => new THREE.Matrix4().multiplyMatrices(b.matrixWorld, this.inverses[i]));
-    for (let p = 0; p < this.n; p++) {
-      const v = this.rep[p];
-      let x = 0, y = 0, z = 0;
-      for (let j = 0; j < 4; j++) {
-        const w = this.skinWeight[v * 4 + j]; if (!w) continue;
-        _v.set(this.bind[v * 3], this.bind[v * 3 + 1], this.bind[v * 3 + 2]).applyMatrix4(mats[this.skinIndex[v * 4 + j]]);
-        x += _v.x * w; y += _v.y * w; z += _v.z * w;
-      }
-      this.target[p * 3] = x; this.target[p * 3 + 1] = y; this.target[p * 3 + 2] = z;
-    }
-  }
+  held(p) { return this.pin[p] >= 1; }
 
   step(dt) {
     this.updateTargets();
@@ -116,8 +204,6 @@ export class ClothSim {
     this.acc = Math.min(this.acc + Math.min(dt, 0.1), 0.1);
     while (this.acc >= STEP) { this.substep(STEP); this.acc -= STEP; }
   }
-  // wind: { dir (unit, world), speed } from wind.js; root: the character's world position; vel: its velocity
-  setWind(wind, root, vel) { this.wind = wind; this.root = root; this.vel = vel; }
   // let a freshly made cloth fall into place before it is first seen
   settle(frames) { for (let i = 0; i < frames; i++) this.substep(STEP); }
 
@@ -164,23 +250,6 @@ export class ClothSim {
     }
   }
 
-  // unit normal per particle (area-weighted over its triangles)
-  normals() {
-    const { pos, nrm, wtris: t } = this;
-    nrm.fill(0);
-    for (let k = 0; k < t.length; k += 3) {
-      const a = t[k] * 3, b = t[k + 1] * 3, c = t[k + 2] * 3;
-      const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
-      const vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2];
-      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-      for (const q of [a, b, c]) { nrm[q] += nx; nrm[q + 1] += ny; nrm[q + 2] += nz; }
-    }
-    for (let i = 0; i < nrm.length; i += 3) {
-      const l = Math.hypot(nrm[i], nrm[i + 1], nrm[i + 2]) || 1;
-      nrm[i] /= l; nrm[i + 1] /= l; nrm[i + 2] /= l;
-    }
-  }
-
   // push particles out of (or, for InsideVolume, back into) one shape; with mark, only flag the particles
   // that are already where the shape doesn't allow them
   collide(s, exempt, mark = false) {
@@ -204,53 +273,5 @@ export class ClothSim {
       const f = (d > 1e-6 ? R / d : 0) - 1;
       pos[i] += dx * f; pos[i + 1] += dy * f; pos[i + 2] += dz * f;
     }
-  }
-
-  // The mesh to draw: the cloth mesh itself, or its Loop subdivision (2 levels) when Tessellate is set.
-  // Positions are rows of weights over the particles; normals are computed on the welded mesh so they
-  // stay smooth across UV seams.
-  renderGeometry(tris, uv) {
-    const r = this.render = this.info.Tessellate
-      ? tessellate(tris, this.vp, this.n, uv || new Float32Array(this.vp.length * 2), 2, p => this.pin[p] >= 1)
-      : { tris: Uint32Array.from(tris), rv2w: Int32Array.from(this.vp), uv: uv || new Float32Array(this.vp.length * 2),
-          start: Int32Array.from({ length: this.n + 1 }, (_, i) => i), idx: Int32Array.from({ length: this.n }, (_, i) => i),
-          w: new Float32Array(this.n).fill(1), nW: this.n };
-    r.wpos = new Float32Array(r.nW * 3); r.wnrm = new Float32Array(r.nW * 3); r.local = new Float32Array(this.n * 3);
-    const nR = r.rv2w.length, geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nR * 3), 3).setUsage(THREE.DynamicDrawUsage));
-    geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(nR * 3), 3).setUsage(THREE.DynamicDrawUsage));
-    geo.setAttribute('uv', new THREE.BufferAttribute(r.uv, 2));
-    geo.setIndex(new THREE.BufferAttribute(r.tris, 1));
-    return geo;
-  }
-
-  // particle positions (world) -> the render geometry (character-local)
-  write(geo, toLocal) {
-    const r = this.render, L = r.local, P = r.wpos, N = r.wnrm;
-    for (let p = 0; p < this.n; p++) {
-      _v.set(this.pos[p * 3], this.pos[p * 3 + 1], this.pos[p * 3 + 2]).applyMatrix4(toLocal);
-      L[p * 3] = _v.x; L[p * 3 + 1] = _v.y; L[p * 3 + 2] = _v.z;
-    }
-    for (let v = 0; v < r.nW; v++) {
-      let x = 0, y = 0, z = 0;
-      for (let k = r.start[v]; k < r.start[v + 1]; k++) { const p = r.idx[k] * 3, w = r.w[k]; x += L[p] * w; y += L[p + 1] * w; z += L[p + 2] * w; }
-      P[v * 3] = x; P[v * 3 + 1] = y; P[v * 3 + 2] = z;
-    }
-    N.fill(0);
-    const t = r.tris, m = r.rv2w;
-    for (let i = 0; i < t.length; i += 3) {
-      const a = m[t[i]] * 3, b = m[t[i + 1]] * 3, c = m[t[i + 2]] * 3;
-      const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];
-      const vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
-      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-      for (const q of [a, b, c]) { N[q] += nx; N[q + 1] += ny; N[q + 2] += nz; }
-    }
-    const pa = geo.attributes.position.array, na = geo.attributes.normal.array;
-    for (let v = 0; v < m.length; v++) {
-      const q = m[v] * 3, l = Math.hypot(N[q], N[q + 1], N[q + 2]) || 1;
-      pa[v * 3] = P[q]; pa[v * 3 + 1] = P[q + 1]; pa[v * 3 + 2] = P[q + 2];
-      na[v * 3] = N[q] / l; na[v * 3 + 1] = N[q + 1] / l; na[v * 3 + 2] = N[q + 2] / l;
-    }
-    geo.attributes.position.needsUpdate = true; geo.attributes.normal.needsUpdate = true;
   }
 }
