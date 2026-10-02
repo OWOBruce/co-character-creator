@@ -1,0 +1,13 @@
+# Built from the game install on each machine (build.py); not source
+catalog/
+index/
+viewer/data/
+viewer/ui/
+settings.json
+dist/
+__pycache__/
+
+# Personal / local, not part of the release
+my_costumes/
+captions/batches.json
+.claude/settings.local.json

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piece Sheets</title>
+<style>
+  :root { --bg: #0d1b33; --panel: #152a4d; --text: #e6eefc; --dim: #9fb3d6; --bad: #ff7a70; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; }
+  header { display: flex; gap: 12px; align-items: center; padding: 12px 16px; background: var(--panel); flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; }
+  button { font: inherit; padding: 6px 14px; border-radius: 6px; border: 1px solid #3d6bb3; background: #2a5aa8; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  #state { color: var(--dim); }
+  main { padding: 16px; }
+  img { max-width: 100%; height: auto; border-radius: 6px; display: block; }
+  #problems { color: var(--bad); }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header>
+  <h1>Piece sheets</h1>
+  <button id="start" type="button">Render</button>
+  <button id="stop" type="button" disabled>Stop</button>
+  <span id="state">Renders the pieces in viewer/data/render_jobs.json (python captions.py pilot).</span>
+</header>
+<main>
+  <img id="last" alt="Last rendered sheet">
+  <ul id="problems"></ul>
+</main>
+<script type="module" src="js/render.js"></script>
+</body>
+</html>

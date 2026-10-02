@@ -1,0 +1,20 @@
+{
+  "skeleton": "Female",
+  "name": "Night Courier",
+  "stance": "Heroic",
+  "mood": "Determined",
+  "height": 6.0,
+  "muscle": 25,
+  "skin": "#d4896f",
+  "colors": ["#1a1a2e", "#c9a227", "#e8e8e8", "#d4896f"],
+  "parts": [
+    { "geometry": "F_Head_Face_01" },
+    { "geometry": "F_Hair_Face_Ponytail_01", "material": "Hair",
+      "colors": ["#2b1a10", "#4a2f1d", "#2b1a10", "#d4896f"] },
+    { "geometry": "F_Chest_Tight_01_1", "material": "Skin & Leather Tights" },
+    { "geometry": "F_Hips_Tight_01", "material": "Tights Leather" },
+    { "geometry": "F_Footl_Tight_Combatsock_01", "material": "Leather" },
+    { "geometry": "F_Footr_Tight_Combatsock_01", "material": "Leather" },
+    { "geometry": "F_Collar_Child_Tight_Cape_Archer_01_Back", "material": "Cloth" }
+  ]
+}

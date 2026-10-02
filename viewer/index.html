@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CO Costume Editor</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* Theme: the game's own costume-creator art (viewer/ui, built by build_ui.py) and comic lettering.
+     Bangers / Comic Neue stand in for the game's licensed Blambot and CC Dave Gibbons fonts. */
+  :root { --ink:#000; --text:#f2f6ff; --muted:#a9c3ea; --gold:#ffd21f; --gold2:#ffb000; --blue:#2066cc; --deep:#0c2046;
+          --title: 'Bangers', 'Impact', sans-serif; --body: 'Comic Neue', 'Comic Sans MS', system-ui, sans-serif; }
+  html,body { margin:0; height:100%; color:var(--text); font:700 13px/1.35 var(--body);
+              background:#0b2a5a url(ui/backdrop.jpg) center/cover fixed; }
+  #app { display:flex; height:100%; }
+  #side { width:372px; margin:10px 0 10px 10px; padding:10px 12px; overflow:auto; box-sizing:border-box;
+          border:8px solid transparent; border-image:url(ui/panel_dark.png) 8 fill / 8px stretch;
+          scrollbar-color:#3d7fdc #0c2046; }
+  #view { flex:1; position:relative; min-width:0; }
+  canvas { display:block; }
+  h1 { font:32px/1 var(--title); letter-spacing:1px; margin:0 0 8px; color:var(--gold); transform:rotate(-2deg);
+       text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 3px 0 #000, 4px 5px 0 #0008; }
+  label { display:block; margin:6px 0; color:var(--muted); }
+
+  /* buttons: tinted CC_Panel kit, yellow comic lettering; selected = gold CC_Paddle */
+  button { font:17px/1 var(--title); letter-spacing:.6px; color:var(--gold); cursor:pointer; padding:3px 8px;
+           border:6px solid transparent; border-image:url(ui/button.png) 8 fill / 6px stretch; background:none;
+           text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+  button:hover { border-image-source:url(ui/button_hover.png); color:#fff27a; }
+  button:active { transform:translateY(1px); }
+  button.on, .tab.on, .mainTabs button.on, .links .link.on, button.choice.on, button.toggle.on {
+           border-image-source:url(ui/button_on.png); color:#231500; text-shadow:none; }
+  select { width:100%; font:700 13px var(--body); color:var(--text); padding:2px 4px; cursor:pointer;
+           border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
+  select option, select optgroup { background:var(--deep); color:var(--text); }
+  .row { display:flex; gap:6px; align-items:center; }
+  .windOpts { display:grid; grid-template-columns:auto 1fr 3.5em; gap:4px 8px; align-items:center; margin-top:8px; }
+  .windOpts .gslider { width:100%; }
+  .windVal { text-align:right; font-variant-numeric:tabular-nums; }
+  .titleRow { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
+  .titleRow h1 { margin:0; }
+  .titleRow button { font-size:14px; padding:2px 7px; }
+  .titleBtns { display:flex; flex-direction:column; align-items:stretch; gap:3px; }
+  .settingsDialog { width:330px; padding:6px; }
+  .gameFolder .gfLabel { font:15px var(--title); letter-spacing:.6px; color:var(--gold); margin-bottom:3px; }
+  .gameFolder .gfRow { display:flex; gap:4px; align-items:center; }
+  .gameFolder input { flex:1; min-width:0; padding:3px 6px; color:var(--text); font:700 12px var(--body); outline:none;
+                      border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
+  .gameFolder button { font-size:14px; padding:2px 6px; }
+  .gameFolder .gfState { font:400 11px var(--body); color:var(--muted); margin-top:3px; }
+  .gameFolder .gfState.bad { color:#ff9a7a; }
+  .settingsDialog .row { justify-content:flex-end; margin-top:8px; }
+  .settingsDialog .gameFolder + .gameFolder { margin-top:10px; }
+  .demoDialog { width:380px; max-height:75vh; display:flex; flex-direction:column; padding:6px; }
+  .demoDialog .hint { font:400 12px var(--body); color:var(--muted); margin:0 2px 6px; }
+  .demoList { overflow:auto; display:flex; flex-direction:column; gap:3px; scrollbar-color:#3d7fdc #0c2046; }
+  .demoRow { display:flex; flex-direction:column; gap:3px; }
+  .demoRow.me { padding:4px; margin-bottom:6px; border:2px solid var(--gold); border-radius:6px; }
+  .demoRow .who { display:flex; justify-content:space-between; align-items:baseline; gap:8px; text-align:left; }
+  .demoRow .who .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .demoRow .who .sub { flex:none; font:400 11px var(--body); color:var(--muted); text-shadow:none; }
+  .demoRow .who:disabled { opacity:.45; cursor:default; }
+  .demoRow.on .who { border-image-source:url(ui/button_on.png); color:#231500; text-shadow:none; }
+  .demoRow.on .who .sub { color:#5a4300; }
+  .demoRow .badge { margin-left:8px; font:700 11px var(--body); color:#231500; background:var(--gold); border-radius:3px;
+                    padding:1px 5px; text-shadow:none; vertical-align:2px; }
+  .demoDialog > .row { justify-content:flex-end; margin-top:8px; }
+  .sheetDialog { width:320px; padding:6px; }
+  .sheetDialog .hint { font:400 12px var(--body); color:var(--muted); margin:0 2px 8px; }
+  .sheetDialog .bgChoices { display:flex; gap:6px; }
+  .sheetDialog .bgChoice { flex:1; }
+  .sheetDialog .row { justify-content:flex-end; margin-top:8px; }
+  .settingsDialog .gameFolder > button { font-size:15px; padding:2px 8px; }
+  .aboutDialog { position:static; width:min(460px, 100%); max-height:calc(100vh - 32px); overflow:auto; padding:8px 12px; }
+  .aboutDialog p { margin:0 2px 8px; font:400 14px/1.45 var(--body); color:var(--text); }
+  .aboutDialog b { color:var(--gold); }
+  .aboutThanks { display:flex; gap:14px; align-items:center; margin:12px 0; padding:10px; border-radius:6px; background:#0006; }
+  .aboutThanks img { width:96px; height:auto; flex:none; }
+  .aboutThanks p { margin:2px 0 4px; }
+  .aboutThanks a { font:700 14px var(--body); color:var(--gold); }
+  .aboutThanks a:hover { color:#fff27a; }
+  .aboutSub { font:17px var(--title); letter-spacing:.6px; color:var(--gold); margin-right:2px; }
+  .aboutLegal p { font-size:12px; color:var(--muted); }
+  .aboutDialog .row { justify-content:flex-end; margin-top:6px; }
+  .modalBackdrop { position:fixed; inset:0; z-index:30; display:flex; align-items:center; justify-content:center;
+                   padding:16px; background:#000a; }
+  .modalBackdrop .noticeDialog { position:static; width:min(400px, 100%); padding:8px 10px; }
+  .noticeDialog p { margin:0 2px 8px; font:400 14px/1.4 var(--body); color:var(--text); }
+  .noticeDialog .row { justify-content:flex-end; margin-top:10px; }
+  .reportDialog { width:min(520px, calc(100vw - 420px)); max-height:70vh; overflow:auto; padding:6px; }
+  .reportDialog .hint { font:400 12px var(--body); color:var(--muted); margin:0 2px 6px; }
+  .reportList { margin:0; padding-left:18px; font:400 12px/1.4 var(--body); color:var(--text); }
+  .reportList li { margin:3px 0; overflow-wrap:anywhere; }
+  .reportList code { font-size:11px; color:var(--muted); }
+  .reportList .r-error b { color:#ff9a7a; } .reportList .r-warning b { color:var(--gold); } .reportList .r-info b { color:#9fc4ff; }
+  .reportDialog .row { justify-content:flex-end; margin-top:8px; }
+  .buildNote { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+               gap:8px; text-align:center; padding:20px; background:#0a1a3acc; z-index:5; }
+  .buildNote .bnTitle { font:26px var(--title); letter-spacing:1px; color:var(--gold); }
+  .buildNote .bnStep { font:700 15px var(--body); color:var(--text); }
+  .buildNote .bnHint { font:400 12px var(--body); color:var(--muted); }
+  .buildNote .bnBar { width:min(420px, 80%); height:14px; margin-top:6px; border:1px solid var(--gold2); border-radius:8px;
+                      background:#0c2046; overflow:hidden; }
+  .buildNote .bnFill { width:0; height:100%; background:linear-gradient(90deg, var(--gold2), var(--gold)); transition:width .8s ease-out; }
+  .buildNote .bnPct { font:22px var(--title); letter-spacing:1px; color:var(--text); }
+  .buildNote .bnError { max-width:90%; white-space:pre-wrap; text-align:left; font:12px monospace; color:#ff9a7a; }
+  .opts label { display:inline-flex; gap:4px; margin:2px 10px 2px 0; }
+  input[type=checkbox] { accent-color: var(--gold2); }
+  #status { position:absolute; left:14px; bottom:10px; font:18px var(--title); letter-spacing:.8px; color:var(--gold);
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 2px 3px 0 #0009; }
+  details { margin:6px 0; } summary { cursor:pointer; }
+  summary, .region { font:18px var(--title); letter-spacing:.8px; color:var(--gold); padding:2px 8px;
+           background:url(ui/header_glow.png) left center/100% 100% no-repeat;
+           text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+  /* main tabs */
+  .mainTabs { display:flex; gap:2px; margin:6px 0 8px; padding-bottom:4px;
+              background:url(ui/zippatone.png) left bottom/100% 6px no-repeat; }
+  .mainTabs button { flex:1; font-size:16px; padding:4px 1px; white-space:nowrap; }
+  .viewOpts { margin-top:12px; }
+
+  /* boxes inside the panel */
+  .bodyBox, .colorsBox { margin:6px 0 8px; padding:4px 6px; border:6px solid transparent;
+           border-image:url(ui/panel_deep.png) 8 fill / 6px stretch; }
+  .bodyBox .row, #bodySliders > .row { display:flex; gap:4px; align-items:center; margin:3px 0; }
+  .row.wrap { flex-wrap:wrap; }
+  .bodyBox .lab, .chips .lab, .links .lab { font:15px var(--title); letter-spacing:.5px; color:var(--muted); width:84px; flex:none; }
+  button.choice, button.toggle, .colorsBox .tools button, .links .link { font-size:14px; padding:1px 5px; }
+  button.choice.reset { color:#9fb7dc; }
+  .animInfo { font:400 10px var(--body); color:var(--muted); margin-top:4px; overflow-wrap:anywhere; }
+  .bodyBox .row.labelled { align-items:flex-start; }
+  .bodyBox .row.labelled .lab { padding-top:4px; }
+  .bodyBox .choices { flex:1; min-width:0; display:flex; flex-wrap:wrap; gap:4px; }
+  .bodyBox .row.overridden .lab, .bodyBox .row.overridden .choices button { opacity:.45; filter:saturate(.35); }
+  .bodyBox .row.overridden .choices button:hover { opacity:.8; filter:none; }
+  .poseNote { font:italic 400 11px var(--body); color:var(--gold); margin:4px 0 2px; }
+  details.sliderGroup { margin:6px 0; }
+
+  /* sliders: the game's segmented bar */
+  .slider { display:grid; grid-template-columns: 1fr 130px 34px; gap:6px; align-items:center; margin:3px 0; }
+  .slider > span:first-child { color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:default; }
+  .slider .val { text-align:right; font:15px var(--title); color:var(--gold); }
+  .gslider { position:relative; height:14px; margin:7px 5px; cursor:pointer; touch-action:none; outline:none;
+             background:url(ui/slider_empty.png) repeat-x 0 0/6px 100%; border:2px solid #000; border-radius:3px; }
+  .gslider .fill { position:absolute; top:0; bottom:0; background:url(ui/slider_full.png) repeat-x 0 0/6px 100%; }
+  .gslider:hover .fill, .gslider:focus .fill, .gslider.drag .fill { background-image:url(ui/slider_focused.png); }
+  .gslider .mid { position:absolute; top:-4px; bottom:-4px; width:2px; margin-left:-1px; background:#000; }
+  .gslider .thumb { position:absolute; top:-9px; width:12px; height:28px; margin-left:-6px;
+                    background:url(ui/slider_thumb.png) center/100% 100% no-repeat; }
+  .gslider:hover .thumb, .gslider.drag .thumb, .gslider:focus .thumb { background-image:url(ui/slider_thumb_hover.png); }
+
+  /* item browser */
+  .tabs { display:flex; flex-wrap:wrap; gap:2px; margin:4px 0 6px; }
+  .tab { flex:1; font-size:15px; padding:3px 2px; line-height:1; }
+  .cycler { display:grid; grid-template-columns: 100px 18px 1fr 18px; align-items:center; gap:2px; margin:2px 0; }
+  .cycler .lab { font:700 12px var(--body); color:var(--muted); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cycler.category { margin-bottom:6px; } .cycler.category .lab { font:17px var(--title); color:var(--gold); letter-spacing:.5px; }
+  .cycler .name { display:flex; align-items:center; gap:4px; min-width:0; text-align:left; padding:1px 6px; line-height:1.25;
+                  font:700 13px var(--body); color:var(--text); text-shadow:none;
+                  border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; }
+  .cycler .name:hover { border-image-source:url(ui/field_hover.png); color:#fff; }
+  .cycler .name .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .arrow { width:18px; height:22px; padding:0; border:none; border-image:none; background:center/12px no-repeat; }
+  .arrow:hover { border-image:none; }
+  .arrow.left { background-image:url(ui/CC_Arrow_Left_Idle.png); } .arrow.left:hover { background-image:url(ui/CC_Arrow_Left_Mouseover.png); }
+  .arrow.right { background-image:url(ui/CC_Arrow_Right_Idle.png); } .arrow.right:hover { background-image:url(ui/CC_Arrow_Right_Mouseover.png); }
+  .arrow:active.left { background-image:url(ui/CC_Arrow_Left_Pushed.png); } .arrow:active.right { background-image:url(ui/CC_Arrow_Right_Pushed.png); }
+  .slot { border-top:1px solid #ffffff14; padding:2px 0; position:relative; }
+  .slot.selected { background:linear-gradient(90deg, #ffd21f22, transparent 70%); box-shadow: inset 3px 0 0 var(--gold); }
+  .slot .swatches { position:absolute; right:26px; top:10px; display:flex; gap:1px; cursor:pointer; }
+  .slot .swatches span { width:6px; height:11px; border:1px solid #000; }
+  .slot.selected .swatches { display:none; }
+  .slot .cycler .name { padding-right:40px; }
+  .details { padding:2px 0 6px 10px; }
+  .cycler.sub { grid-template-columns: 90px 18px 1fr 18px; }
+  .cycler.sub.child .lab { color:#cfe0ff; }
+  .note { font-size:11px; color:#ff9d8a; padding-left:100px; }
+  img.badge { height:15px; flex:none; filter: drop-shadow(0 0 1px #000); }
+  .panelOpts { margin-top:8px; font-size:12px; } .panelOpts label { display:inline-flex; gap:3px; margin:2px 8px 2px 0; color:var(--muted); }
+  .panelOpts .unlocksBtn { margin:2px 0; } .panelOpts .unlocksBtn.some { color:var(--gold); border-color:var(--gold2); }
+  .unlocksDialog { width:min(400px, calc(100vw - 16px)); max-height:min(70vh, 560px); display:flex; flex-direction:column; padding:6px; }
+  .unlockList { overflow:auto; display:flex; flex-direction:column; gap:4px; margin:4px 0; }
+  .unlockItem { display:block; width:100%; text-align:left; padding:6px 8px; font:400 12px var(--body); text-transform:none; letter-spacing:0; }
+  .unlockItem .uiHead { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .unlockItem .uiHead .badge { width:16px; height:16px; }
+  .unlockItem .uiName { font-weight:700; color:var(--text); } .unlockItem .uiKind { color:var(--muted); font-size:11px; }
+  .unlockItem .uiHow { margin-top:3px; color:var(--text); } .unlockItem .uiItems { color:var(--muted); }
+  .unlockNone { margin:6px 2px; }
+  .unlocksDialog > .row { margin-top:8px; }
+
+  /* colours: swatch chips */
+  .chips { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .chip { width:30px; height:26px; padding:0; position:relative; border:2px solid #000; border-radius:6px; border-image:none;
+          box-shadow: inset 0 0 0 2px #ffffff55, inset 0 -6px 8px #0005; }
+  .chip:hover { border-image:none; outline:2px solid var(--gold); }
+  .chip span { position:absolute; left:3px; bottom:1px; font:12px var(--title); color:#fff; text-shadow:0 0 2px #000, 0 0 2px #000; }
+  .chip.skin { width:44px; }
+  .chip.glow::after { content:''; position:absolute; inset:-6px; background:url(ui/color_glow.png) center/100% 100%; pointer-events:none; }
+  .colorsBox .tools { display:flex; gap:3px; margin-top:6px; } .colorsBox .tools button { flex:1; }
+  .partColors { margin:4px 0 2px; }
+  .links { display:flex; align-items:center; gap:3px; margin-bottom:4px; }
+
+  /* pop-ups */
+  .picker, .palette { position:fixed; z-index:10; border:8px solid transparent; border-image:url(ui/panel_dark.png) 8 fill / 8px stretch;
+                      filter: drop-shadow(0 8px 18px #000a); }
+  .picker { width:320px; max-height:410px; display:flex; flex-direction:column; }
+  .picker input { margin:4px; padding:3px 7px; color:var(--text); font:700 13px var(--body); outline:none;
+                  border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
+  .picker .list { overflow:auto; padding:0 2px 4px; scrollbar-color:#3d7fdc #0c2046; }
+  .picker .item { display:flex; align-items:center; gap:6px; padding:3px 6px; border-radius:4px; cursor:pointer; white-space:nowrap; }
+  .picker .item .nm { overflow:hidden; text-overflow:ellipsis; }
+  .picker .item.active { background:var(--gold); color:#231500; }
+  .picker .item.current { color:var(--gold); } .picker .item.current.active { color:#231500; }
+  .picker .item.missing { opacity:.45; }
+  .palette { padding:4px; }
+  .palette .phead { font:19px var(--title); letter-spacing:.8px; margin:0 2px 6px; color:var(--gold);
+                    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+  .palette .grid { display:grid; grid-template-columns: repeat(19, 16px); gap:2px; }
+  .palette .sw { width:16px; height:16px; padding:0; border:1px solid #000; border-radius:3px; border-image:none; }
+  .palette .sw:hover { outline:2px solid var(--gold); z-index:1; border-image:none; }
+  .palette .sw.cur { outline:2px solid #fff; }
+  .palette .glowRow { display:flex; align-items:center; gap:6px; margin-top:8px; font:16px var(--title); color:var(--gold); }
+  .palette .glowRow .gslider { flex:1; }
+  .palette .quads { display:grid; grid-template-columns: repeat(5, 54px); gap:4px; }
+  .palette .quad { display:flex; height:24px; padding:0; border:2px solid #000; border-radius:4px; overflow:hidden; border-image:none; }
+  .palette .quad span { flex:1; } .palette .quad:hover { outline:2px solid var(--gold); border-image:none; }
+  /* save dialog, drag & drop */
+  .saveDialog { width:270px; padding:6px; }
+  .saveDialog .field { display:grid; grid-template-columns: 76px 1fr; align-items:center; gap:6px; margin:4px 0; color:var(--muted); }
+  .saveDialog input { min-width:0; padding:3px 6px; color:var(--text); font:700 13px var(--body); outline:none;
+                      border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
+  .saveDialog .hint { font:400 11px var(--body); color:var(--muted); margin:6px 0; }
+  .saveDialog .row { justify-content:flex-end; }
+  body.dropping #view { outline:4px dashed var(--gold); outline-offset:-10px; }
+  @media (max-width: 700px) { #app { flex-direction:column-reverse; } #side { width:auto; margin:0 6px 6px; height:48%; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <div class="titleRow"><h1>CO Costume Editor</h1>
+      <div class="titleBtns"><button id="settings" type="button" title="Settings (game folder, account, character sheet)" aria-haspopup="dialog">Settings</button>
+        <button id="about" type="button" title="Who made this, thanks, and the legal notice" aria-haspopup="dialog">About</button></div></div>
+    <label>Start from <select id="costume"></select></label>
+    <div class="row"><button id="blankM" type="button">New male</button><button id="blankF" type="button">New female</button>
+      <span style="flex:1"></span><button id="loadCostume" type="button" title="Open a costume saved by the game (Live/screenshots/Costume_*.jpg), a demo recording (Live/demos/*.demo: pick a player) or a costume JSON (index/GUIDE.md); you can also drop one on the page or paste JSON">Load</button><button id="saveCostume" type="button" title="Save as a game costume file">Save</button></div>
+    <div class="mainTabs"><button data-tab="costume" class="on">Costume</button><button data-tab="body">Body</button><button data-tab="stance">Stance &amp; Mood</button></div>
+    <div id="tab-costume" class="tabPage"><div id="parts"></div></div>
+    <div id="tab-body" class="tabPage" hidden><div id="bodySliders"></div></div>
+    <div id="tab-stance" class="tabPage" hidden><div id="stancePanel"></div></div>
+    <details class="viewOpts"><summary>View</summary>
+      <div class="opts">
+        <label><input type="checkbox" id="play" checked> Play</label>
+        <label><input type="checkbox" id="mirror" checked> Mirror X</label>
+        <label><input type="checkbox" id="showSkel"> Skeleton</label>
+        <label><input type="checkbox" id="normals" checked> Normal maps</label>
+        <label><input type="checkbox" id="wire"> Wireframe</label>
+        <label><input type="checkbox" id="rawMask"> Raw masks</label>
+        <label><input type="checkbox" id="applyBody" checked> Body sliders</label>
+        <label><input type="checkbox" id="showGrid"> Floor grid</label>
+        <label title="The game's jiggle bones (hair, ears, backpacks...)"><input type="checkbox" id="bounce" checked> Bouncers</label>
+        <label title="Simulate capes, skirts and scarves with the game's cloth settings. Applies to pieces loaded afterwards."><input type="checkbox" id="cloth" checked> Cloth</label>
+        <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
+        <button id="shake" type="button" title="Sway the character to see the bouncers move">Shake</button>
+      </div>
+      <div class="windOpts" title="Wind on the cloth. The game takes it from each map's sky; the creator's isn't in the client data, so set it here.">
+        <span>Wind</span><span id="windSpeed"></span><span class="windVal" id="windSpeedVal"></span>
+        <span>Direction</span><span id="windHeading"></span><span class="windVal" id="windHeadingVal"></span>
+        <span>Gusts</span><span id="windGusts"></span><span class="windVal" id="windGustsVal"></span>
+      </div>
+    </details>
+  </div>
+  <div id="view"><div id="status">Loading…</div></div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script>
+// Tell the server this page is open (serve.py --quit-when-closed: the app stops when its last window closes)
+(() => {
+  const id = Math.random().toString(36).slice(2), body = JSON.stringify({ id });
+  const alive = () => fetch('api/alive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }).catch(() => {});
+  alive(); setInterval(alive, 15000);
+  addEventListener('pageshow', e => { if (e.persisted) alive(); });
+  addEventListener('pagehide', () => navigator.sendBeacon('api/bye', new Blob([body], { type: 'application/json' })));
+})();
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Character } from './js/character.js';
+import { loadShared, loadCatalog } from './js/catalog.js';
+import { newPart, isWeaponBone } from './js/rules.js';
+import { PartsPanel } from './js/parts-panel.js';
+import { BodyPanel } from './js/body-panel.js';
+import { setupFiles } from './js/file-ui.js';
+import { gameSlider } from './js/ui.js';
+import { setupSettings, waitForBuild } from './js/source-ui.js';
+import { openSheetDialog } from './js/sheet.js';
+import { setupAbout } from './js/about.js';
+
+const $ = id => document.getElementById(id);
+const view = $('view'), status = $('status');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });  // the tailor backdrop shows through
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 200);
+camera.position.set(0, 3.2, 11);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 3, 0);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444450, 1.4));
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 6, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9fb6ff, 1.0); rim.position.set(-4, 4, -5); scene.add(rim);
+const grid = new THREE.GridHelper(10, 20, 0x9fc4ff, 0x5d86c4); grid.visible = false; scene.add(grid);
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+const ch = new Character(scene);
+scene.matrixWorldAutoUpdate = false;
+// under viewer/test.html the tests read the editor's state, not its pixels: draw 2 frames a second, which
+// keeps a headless browser (software WebGL on the CPU) from running every core flat out
+const frameGap = new URLSearchParams(location.search).has('test') ? 500 : 0;
+let lastFrame = 0;
+renderer.setAnimationLoop(now => {
+  if (now - lastFrame < frameGap) return;
+  lastFrame = now;
+  try {  // an exception here would stop three's animation loop for good
+    ch.tick(now, $('play').checked); controls.update();
+    scene.updateMatrixWorld();
+    ch.afterMatrixUpdate(now);
+    renderer.render(scene, camera);
+  } catch (e) { console.error(e); }
+});
+
+
+// ---- costume loading ----------------------------------------------------------------------------
+async function open(doc) {
+  const t0 = performance.now();
+  status.textContent = `Loading ${doc.name || doc.skeleton}…`;
+  document.dispatchEvent(new CustomEvent('costume-open', { detail: doc }));  // e.g. the demo picker's highlight
+  if (!await ch.load(doc)) return;  // superseded by a newer pick
+  const box = characterBox();
+  if (!box.isEmpty()) {
+    // centred on the character, not on the box: big pieces (wings, backpacks) reach far out to one side
+    const y = (box.min.y + box.max.y) / 2;
+    controls.target.set(0, y, 0); camera.position.set(0, y + 0.5, box.getSize(new THREE.Vector3()).y * 2.2);
+  }
+  panel.reset(); body.render(); applyOptions();
+  showStatus(`${doc.name || 'New ' + doc.skeleton.toLowerCase()} · loaded in ${((performance.now() - t0) / 1000).toFixed(1)} s`);
+}
+function showStatus(prefix) {
+  const shown = [...ch.parts.values()].filter(p => p.mesh).length;
+  const missing = ch.doc.parts.filter(p => !isWeaponBone(ch.cat, p.bone)).length - shown;  // weapons aren't drawn
+  status.textContent = `${prefix} · ${shown} parts${missing ? ` (${missing} not installed)` : ''} · ${ch.doc.skeleton}`;
+}
+// The character as drawn: sampled skinned vertices with the body sliders applied (height, leg length...).
+// Box3.setFromObject would use skinned meshes' bounding boxes, computed once at load before the
+// sliders, which cuts off tall characters.
+function characterBox() {
+  scene.updateMatrixWorld(); ch.afterMatrixUpdate();
+  const box = new THREE.Box3(), v = new THREE.Vector3();
+  ch.group.traverse(o => {
+    if (!o.isMesh || !o.visible) return;
+    const pos = o.geometry.attributes.position, step = Math.max(1, Math.floor(pos.count / 3000));
+    for (let i = 0; i < pos.count; i += step) {
+      if (o.isSkinnedMesh) o.getVertexPosition(i, v); else v.fromBufferAttribute(pos, i);
+      box.expandByPoint(v.applyMatrix4(o.matrixWorld));
+    }
+  });
+  return box;
+}
+async function blank(skeleton) {
+  const cat = await loadCatalog(skeleton);
+  const parts = cat.requiredBones.filter(b => cat.bones[b]?.defaultGeo && cat.geometries[cat.bones[b].defaultGeo])
+    .map(b => newPart(cat, b, cat.bones[b].defaultGeo));
+  const heroic = cat.stances.find(s => s.player && s.displayName === 'Heroic')?.name;  // new costumes stand heroic
+  return { name: '', skeleton, stance: heroic || cat.defaultStance, parts, bodyScale: [], scaleValues: {} };
+}
+
+// ---- saved-costume preview: the character on the game's comic cover, 300x400 like the game's files ----
+const cover = new Image(); cover.src = 'ui/cover.jpg';
+function renderPreview() {
+  const W = 300, H = 400, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.drawImage(cover, 0, 0, W, W * cover.naturalHeight / cover.naturalWidth);
+  const size = renderer.getSize(new THREE.Vector2()), pr = renderer.getPixelRatio();
+  const box = characterBox(), ctr = new THREE.Vector3(0, (box.min.y + box.max.y) / 2, 0), h = box.getSize(new THREE.Vector3()).y;
+  const cam = new THREE.PerspectiveCamera(30, 3 / 4, 0.05, 200);
+  cam.position.set(ctr.x, ctr.y + h * 0.04, ctr.z + h * 0.56 / Math.tan(THREE.MathUtils.degToRad(15)));
+  cam.lookAt(ctr);
+  const hidden = [grid, ch.rig?.helper].filter(o => o && o.visible);
+  hidden.forEach(o => (o.visible = false));
+  renderer.setPixelRatio(1); renderer.setSize(600, 800, false);
+  scene.updateMatrixWorld(); ch.afterMatrixUpdate();
+  renderer.render(scene, cam);
+  g.drawImage(renderer.domElement, 33, 88, 234, 312);  // below the logo, like the game's pictures
+  renderer.setPixelRatio(pr); renderer.setSize(size.x, size.y, false);
+  hidden.forEach(o => (o.visible = true));
+  return c;
+}
+
+// ---- options ----------------------------------------------------------------------------------
+function applyOptions() {
+  Object.assign(ch.options, { rawMask: $('rawMask').checked, normals: $('normals').checked, wireframe: $('wire').checked,
+                              body: $('applyBody').checked, mirror: $('mirror').checked,
+                              bounce: $('bounce').checked, cloth: $('cloth').checked, showHidden: $('showHidden').checked });
+  ch.applyOptions();
+  if (ch.rig) ch.rig.helper.visible = $('showSkel').checked;
+  grid.visible = $('showGrid').checked;
+}
+
+// ---- start --------------------------------------------------------------------------------------
+const sheetView = { renderer, scene, ch, lights: [key, rim], characterBox, hide: () => [grid, ch.rig?.helper],
+                    status: t => (status.textContent = t) };  // for the character sheet export (sheet.js)
+setupAbout($('about'));
+setupSettings($('settings'), { exportSheet: anchor => openSheetDialog(sheetView, anchor) });
+if (!await waitForBuild($('view'))) throw new Error('no editor data');  // built from the game files by serve.py
+const shared = await loadShared();
+const panel = new PartsPanel($('parts'), ch, shared, () => { showStatus('Edited'); body.render(); });
+const body = new BodyPanel($('bodySliders'), $('stancePanel'), ch, () => showStatus('Edited'));
+for (const b of document.querySelectorAll('.mainTabs button')) b.onclick = () => {
+  for (const x of document.querySelectorAll('.mainTabs button')) x.classList.toggle('on', x === b);
+  for (const t of ['costume', 'body', 'stance']) $('tab-' + t).hidden = t !== b.dataset.tab;
+};
+const sel = $('costume');
+for (const skel of ['Male', 'Female']) {
+  const og = document.createElement('optgroup'); og.label = skel;
+  shared.costumes.forEach((c, i) => { if (c.skeleton === skel) og.append(new Option(c.name.replace(/^Archetype_/, ''), i)); });
+  sel.append(og);
+}
+// Picking the costume that's already chosen loads it again (undoing edits): the list is blanked as it
+// opens, so any pick is a change; if it's closed without a pick the name comes back when focus leaves.
+// Anything else loaded (a file, a demo, New) blanks it, since it no longer shows what's on screen.
+const none = new Option('', ''); none.hidden = true; sel.prepend(none);
+let shown = '';
+sel.addEventListener('mousedown', () => { if (sel.value) { shown = sel.value; sel.value = ''; } });
+sel.addEventListener('blur', () => { if (!sel.value) sel.value = shown; });
+sel.onchange = () => { if (!sel.value) return; shown = sel.value; ch.fileInfo = null; open(shared.costumes[sel.value]); };
+document.addEventListener('costume-open', e => { if (!shared.costumes.includes(e.detail)) sel.value = shown = ''; });
+$('blankM').onclick = async () => { ch.fileInfo = null; open(await blank('Male')); };
+$('blankF').onclick = async () => { ch.fileInfo = null; open(await blank('Female')); };
+setupFiles({ ch, open, renderPreview, status: t => (status.textContent = t), loadButton: $('loadCostume'),
+             saveButton: $('saveCostume'), dropTarget: document.body });
+for (const id of ['rawMask', 'normals', 'wire', 'applyBody', 'mirror', 'showSkel', 'showGrid', 'bounce', 'cloth', 'showHidden']) $(id).onchange = applyOptions;
+// Wind on the cloth (speed 0-10 like the game's sky settings, heading, gusts)
+for (const [id, key, min, max, step, fmt] of [['windSpeed', 'speed', 0, 10, 0.1, v => v.toFixed(1)],
+                                              ['windHeading', 'heading', -180, 180, 5, v => v + '°'],
+                                              ['windGusts', 'gusts', 0, 1, 0.05, v => Math.round(v * 100) + '%']]) {
+  const show = v => { $(id + 'Val').textContent = fmt(v); };
+  const sl = gameSlider({ min, max, step, value: ch.wind[key], onInput: v => { ch.wind[key] = v; show(v); } });
+  sl.setAttribute('aria-label', 'Wind ' + key);
+  $(id).replaceWith(sl); sl.id = id; show(ch.wind[key]);
+}
+// Shake: sway the whole character side to side for a moment (the bouncers see the movement)
+$('shake').onclick = () => {
+  const t0 = performance.now(), g = ch.group;
+  const step = () => {
+    const t = (performance.now() - t0) / 1000;
+    g.position.x = t < 1.2 ? Math.sin(t * Math.PI * 4) * 0.35 * (1 - t / 1.2) : 0;
+    if (t < 1.2) requestAnimationFrame(step);
+  };
+  step();
+};
+window.editor = { THREE, camera, controls, ch, open, shared, panel, body, renderPreview, sheetView };  // debug handle
+// start on a Freeform costume (the creator's own starting point), else the first one
+const first = ['Archetype_Freeform_Free_F_01', 'Archetype_Freeform_Free_M_01'].map(n => shared.costumes.findIndex(c => c.name === n))
+  .find(i => i >= 0) ?? shared.costumes.findIndex(c => /Freeform/i.test(c.name));
+sel.value = shown = String(Math.max(first, 0));
+open(shared.costumes[sel.value]);
+</script>
+</body>
+</html>

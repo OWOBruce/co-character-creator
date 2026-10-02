@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "costume-viewer",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["serve.py"],
+      "port": 8765,
+      "autoPort": true
+    },
+    {
+      "name": "costume-viewer-app",
+      "runtimeExecutable": "./CO Costume Editor.exe",
+      "runtimeArgs": ["serve.py"],
+      "port": 8765,
+      "autoPort": true
+    }
+  ]
+}

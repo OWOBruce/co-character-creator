@@ -1,0 +1,13 @@
+{
+  "_about": "Accepted exceptions for tests/run.py and viewer/test.html. Each is a real quirk of the game data, not a bug in the editor.",
+  "modelNotFound": {
+    "_why": "The game's geometry def names a model its mesh file doesn't have; all are weapons or travel items, which the editor doesn't offer.",
+    "names": ["Travel_Broomstick_Skeletal_01", "Travel_Curlingbroom_01", "Weapon_Dragon_Sword_01_Psi", "Weapon_Energyrifle1_01",
+              "Weapon_Hooksword_01_Psi", "Weapon_Sorcery_Fireblade", "Weapon_Staff_Arvad_01_Heavy", "Weapon_Wheellockpistol1"]
+  },
+  "oversized": {
+    "_why": "Pieces that really are bigger than the body (checked on screen): the Blazing archetypes' bird wings.",
+    "Archetype_Blazing_Free_M_01": ["M_Back"],
+    "Archetype_Blazing_Free_F_01": ["F_Back"]
+  }
+}

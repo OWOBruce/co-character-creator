@@ -1,0 +1,518 @@
+{
+ "name": "Night Courier",
+ "skeleton": "Female",
+ "bodyScale": [],
+ "scaleValues": {},
+ "stance": "Femaleheroic",
+ "mood": "Determined",
+ "height": 6.0,
+ "muscle": 25.0,
+ "skin": [
+  212,
+  137,
+  111,
+  255
+ ],
+ "glow": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "regionCategories": {
+  "F_Head": "F_Head_Face",
+  "F_Upperbody": "F_Upper_Tight",
+  "F_Hands": "F_Hands_Long",
+  "F_Lowerbody": "F_Lower_Tight"
+ },
+ "colors": [
+  [
+   26,
+   26,
+   46,
+   255
+  ],
+  [
+   201,
+   162,
+   39,
+   255
+  ],
+  [
+   232,
+   232,
+   232,
+   255
+  ],
+  [
+   212,
+   137,
+   111,
+   255
+  ]
+ ],
+ "parts": [
+  {
+   "bone": "F_Head",
+   "geometry": "F_Head_Face_01",
+   "material": "F_Head_Face_Skin",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Hair",
+   "geometry": "F_Hair_Face_Ponytail_01",
+   "material": "F_Hair_Face_Ponytail_01_Avatar_Hair",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     43,
+     26,
+     16,
+     255
+    ],
+    [
+     74,
+     47,
+     29,
+     255
+    ],
+    [
+     43,
+     26,
+     16,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 0,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Chest",
+   "geometry": "F_Chest_Tight_01_1",
+   "material": "F_Chest_Tight_01_1_F_Chest_Leather_Skin",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Hips",
+   "geometry": "F_Hips_Tight_01",
+   "material": "F_Hips_Leather",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Footl",
+   "geometry": "F_Footl_Tight_Combatsock_01",
+   "material": "M_Footl_Tight_Combatsock_01_Leather",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Footr",
+   "geometry": "F_Footr_Tight_Combatsock_01",
+   "material": "M_Footl_Tight_Combatsock_01_Leather",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Cape",
+   "geometry": "F_Collar_Child_Tight_Cape_Archer_01_Back",
+   "material": "M_Collar_Tight_Cape_Archer_01_Avatar_Cloth",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Handl",
+   "geometry": "F_Handl_Tight_01_Hand",
+   "material": "F_Handr_Tight_01_Skin",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Handr",
+   "geometry": "F_Handr_Tight_01_Hand",
+   "material": "F_Handr_Tight_01_Skin",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Eyeballr",
+   "geometry": "F_Eye_R_Tight_Basic_01",
+   "material": "M_Eye_Tight_Eyeshuman_01_Avatar_Emblem_Leather",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "bone": "F_Eyeballl",
+   "geometry": "F_Eye_L_Tight_Basic_01",
+   "material": "M_Eye_Tight_Eyeshuman_01_Avatar_Emblem_Leather",
+   "pattern": "",
+   "detail": "",
+   "diffuse": "",
+   "specular": "",
+   "colors": [
+    [
+     26,
+     26,
+     46,
+     255
+    ],
+    [
+     201,
+     162,
+     39,
+     255
+    ],
+    [
+     232,
+     232,
+     232,
+     255
+    ],
+    [
+     212,
+     137,
+     111,
+     255
+    ]
+   ],
+   "colorLink": 1,
+   "glow": [
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ ]
+}
