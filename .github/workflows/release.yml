@@ -36,6 +36,12 @@ jobs:
       - name: Build the program, zip and installer
         run: python make_release.py --installer
 
+      # the same installer under a name that never changes, so this link always gets the newest one:
+      # https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe
+      - name: Add the installer under a fixed name
+        shell: bash
+        run: cp dist/CO-Costume-Editor-*-Setup.exe dist/CO-Costume-Editor-Setup.exe
+
       - name: Publish the release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3

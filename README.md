@@ -14,7 +14,7 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 ## Starting it
 
-1. Download **`CO-Costume-Editor-<version>-Setup.exe`** from the [latest release](https://github.com/codexheroes/co-character-creator/releases/latest) and run it.
+1. Download **[CO-Costume-Editor-Setup.exe](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version; older ones are on the [releases page](https://github.com/codexheroes/co-character-creator/releases)) and run it.
    - Windows may say **"Windows protected your PC"**, because the installer isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
    - It installs into `C:\Program Files\CO Costume Editor` (Windows asks for admin rights), or, if you choose **Install for me only**, into your own `%LOCALAPPDATA%\Programs` without them. It adds the editor to the Start menu (and the desktop, if you tick that box).
    - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
