@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(HERE, 'tools'))
 from paths import data  # noqa: E402
 
 BUILD_INFO = data('viewer', 'data', 'build.json')
-VERSION = 3  # bump when the build's output format changes, to force a rebuild
+VERSION = 4  # bump when the build's output changes, to force a rebuild (4: hogg.py reads the data list journal)
 
 
 PACKAGES = {'PIL': 'Pillow', 'numpy': 'numpy'}  # import name -> pip name; also in requirements.txt

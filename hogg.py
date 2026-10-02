@@ -15,6 +15,7 @@ class Hogg:
          self.datalist_fileno, dlj_size) = struct.unpack('<IHHIIII', hdr)
         if magic != 0xDEADF00D:
             raise ValueError('not a hogg file')
+        self.opj_size, self.dlj_size = opj_size, dlj_size
         self.f.seek(24 + opj_size + dlj_size)
         fl = self.f.read(fl_size)
         ea = self.f.read(ea_size)
@@ -45,7 +46,32 @@ class Hogg:
             pos += 4
             out.append(data[pos:pos + n])
             pos += n
-        return out
+        return self._apply_journal(out)
+
+    def _apply_journal(self, names):
+        """Names the patcher added (or removed) since the data list was last written, kept in the data list
+        journal after the header: u32, u32 bytes used, u32 (the same), then records of u8 op: 1 = add
+        (i32 name id, u32 length, the name), 2 = remove (i32 name id). Every file the game was patched with
+        since then (about a thousand costume pieces) is only named here."""
+        with self.lock:
+            self.f.seek(24 + self.opj_size)
+            d = self.f.read(self.dlj_size)
+        if len(d) < 12:
+            return names
+        pos, end = 12, min(len(d), 12 + struct.unpack_from('<I', d, 4)[0])
+        while pos < end:
+            op = d[pos]
+            if op == 1 and pos + 9 <= end:
+                nid, n = struct.unpack_from('<iI', d, pos + 1)
+                name, pos = d[pos + 9:pos + 9 + n], pos + 9 + n
+            elif op == 2 and pos + 5 <= end:
+                (nid,), name, pos = struct.unpack_from('<i', d, pos + 1), b'', pos + 5
+            else:
+                break  # something this reader doesn't know: keep what was read so far
+            if nid >= 0:
+                names.extend([b''] * (nid + 1 - len(names)))
+                names[nid] = name
+        return names
 
     def entries(self):
         """Yield (index, name, size, unpacked_size)."""
@@ -56,6 +82,8 @@ class Hogg:
             if name_id < 0 or name_id >= len(self.names) or size == 0 and unpacked == 0:
                 continue
             name = self.names[name_id].rstrip(b'\0').decode('utf-8', 'replace')
+            if not name:  # removed in the journal
+                continue
             yield i, name, size, unpacked
 
     def read(self, name):

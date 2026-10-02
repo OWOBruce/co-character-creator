@@ -91,6 +91,22 @@ RENDERS = renders_folder()  # settings.json rendersFolder, else %LOCALAPPDATA%/C
 RENDER_NAME = re.compile(r'^(Male|Female)/[A-Za-z0-9_.-]+\.jpg$')
 
 
+def read_asset(rel):
+    """SOURCE.read, opening the archives again once if it fails: the game patches its archives while it
+    runs (and its launcher between runs), which moves files the index made at start pointed to."""
+    global SOURCE
+    src = SOURCE
+    try:
+        return src.read(rel)
+    except Exception as e:
+        print(f'Reading {rel} failed ({e!r}); opening the game archives again', flush=True)
+    with SOURCE_LOCK:
+        if SOURCE is src:  # not already reopened by another request
+            SOURCE = GameSource(src.folder)
+        src = SOURCE
+    return src.read(rel)
+
+
 def screenshots_folder():
     """The chosen install's Live/screenshots, where the game keeps saved costumes (None without a game folder)."""
     return os.path.join(os.path.dirname(SOURCE.piggs), 'screenshots') if SOURCE and SOURCE.piggs else None
@@ -336,7 +352,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if '..' in rel or not rel.startswith(ASSET_DIRS):
                 self.send_error(403)
                 return None
-            data = SOURCE.read(rel)
+            try:
+                data = read_asset(rel)
+            except Exception as e:  # answer with the reason (a dropped connection is all the page would see)
+                print(f'Could not read {rel}: {e!r}', flush=True)
+                self.send_bytes(f'Could not read {rel} from the game files: {e}'.encode(), 'text/plain', 500)
+                return None
             if data is None:
                 self.send_error(404)
                 return None
