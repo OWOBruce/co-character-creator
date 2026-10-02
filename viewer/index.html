@@ -73,6 +73,28 @@
   .sheetDialog .bgChoices { display:flex; gap:6px; }
   .sheetDialog .bgChoice { flex:1; }
   .sheetDialog .row { justify-content:flex-end; margin-top:8px; }
+  .sheetDialog .nameBox { margin-top:10px; }
+  .sheetDialog .nameRow { display:flex; align-items:center; gap:6px; margin:0 0 6px; }
+  .sheetDialog .lab { flex:none; width:52px; font:15px var(--title); letter-spacing:.5px; color:var(--gold); }
+  .sheetDialog .nameRow > :last-child { flex:1; min-width:0; }
+  .sheetDialog .nameRow input[type=text] { padding:3px 6px; color:var(--text); font:700 12px var(--body); outline:none;
+                    border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
+  .sheetDialog .nameRow .bgChoice { font-size:14px; padding:2px 4px; }
+  .sheetDialog .nameSwatches { display:flex; flex-wrap:wrap; gap:4px; margin:0 0 6px 58px; }
+  .sheetDialog .nameSwatch { width:24px; height:24px; padding:0; border:1px solid #000; border-radius:4px; border-image:none; }
+  .sheetDialog .nameSwatch:hover { outline:2px solid var(--gold); border-image:none; }
+  .sheetDialog .nameSwatch.on { outline:2px solid #fff; }
+  .sheetDialog .namePicks { display:flex; align-items:center; gap:6px; margin:0 0 6px; }
+  .sheetDialog .namePicks .to { font:400 12px var(--body); color:var(--muted); }
+  .sheetDialog .namePicks input[type=color] { width:44px; height:24px; padding:0; border:1px solid #000; border-radius:4px; background:none; cursor:pointer; }
+  .sheetDialog .nameCheck { display:flex; align-items:center; gap:4px; margin:0 0 6px 58px; color:var(--text); }
+  .sheetDialog .namePreview { display:block; width:100%; border-radius:4px; }
+  .sheetPreview .palette { position:static; display:flex; flex-direction:column; gap:8px; padding:8px;
+                           max-width:calc(100vw - 32px); max-height:calc(100vh - 32px); box-sizing:border-box; }
+  .sheetPreview img { display:block; min-height:0; max-width:100%; max-height:calc(100vh - 110px); object-fit:contain;
+                      border-radius:4px; background:#000; }
+  .sheetPreview .row { justify-content:flex-end; }
+  .sheetPreview .hint { flex:1; font:400 12px var(--body); color:var(--muted); }
   .settingsDialog .gameFolder > button { font-size:15px; padding:2px 8px; }
   .aboutDialog { position:static; width:min(460px, 100%); max-height:calc(100vh - 32px); overflow:auto; padding:8px 12px; }
   .aboutDialog p { margin:0 2px 8px; font:400 14px/1.45 var(--body); color:var(--text); }
