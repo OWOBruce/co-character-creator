@@ -1,4 +1,10 @@
-"""Zip the editor for sharing: python make_release.py [--source-only]  ->  dist/CO-Costume-Editor-<date>.zip
+"""Make a release: python make_release.py [--installer | --source-only | --version]
+  -> dist/CO-Costume-Editor-<version>.zip, and with --installer dist/CO-Costume-Editor-<version>-Setup.exe
+
+The version comes from viewer/js/version.js (the one place it is set). --version just prints it.
+--installer also compiles installer/setup.iss with Inno Setup 6 (ISCC.exe, on PATH or in its usual install
+folders; winget install JRSoftware.InnoSetup). Pushing a tag v<version> to GitHub does all of this on a
+Windows runner and publishes a release (.github/workflows/release.yml), so a local build is only for testing.
 
 The zip holds "CO Costume Editor.exe" (app_launcher.py frozen by PyInstaller, with Python, Pillow, numpy and
 tkinter inside, so players need nothing installed; it has no console and quits when its window closes) and
@@ -14,11 +20,12 @@ built on each person's machine from their own install on first start. settings.j
 folder and account) stays out too.
 """
 import ast
+import glob
 import os
 import shutil
 import subprocess
 import sys
-import time
+import re
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +37,7 @@ FILES = ['README.md', 'LICENSE', 'DEVELOPER.md', 'start.bat', 'requirements.txt'
          'captions/captions.json',
          # for AI assistants (Claude Code): the costume-building skill, and how to start the editor in its browser pane
          '.claude/skills/build-costume/SKILL.md', '.claude/skills/build-costume/costume_to_json.py', '.claude/launch.json',
-         'tests/known.json', 'tests/mset_parity.mjs']
+         'tests/known.json', 'tests/mset_parity.mjs', 'installer/setup.iss']
 FOLDERS = [('tools', '.py'), ('viewer/js', '.js'), ('viewer/img', '.svg'), ('examples', '.json'), ('tests', '.py')]
 GENERATED = ['catalog', 'index', 'viewer/data', 'viewer/ui', 'settings.json']
 
@@ -93,24 +100,65 @@ def build_program():
     return os.path.join(WORK, 'dist', APP_NAME)
 
 
+def version():
+    text = open(os.path.join(HERE, 'viewer', 'js', 'version.js'), encoding='utf-8').read()
+    return re.search(r"VERSION = '([^']+)'", text).group(1)
+
+
+def find_iscc():
+    """Inno Setup 6's compiler: on PATH, or where its installer (or winget, per user) puts it."""
+    found = shutil.which('ISCC') or shutil.which('iscc')
+    if found:
+        return found
+    for base in (os.environ.get('ProgramFiles(x86)'), os.environ.get('ProgramFiles'),
+                 os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Programs')):
+        if base and os.path.isfile(os.path.join(base, 'Inno Setup 6', 'ISCC.exe')):
+            return os.path.join(base, 'Inno Setup 6', 'ISCC.exe')
+    sys.exit('The installer needs Inno Setup 6: winget install JRSoftware.InnoSetup (or jrsoftware.org/isdl.php)')
+
+
+def stage(program):
+    """Copy the editor's files, and the program beside them, into WORK/stage: what the zip and installer hold."""
+    out = os.path.join(WORK, 'stage')
+    shutil.rmtree(out, ignore_errors=True)
+    for f in files():
+        os.makedirs(os.path.dirname(os.path.join(out, f)), exist_ok=True)
+        shutil.copy2(os.path.join(HERE, f), os.path.join(out, f))
+    if program:  # the .exe and _internal/
+        shutil.copytree(program, out, dirs_exist_ok=True)
+    return out
+
+
 def main():
-    source_only = '--source-only' in sys.argv[1:]
-    name = 'CO-Costume-Editor-' + time.strftime('%Y%m%d')
+    args = sys.argv[1:]
+    if '--version' in args:
+        print(version())
+        return
+    source_only, installer = '--source-only' in args, '--installer' in args
+    if source_only and installer:
+        sys.exit('The installer needs the program: leave out --source-only')
+    iscc = find_iscc() if installer else None  # before the slow part
+    name = 'CO-Costume-Editor-' + version()
     program = None if source_only else build_program()
-    os.makedirs(os.path.join(HERE, 'dist'), exist_ok=True)
-    dest = os.path.join(HERE, 'dist', name + '.zip')
+    staged = stage(program)
+    dist = os.path.join(HERE, 'dist')
+    os.makedirs(dist, exist_ok=True)
+    dest = os.path.join(dist, name + '.zip')
     count = 0
     with zipfile.ZipFile(dest, 'w', zipfile.ZIP_DEFLATED) as z:
-        for f in files():
-            z.write(os.path.join(HERE, f), f'{name}/{f}')
-            count += 1
-        if program:  # the .exe and _internal/ sit beside the source
-            for root, _, names in os.walk(program):
-                for n in names:
-                    path = os.path.join(root, n)
-                    z.write(path, f'{name}/' + os.path.relpath(path, program).replace(os.sep, '/'))
-                    count += 1
+        for root, _, names in os.walk(staged):
+            for n in names:
+                path = os.path.join(root, n)
+                z.write(path, f'{name}/' + os.path.relpath(path, staged).replace(os.sep, '/'))
+                count += 1
     print(f'wrote {dest} ({count} files, {os.path.getsize(dest) // 1024} KB)')
+    if installer:
+        for old in glob.glob(os.path.join(dist, name + '-Setup.exe')):
+            os.remove(old)
+        subprocess.run([iscc, '/Q', f'/DAppVersion={version()}', f'/DSourceDir={staged}', f'/O{dist}',
+                        os.path.join(HERE, 'installer', 'setup.iss')], check=True)
+        exe = os.path.join(dist, name + '-Setup.exe')
+        print(f'wrote {exe} ({os.path.getsize(exe) // 1024} KB)')
 
 
 if __name__ == '__main__':

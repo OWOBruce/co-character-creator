@@ -12,9 +12,12 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 ## Starting it
 
-1. Unzip the editor into any folder you like (keep the whole folder together).
-2. Double-click **`CO Costume Editor.exe`**.
-   - The first time, Windows may say **"Windows protected your PC"**, because the program isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
+1. Download **`CO-Costume-Editor-<version>-Setup.exe`** from the [latest release](https://github.com/codexheroes/co-character-creator/releases/latest) and run it.
+   - Windows may say **"Windows protected your PC"**, because the installer isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
+   - It installs just for you, without asking for admin rights, into `%LOCALAPPDATA%\Programs\CO Costume Editor`, and adds the editor to the Start menu (and the desktop, if you tick that box).
+   - To update, run a newer installer: it keeps the data built from your game and your settings. Uninstall it from Windows' **Installed apps**.
+   - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`CO Costume Editor.exe`**.
+2. Start **CO Costume Editor** from the Start menu (the installer can start it for you the first time).
 3. The editor opens in its own window (Microsoft Edge or Google Chrome with no tabs or address bar; without either, your normal browser).
    - Closing the editor window stops the editor.
    - While it's open you can also use it in any browser at `http://localhost:8765`.
@@ -99,8 +102,4 @@ The editor then checks the costume. It fixes what it can (for example, it snaps 
 
 ## Sharing it
 
-Run `python make_release.py` to make a zip of the editor for someone else, with `CO Costume Editor.exe` in it (this needs PyInstaller: `python -m pip install pyinstaller`). `python make_release.py --source-only` makes a small zip without the program, for people who use `start.bat`. Either way it includes only the editor itself (with the piece descriptions and the costume-building skill for AI assistants), never data built from your game: each person's copy builds its own from their install. Your own costumes in `my_costumes/` stay out.
-
-For how it works inside, see [`DEVELOPER.md`](DEVELOPER.md).
-
-*Champions Online is a trademark of its owners. This is a fan-made tool, not affiliated with or endorsed by them.*
+Send people to the [releases page](https://github.com/codexheroes/co-character-creator/releases/latest). To make a release yourself: `python make_release.py` makes a zip of the editor with `CO Costume Editor.exe` in it (this needs PyInstaller: `python -m pip install pyinstaller`), `--installer` also makes the Setup.exe (this needs [Inno Setup 6](https://jrsoftware.org/isdl.php)), and `--source-only` makes a small zip without the program, for people who use `start.bat`. Either way it includes only the editor itself (with the piece descriptions and the costume-building skill for AI assistants), never data built from your game: each person's copy builds its own from their install. Your own costumes in `my_costumes/` stay out.

@@ -9,7 +9,7 @@ Everything is read straight from the install's `.hogg` archives: nothing is extr
 start.bat                       # double-click: builds the editor's data if needed, starts the server, opens the editor
 python build.py [--game FOLDER] [--force]   # build everything the editor needs from an install (~90 s)
 python tools/dump_schema.py     # GameClient.exe ParseTables -> catalog/schema.json (build.py runs it every build)
-python make_release.py          # zip for sharing, with CO Costume Editor.exe -> dist/CO-Costume-Editor-<date>.zip (no game data; --source-only: no exe)
+python make_release.py          # zip for sharing, with CO Costume Editor.exe -> dist/CO-Costume-Editor-<version>.zip (no game data; --source-only: no exe; --installer: also the Setup.exe)
 python tests/run.py [--quick] [--no-browser] [--show]   # regression tests (see Tests below)
 ```
 
@@ -19,6 +19,16 @@ python tests/run.py [--quick] [--no-browser] [--show]   # regression tests (see 
 - **`serve.py`** checks that record at start and after a folder change in Settings. When the build is missing or the game was patched, it runs `build.py` in the background, and the page shows the progress, then reloads.
 - **Outputs** (all generated per install): `catalog/` (with `schema.json`), `viewer/data/`, `viewer/ui/` and `index/`. They are not source: `make_release.py` leaves them out, `.gitignore` lists them, and in this Dropbox copy they carry Dropbox's ignore mark (`com.dropbox.ignored` stream) so they don't sync. The build empties `index/` rather than deleting it, so the mark stays.
 - **Checked against the old extraction-based build:** everything is byte-identical, except 17 piece names the game has since corrected ("Cannisters" → "Canisters").
+
+## Releasing
+
+GitHub: [codexheroes/co-character-creator](https://github.com/codexheroes/co-character-creator) (`main`, GPL-3.0). The repo holds exactly the release files (`make_release.py`'s `FILES`/`FOLDERS`) plus `LICENSE`, `.gitignore`, `.gitattributes` and `.github/`; `.gitignore` keeps out everything built from the game, `settings.json`, `my_costumes/`, `captions/batches.json` and `.claude/settings.local.json`. A new file the editor needs must go in `FILES`/`FOLDERS` too, or the program won't have it.
+
+1. Bump `VERSION` in `viewer/js/version.js` (the only place it is set; the About box shows it).
+2. Commit and `git push`.
+3. `git tag v<version>` and `git push origin v<version>`. `.github/workflows/release.yml` then builds the program, the zip and `CO-Costume-Editor-<version>-Setup.exe` (Inno Setup, `installer/setup.iss`) on a Windows runner and publishes them as a GitHub Release. It fails if the tag doesn't match `version.js`. **Actions > Release > Run workflow** builds without publishing (the files are kept as a workflow artifact).
+
+`python make_release.py --installer` makes the same files locally in `dist/`, for testing (needs PyInstaller and Inno Setup 6). The installer is per user (`%LOCALAPPDATA%\Programs\CO Costume Editor`, no admin), because the editor writes its built data and `settings.json` beside itself; installing over an older version replaces the code (it clears `_internal/`, `tools/` and `viewer/js/` first) and keeps that data. The uninstaller asks before deleting the data and settings.
 
 ## Tests
 

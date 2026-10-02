@@ -1,4 +1,5 @@
 // About: who made the editor, thanks, and the legal notice. A centred dialog over a darkened page.
+import { VERSION } from './version.js';
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
 export function setupAbout(button) {
@@ -6,7 +7,7 @@ export function setupAbout(button) {
     document.querySelector('.aboutBackdrop')?.remove();
     const back = el('div', 'modalBackdrop aboutBackdrop'), box = el('div', 'palette aboutDialog');
     box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'aboutHead');
-    const head = el('div', 'phead', 'CO Costume Editor'); head.id = 'aboutHead';
+    const head = el('div', 'phead', 'CO Costume Editor ' + VERSION); head.id = 'aboutHead';
 
     const made = el('p');
     made.append('Made by ', el('b', null, '@sadders1'), '. Feel free to hit me up in-game!');

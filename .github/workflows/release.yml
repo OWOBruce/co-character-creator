@@ -1,0 +1,56 @@
+# Pushing a version tag (git tag v0.5.1 && git push origin v0.5.1) builds CO Costume Editor.exe and the
+# installer on a Windows runner and publishes them, with the zip, as a GitHub Release. The tag must match
+# viewer/js/version.js. Run it by hand (Actions > Release > Run workflow) to just build and download them.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install the build's tools
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements.txt pyinstaller
+          choco install innosetup -y --no-progress
+
+      - name: Check the tag matches viewer/js/version.js
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          v="v$(python make_release.py --version)"
+          [ "$v" = "$GITHUB_REF_NAME" ] || { echo "Tag $GITHUB_REF_NAME but version.js says $v"; exit 1; }
+
+      - name: Build the program, zip and installer
+        run: python make_release.py --installer
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CO Costume Editor ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/*-Setup.exe
+            dist/*.zip
+
+      - name: Keep the files (manual runs)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: co-costume-editor
+          path: |
+            dist/*-Setup.exe
+            dist/*.zip

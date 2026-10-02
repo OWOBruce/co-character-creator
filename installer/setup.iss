@@ -1,0 +1,84 @@
+; The Windows installer: CO-Costume-Editor-<version>-Setup.exe. Built by "python make_release.py --installer"
+; (and by .github/workflows/release.yml on a version tag), which passes:
+;   /DAppVersion=0.5.1          from viewer/js/version.js
+;   /DSourceDir=<folder>        the staged release: the editor's files plus CO Costume Editor.exe and _internal\
+;
+; It installs for the current user only (no admin prompt) into %LOCALAPPDATA%\Programs\CO Costume Editor,
+; because the editor writes the data it builds from the game (catalog\, index\, viewer\data\, viewer\ui\)
+; and settings.json next to itself. Installing a newer version over an older one keeps that data;
+; build.py rebuilds it only if the build format changed.
+
+#define AppName "CO Costume Editor"
+#define AppExe "CO Costume Editor.exe"
+#ifndef AppVersion
+  #error Pass /DAppVersion=x.y.z (make_release.py --installer does)
+#endif
+#ifndef SourceDir
+  #error Pass /DSourceDir=<staged release folder> (make_release.py --installer does)
+#endif
+
+[Setup]
+AppId={{31bd8f76-ba20-499d-a18a-e665ad382230}
+AppName={#AppName}
+AppVersion={#AppVersion}
+AppVerName={#AppName} {#AppVersion}
+AppPublisher=sadders1
+AppPublisherURL=https://github.com/codexheroes/co-character-creator
+AppSupportURL=https://github.com/codexheroes/co-character-creator/issues
+AppUpdatesURL=https://github.com/codexheroes/co-character-creator/releases
+VersionInfoVersion={#AppVersion}
+PrivilegesRequired=lowest
+DefaultDirName={autopf}\{#AppName}
+DisableProgramGroupPage=yes
+DisableDirPage=auto
+LicenseFile={#SourceDir}\LICENSE
+SetupIconFile={#SourceDir}\app.ico
+UninstallDisplayIcon={app}\{#AppExe}
+UninstallDisplayName={#AppName}
+OutputBaseFilename=CO-Costume-Editor-{#AppVersion}-Setup
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+Compression=lzma2/max
+SolidCompression=yes
+WizardStyle=modern
+CloseApplications=yes
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+
+[InstallDelete]
+; code from an older version that this one may no longer have (the built data and settings stay)
+Type: filesandordirs; Name: "{app}\_internal"
+Type: filesandordirs; Name: "{app}\tools"
+Type: filesandordirs; Name: "{app}\viewer\js"
+Type: filesandordirs; Name: "{app}\__pycache__"
+
+[Files]
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}\__pycache__"
+Type: filesandordirs; Name: "{app}\tools\__pycache__"
+
+[Code]
+// The uninstaller removes what it installed. What the editor made itself (the data built from the game,
+// about 200 MB, and settings.json) is removed too only if the player says so: keeping it makes a
+// reinstall start without the rebuild.
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if (CurUninstallStep = usPostUninstall) and DirExists(ExpandConstant('{app}')) and not UninstallSilent then
+    if MsgBox('Also delete the data the editor built from your game files, and its settings?' + #13#10 + #13#10 +
+              'Choose No to keep them, so a reinstall starts straight away instead of rebuilding.',
+              mbConfirmation, MB_YESNO) = IDYES then
+    begin
+      DelTree(ExpandConstant('{app}'), True, True, True);
+      DelTree(ExpandConstant('{localappdata}\{#AppName}'), True, True, True);
+    end;
+end;
