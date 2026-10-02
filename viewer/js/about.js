@@ -11,6 +11,11 @@ export function setupAbout(button) {
 
     const made = el('p');
     made.append('Made by ', el('b', null, '@sadders1'), '. Feel free to hit me up in-game!');
+    // bugs and ideas: the project's GitHub issues, as on the website
+    const bugs = el('p'), bugLink = el('a', null, 'Open an issue on GitHub.');
+    bugLink.href = 'https://github.com/codexheroes/co-character-creator/issues';
+    bugLink.target = '_blank'; bugLink.rel = 'noopener noreferrer';
+    bugs.append('Found a bug or have an idea? ', bugLink);
 
     const thanks = el('div', 'aboutThanks');
     const logo = el('img'); logo.src = 'img/adventurers.svg'; logo.alt = 'Adventurers supergroup emblem';
@@ -30,7 +35,7 @@ export function setupAbout(button) {
 
     const row = el('div', 'row'), close = el('button', null, 'Close'); close.type = 'button';
     row.append(close);
-    box.append(head, made, thanks, legal, row);
+    box.append(head, made, bugs, thanks, legal, row);
     back.append(box);
     document.body.append(back);
     const done = () => { back.remove(); button.focus(); };
@@ -38,7 +43,11 @@ export function setupAbout(button) {
     back.addEventListener('mousedown', e => { if (e.target === back) done(); });  // click outside closes
     back.addEventListener('keydown', e => {
       if (e.key === 'Escape') done();
-      else if (e.key === 'Tab') { e.preventDefault(); (document.activeElement === close ? link : close).focus(); }
+      else if (e.key === 'Tab') {  // keep focus in the dialog: its links, then Close
+        e.preventDefault();
+        const stops = [bugLink, link, close], i = stops.indexOf(document.activeElement);
+        stops[(i + (e.shiftKey ? stops.length - 1 : 1)) % stops.length].focus();
+      }
     });
     close.focus();
   };

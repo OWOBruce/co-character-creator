@@ -8,7 +8,7 @@
 //    body mass, muscle and the other BodyScale tracks (brow, jaw, mouth). Tail/wing sliders only while
 //    such a piece is worn. Double-click a slider's name to put it back to its default.
 
-import { gameSlider } from './ui.js';
+import { gameSlider, editableValue, numberParser } from './ui.js';
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 // a labelled row: the label in its own column, the buttons wrapping in theirs
@@ -45,6 +45,16 @@ const gameOrder = (group, items, name) => {
 };
 // feet as the game shows height: 5' 4"
 const feetInches = ft => { const inches = Math.round(ft * 12); return `${Math.floor(inches / 12)}' ${inches % 12}"`; };
+// a typed height -> feet, or null: 5' 4", 5'4, 5 ft 4 in, 64" or 64 in (inches), or 5.5 (feet); a bare
+// number is feet up to 8, inches from 48 (a height is never in between)
+function parseHeight(text) {
+  const t = text.toLowerCase().replace(/[’′]/g, "'").replace(/[”″]|''/g, '"').trim();
+  let m = t.match(/^(\d+(?:\.\d+)?)\s*(?:'|ft|feet|foot)\s*(?:(\d+(?:\.\d+)?)\s*(?:"|in|inch|inches)?)?$/);
+  if (m) return m[2] !== undefined && +m[2] >= 12 ? null : +m[1] + (m[2] ? +m[2] / 12 : 0);
+  if ((m = t.match(/^(\d+(?:\.\d+)?)\s*(?:"|in|inch|inches)$/))) return +m[1] / 12;
+  if ((m = t.match(/^(\d+(?:\.\d+)?)$/))) return +m[1] <= 8 ? +m[1] : +m[1] >= 48 ? +m[1] / 12 : null;
+  return null;
+}
 
 export class BodyPanel {
   // bodyRoot: presets and sliders; stanceRoot: stance, mood and pose
@@ -129,15 +139,22 @@ export class BodyPanel {
 
   // ---- sliders -------------------------------------------------------------------------------------
   // The number shown counts from 0 at the slider's left end, as the game's creator shows it (the game's
-  // values can run from below 0, e.g. -100 to 100); the value kept is the game's. show: another way to
-  // show it (height in feet and inches).
-  slider(label, min, max, step, value, def, onInput, title, show = null) {
+  // values can run from below 0, e.g. -100 to 100); the value kept is the game's. Clicking the number
+  // types one in. height: shown and typed in feet and inches.
+  slider(label, min, max, step, value, def, onInput, title, height = false) {
+    const show = height ? feetInches : null;
     const row = el('div', 'slider');
     const l = el('span', null, label); l.title = (title ? title + '\n' : '') + 'Double-click to reset';
     const fmt = v => show ? show(+v) : (+v - min).toFixed(step < 1 ? 2 : 0);
     const out = el('span', 'val', fmt(value));
     const s = gameSlider({ min, max, step, value, onInput: v => { out.textContent = fmt(v); onInput(v); } });
-    l.ondblclick = () => { s.value = def; out.textContent = fmt(def); onInput(def); };
+    const set = v => { s.value = v; out.textContent = fmt(v); onInput(s.value); };
+    l.ondblclick = () => set(def);
+    const parse = height
+      ? text => { const ft = parseHeight(text); return ft != null && ft >= min - 1e-9 && ft <= max + 1e-9 ? ft : null; }
+      : numberParser({ min, max, step, toShown: v => v - min, fromShown: n => n + min });
+    editableValue(out, { parse, apply: set, label: height ? 'height' : 'number',
+                         hint: height ? `${feetInches(min)} to ${feetInches(max)}, e.g. 5' 10"` : `0 to ${max - min}` });
     row.append(l, s, out);
     return row;
   }
@@ -154,7 +171,7 @@ export class BodyPanel {
     const changed = () => ch.updateBody();
     // Body: height, muscle, body mass (the game's Basics)
     const bodyRows = [this.slider('Height', body.heightRange[0], body.heightRange[1], 0.01, vals.height, body.heightBase,
-                                  v => { vals.height = v; changed(); }, '', feetInches)];
+                                  v => { vals.height = v; changed(); }, '', true)];
     const scaleRow = i => {
       const b = vals.bodyScales[i], lo = body.bodyScaleRange[0]?.[i] ?? 0, hi = body.bodyScaleRange[1]?.[i] ?? 100;
       const label = (body.bodyScaleNames?.[i] || b.name) + (b.fallback ? ' (approx.)' : b.track ? '' : ' (no data)');

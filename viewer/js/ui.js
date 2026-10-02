@@ -39,3 +39,48 @@ export function gameSlider({ min, max, step = 1, value, onInput, onChange }) {
   draw();
   return el;
 }
+
+// Clicking a slider's number (or Enter on it) lets the player type one. Enter or clicking away sets it
+// when it's a value the slider can take; otherwise the box turns red and says what it takes (Enter keeps
+// editing, clicking away puts the old number back). Escape puts the old number back.
+// parse(text) -> the slider's value, or null; apply(value) sets it; hint: what it takes, e.g. '0 to 100'.
+export function editableValue(out, { parse, apply, hint, label = 'value' }) {
+  out.classList.add('editable'); out.tabIndex = 0; out.setAttribute('role', 'button');
+  out.title = `Click to type a ${label} (${hint})`;
+  const edit = () => {
+    if (out.querySelector('input')) return;
+    const was = out.textContent, inp = document.createElement('input');
+    inp.type = 'text'; inp.value = was; inp.className = 'valEdit'; inp.spellcheck = false;
+    inp.setAttribute('aria-label', `${label} (${hint})`);
+    out.textContent = ''; out.append(inp); inp.focus(); inp.select();
+    let open = true;
+    const close = () => { open = false; out.textContent = was; };
+    const commit = () => {
+      const v = parse(inp.value.trim());
+      if (v == null) { inp.classList.add('bad'); inp.title = `Not a ${label} this takes: ${hint}`; return false; }
+      close(); apply(v);  // apply shows the new number
+      return true;
+    };
+    inp.addEventListener('keydown', e => {
+      e.stopPropagation();  // not the page's shortcuts
+      if (e.key === 'Enter') { e.preventDefault(); if (commit()) out.focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); out.focus(); }
+    });
+    inp.addEventListener('input', () => { inp.classList.remove('bad'); inp.title = ''; });
+    inp.addEventListener('blur', () => { if (open && !commit()) close(); });
+  };
+  out.addEventListener('click', edit);
+  out.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !out.querySelector('input')) { e.preventDefault(); edit(); } });
+}
+
+// A parser for a slider shown as a plain number: shown = toShown(value). Takes the number as shown (with
+// its unit, e.g. ° or %, optional) only when it is in range and on the slider's step.
+export function numberParser({ min, max, step, toShown = v => v, fromShown = n => n, unit = '' }) {
+  return text => {
+    const t = text.replace(unit, '').trim();
+    if (!/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return null;
+    const v = fromShown(+t), k = (v - min) / step;
+    if (v < min - 1e-9 || v > max + 1e-9 || Math.abs(k - Math.round(k)) > 1e-6) return null;
+    return +(Math.round(k) * step + min).toFixed(6);  // not 0.30000000000000004
+  };
+}

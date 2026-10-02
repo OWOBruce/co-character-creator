@@ -169,13 +169,16 @@ function showDemoPicker(demo, label, pick) {
   list.querySelector('button:not(:disabled)')?.focus();
 }
 
+// Returns { pickFile(target) }: Load's file picker for another figure (View > Compare with). A target is
+// { open(doc, fileInfo) }; the character's own is Load's (ch.fileInfo for the save dialog, then open).
 export function setupFiles({ ch, open, renderPreview, status, loadButton, saveButton, dropTarget }) {
   // ---- load ----
+  const main = { open: async (doc, info) => { ch.fileInfo = info; await open(doc); } };
   const input = el('input'); input.type = 'file'; input.accept = '.jpg,.jpeg,image/jpeg,.json,application/json,.demo'; input.hidden = true;
   document.body.append(input);
   // Costume JSON (index/GUIDE.md, e.g. written by an AI): checked and completed by the server
   // (costume_check.py), then loaded; what the check changed or found is shown.
-  const importJson = async (text, label) => {
+  const importJson = async (text, label, target = main) => {
     let costume;
     try { costume = JSON.parse(text); } catch (e) { status(`${label} isn't valid JSON: ${e.message}`); return; }
     let res;
@@ -186,11 +189,10 @@ export function setupFiles({ ch, open, renderPreview, status, loadButton, saveBu
     } catch (e) { status('Could not check the costume: ' + e.message); return; }
     showReport(res.problems || [], label, !!res.doc);
     if (!res.doc) return;
-    ch.fileInfo = null;
-    await open(res.doc);
+    await target.open(res.doc, null);
   };
   // A demo recording: pick a player; the save dialog then offers their character name and your account.
-  const loadDemo = async file => {
+  const loadDemo = async (file, target) => {
     let demo;
     try { demo = readDemo(await file.text()); } catch (e) { status('Could not read ' + file.name + ': ' + e.message); console.warn(e); return; }
     if (!demo.players.length) { status(`No players in ${file.name}`); return; }
@@ -202,48 +204,50 @@ export function setupFiles({ ch, open, renderPreview, status, loadButton, saveBu
     let latest = 0;
     showDemoPicker(demo, file.name, async (p, doc, mark) => {
       const n = ++latest;  // clicking through quickly: only the last pick reports (ch.load drops the others)
-      ch.fileInfo = { account: '', character: p.name };
       const d = { ...doc, name: p.name };
       mark(d);
-      await open(d);
+      await target.open(d, { account: '', character: p.name });
       if (n === latest) status(`Loaded ${p.name} from ${file.name}`);
     });
   };
-  const load = async file => {
-    if (/\.json$/i.test(file.name)) { await importJson(await file.text(), file.name); return; }
-    if (/\.demo$/i.test(file.name)) { await loadDemo(file); return; }
+  const load = async (file, target = main) => {
+    if (/\.json$/i.test(file.name)) { await importJson(await file.text(), file.name, target); return; }
+    if (/\.demo$/i.test(file.name)) { await loadDemo(file, target); return; }
     try {
       const info = readCostumeJpeg(await file.arrayBuffer());
       if (!SKELETONS.includes(info.doc.skeleton)) throw new Error(`Skeleton "${info.doc.skeleton}" isn't supported yet`);
-      ch.fileInfo = { account: info.account, character: info.character };
-      await open({ ...info.doc, name: info.character || info.doc.name });
+      await target.open({ ...info.doc, name: info.character || info.doc.name }, { account: info.account, character: info.character });
       if (!info.hashOk) status(`Loaded ${info.character}, but its checksum doesn't match: the game would reject this file (it was changed outside the game). Saving it again fixes that.`);
     } catch (e) { status('Could not load ' + file.name + ': ' + e.message); console.warn(e); }
   };
   // Load: the server's native Open dialog, which starts in the game's Live/screenshots (the browser's own
   // picker can't be pointed at a folder); the browser's picker when the page isn't served by serve.py
-  let picking = false;
-  loadButton.onclick = async () => {
-    if (picking) return;
+  // pickFile(target) -> true once a file is read (a demo then shows its players), false if cancelled
+  let picking = false, browserTarget = main;
+  const pickFile = async (target = main) => {
+    if (picking) return false;
     picking = true;
     try {
       const r = await fetch('api/file/open', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       if (r.ok && r.headers.get('Content-Type') === 'application/octet-stream') {
         const file = new File([await r.blob()], decodeURIComponent(r.headers.get('X-File-Name') || 'costume.jpg'));
         picking = false;
-        await load(file);
-        return;
+        await load(file, target);
+        return true;
       }
       const res = await r.json().catch(() => ({}));
-      if (res.cancelled) return;
-      if (r.status === 409) { status(res.error); return; }
+      if (res.cancelled) return false;
+      if (r.status === 409) { status(res.error); return false; }
       throw new Error(res.error || `server answered ${r.status}`);
     } catch (e) {  // quick failures only (no serve.py, no tkinter), so the click still lets the browser's picker open
       console.warn("Open dialog unavailable, using the browser's:", e);
+      browserTarget = target;
       input.click();
+      return true;  // the browser's picker says nothing when it's cancelled
     } finally { picking = false; }
   };
-  input.onchange = () => { if (input.files[0]) load(input.files[0]); input.value = ''; };
+  loadButton.onclick = () => pickFile(main);
+  input.onchange = () => { if (input.files[0]) load(input.files[0], browserTarget); input.value = ''; browserTarget = main; };
   dropTarget.addEventListener('dragover', e => { e.preventDefault(); dropTarget.classList.add('dropping'); });
   dropTarget.addEventListener('dragleave', () => dropTarget.classList.remove('dropping'));
   dropTarget.addEventListener('drop', e => {
@@ -267,7 +271,7 @@ export function setupFiles({ ch, open, renderPreview, status, loadButton, saveBu
       const i = el('input'); i.value = value; i.placeholder = hint; l.append(i); box.append(l); return i;
     };
     // the account is always yours (Settings), not the one in a loaded file; a new costume (starting costume,
-    // New male/female, JSON) has no character yet
+    // New masculine/feminine, JSON) has no character yet
     const acc = field('Account', savedAccount.get(), 'your @handle, without the @');
     const name = field('Character', ch.fileInfo?.character || (ch.doc.name || '').replace(/^Archetype_/, ''), 'character name');
     const note = el('div', 'hint', 'Saved into the game\'s Live/screenshots folder, where the tailor finds it.'
@@ -309,4 +313,5 @@ export function setupFiles({ ch, open, renderPreview, status, loadButton, saveBu
       } catch (e) { note.textContent = 'Could not save: ' + e.message; console.warn(e); }
     };
   };
+  return { pickFile };
 }

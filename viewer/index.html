@@ -60,7 +60,8 @@
   .demoRow { display:flex; flex-direction:column; gap:3px; }
   .demoRow.me { padding:4px; margin-bottom:6px; border:2px solid var(--gold); border-radius:6px; }
   .demoRow .who { display:flex; justify-content:space-between; align-items:baseline; gap:8px; text-align:left; }
-  .demoRow .who .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* room for Bangers' slant and the outline, which overflow:hidden would shave off the last letter */
+  .demoRow .who .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 0.2em 0 1px; }
   .demoRow .who .sub { flex:none; font:400 11px var(--body); color:var(--muted); text-shadow:none; }
   .demoRow .who:disabled { opacity:.45; cursor:default; }
   .demoRow.on .who { border-image-source:url(ui/button_on.png); color:#231500; text-shadow:none; }
@@ -102,8 +103,8 @@
   .aboutThanks { display:flex; gap:14px; align-items:center; margin:12px 0; padding:10px; border-radius:6px; background:#0006; }
   .aboutThanks img { width:96px; height:auto; flex:none; }
   .aboutThanks p { margin:2px 0 4px; }
-  .aboutThanks a { font:700 14px var(--body); color:var(--gold); }
-  .aboutThanks a:hover { color:#fff27a; }
+  .aboutThanks a, .aboutDialog p a { font:700 14px var(--body); color:var(--gold); }
+  .aboutThanks a:hover, .aboutDialog p a:hover { color:#fff27a; }
   .aboutSub { font:17px var(--title); letter-spacing:.6px; color:var(--gold); margin-right:2px; }
   .aboutLegal p { font-size:12px; color:var(--muted); }
   .aboutDialog .row { justify-content:flex-end; margin-top:6px; }
@@ -160,6 +161,7 @@
   .frHelp { margin-top:10px; font:400 13px/1.45 var(--body); color:var(--muted); }
   .frHelp summary { background:none; padding:0; font-size:17px; }
   .frHelp ul { margin:8px 0 0; padding-left:20px; } .frHelp li { margin:4px 0; }
+  .opts #compareWith { width:auto; margin:0 10px 0 -6px; font-size:12px; padding:0 2px; vertical-align:middle; }
   .opts label { display:inline-flex; gap:4px; margin:2px 10px 2px 0; }
   input[type=checkbox] { accent-color: var(--gold2); }
   #version { position:absolute; right:12px; bottom:8px; font:400 11px var(--body); color:#8a9bb8; opacity:.75;
@@ -175,7 +177,8 @@
   .mainTabs { display:flex; gap:2px; margin:6px 0 8px; padding-bottom:4px;
               background:url(ui/zippatone.png) left bottom/100% 6px no-repeat; }
   .mainTabs button { flex:1; font-size:16px; padding:4px 1px; white-space:nowrap; }
-  .viewOpts { margin-top:12px; }
+  .fileRow { gap:4px; } .fileRow button { white-space:nowrap; font-size:14px; padding:3px 5px; }
+  .viewOpts { margin-top:12px; padding-top:10px; border-top:1px solid #9fc4ff73; }
 
   /* boxes inside the panel */
   .bodyBox, .colorsBox { margin:6px 0 8px; padding:4px 6px; border:6px solid transparent;
@@ -198,6 +201,12 @@
   .slider { display:grid; grid-template-columns: 1fr 130px 34px; gap:6px; align-items:center; margin:3px 0; }
   .slider > span:first-child { color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:default; }
   .slider .val { text-align:right; font:15px var(--title); color:var(--gold); }
+  /* a slider's number, click to type one (ui.js editableValue) */
+  .editable { cursor:text; border-radius:3px; }
+  .editable:hover, .editable:focus-visible { outline:1px dashed #ffd21f99; outline-offset:1px; }
+  .valEdit { width:100%; min-width:2.6em; box-sizing:border-box; padding:0 2px; text-align:right; font:inherit; color:var(--text);
+             background:#061532; border:1px solid var(--gold2); border-radius:3px; outline:none; }
+  .valEdit.bad { border-color:#ff6a4a; background:#3a0c0c; }
   .gslider { position:relative; height:14px; margin:7px 5px; cursor:pointer; touch-action:none; outline:none;
              background:url(ui/slider_empty.png) repeat-x 0 0/6px 100%; border:2px solid #000; border-radius:3px; }
   .gslider .fill { position:absolute; top:0; bottom:0; background:url(ui/slider_full.png) repeat-x 0 0/6px 100%; }
@@ -300,7 +309,7 @@
       <div class="titleBtns"><button id="settings" type="button" title="Settings (game folder, account, character sheet)" aria-haspopup="dialog">Settings</button>
         <button id="about" type="button" title="Who made this, thanks, and the legal notice" aria-haspopup="dialog">About</button></div></div>
     <label>Start from <select id="costume"></select></label>
-    <div class="row"><button id="blankM" type="button">New male</button><button id="blankF" type="button">New female</button>
+    <div class="row fileRow"><button id="blankM" type="button" title="Start a blank costume on the masculine body">New masculine</button><button id="blankF" type="button" title="Start a blank costume on the feminine body">New feminine</button>
       <span style="flex:1"></span><button id="loadCostume" type="button" title="Open a costume saved by the game (Live/screenshots/Costume_*.jpg), a demo recording (Live/demos/*.demo: pick a player) or a costume JSON (index/GUIDE.md); you can also drop one on the page or paste JSON">Load</button><button id="saveCostume" type="button" title="Save as a game costume file">Save</button></div>
     <div class="mainTabs"><button data-tab="costume" class="on">Costume</button><button data-tab="body">Body</button><button data-tab="stance">Stance &amp; Mood</button></div>
     <div id="tab-costume" class="tabPage"><div id="parts"></div></div>
@@ -316,6 +325,8 @@
         <label><input type="checkbox" id="rawMask"> Raw masks</label>
         <label><input type="checkbox" id="applyBody" checked> Body sliders</label>
         <label><input type="checkbox" id="showGrid"> Floor grid</label>
+        <label title="A measuring stick beside the character, marked at the height the Height slider gives (hair and hats don't count)"><input type="checkbox" id="showRuler"> Height ruler</label>
+        <label title="Another character beside yours, in the same stance: a default in grey at the game's default body, or one from a saved costume or demo"><input type="checkbox" id="compare"> Compare with</label><select id="compareWith" aria-label="Compare with"><option value="same">the same body type</option><option value="Male">a masculine default</option><option value="Female">a feminine default</option><option value="file" hidden>a character from a file…</option><option value="pick">a character from a file…</option></select>
         <label title="The game's jiggle bones (hair, ears, backpacks...)"><input type="checkbox" id="bounce" checked> Bouncers</label>
         <label title="Simulate capes, skirts and scarves with the game's cloth settings. Applies to pieces loaded afterwards."><input type="checkbox" id="cloth" checked> Cloth</label>
         <label title="Wings flap once when picked or loaded. Tick to keep them flapping."><input type="checkbox" id="loopWings"> Loop wings</label>
@@ -356,13 +367,16 @@ import { newPart, isWeaponBone } from './js/rules.js';
 import { PartsPanel } from './js/parts-panel.js';
 import { BodyPanel } from './js/body-panel.js';
 import { setupFiles } from './js/file-ui.js';
-import { gameSlider } from './js/ui.js';
+import { gameSlider, editableValue, numberParser } from './js/ui.js';
 import { setupSettings, waitForBuild } from './js/source-ui.js';
 import { openSheetDialog } from './js/sheet.js';
 import { setupAbout } from './js/about.js';
 import { VERSION } from './js/version.js';
+import { HeightRuler } from './js/ruler.js';
+import { CompareFigure } from './js/compare.js';
 
 const $ = id => document.getElementById(id);
+const BUILD_NAMES = { Male: 'masculine', Female: 'feminine' };  // the skeletons, as the page names them
 const view = $('view'), status = $('status');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });  // the tailor backdrop shows through
 renderer.setPixelRatio(devicePixelRatio);
@@ -377,6 +391,8 @@ scene.add(new THREE.HemisphereLight(0xffffff, 0x444450, 1.4));
 const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 6, 5); scene.add(key);
 const rim = new THREE.DirectionalLight(0x9fb6ff, 1.0); rim.position.set(-4, 4, -5); scene.add(rim);
 const grid = new THREE.GridHelper(10, 20, 0x9fc4ff, 0x5d86c4); grid.visible = false; scene.add(grid);
+const ruler = new HeightRuler(scene);              // View > Height ruler
+const compare = new CompareFigure(scene, blank);  // View > Compare with
 function resize() {
   const w = view.clientWidth, h = view.clientHeight;
   renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
@@ -393,9 +409,11 @@ renderer.setAnimationLoop(now => {
   if (now - lastFrame < frameGap) return;
   lastFrame = now;
   try {  // an exception here would stop three's animation loop for good
-    ch.tick(now, $('play').checked); controls.update();
+    ch.tick(now, $('play').checked); compare.tick(now, $('play').checked); controls.update();
+    if (compare.loaded) compare.follow(ch);
+    if (ruler.visible) markHeights();
     scene.updateMatrixWorld();
-    ch.afterMatrixUpdate(now);
+    ch.afterMatrixUpdate(now); compare.afterMatrixUpdate(now);
     renderer.render(scene, camera);
   } catch (e) { console.error(e); }
 });
@@ -410,11 +428,31 @@ async function open(doc) {
   const box = characterBox();
   if (!box.isEmpty()) {
     // centred on the character, not on the box: big pieces (wings, backpacks) reach far out to one side
-    const y = (box.min.y + box.max.y) / 2;
-    controls.target.set(0, y, 0); camera.position.set(0, y + 0.5, box.getSize(new THREE.Vector3()).y * 2.2);
+    const y = (box.min.y + box.max.y) / 2, x = viewX();
+    controls.target.set(x, y, 0); camera.position.set(x, y + 0.5, box.getSize(new THREE.Vector3()).y * 2.2 * (compare.on ? 1.2 : 1));
   }
   panel.reset(); body.render(); applyOptions();
-  showStatus(`${doc.name || 'New ' + doc.skeleton.toLowerCase()} · loaded in ${((performance.now() - t0) / 1000).toFixed(1)} s`);
+  if (compare.on && $('compareWith').value === 'same') updateCompare();  // a new costume can be the other gender
+  showStatus(`${doc.name || 'New ' + (BUILD_NAMES[doc.skeleton] || doc.skeleton.toLowerCase())} · loaded in ${((performance.now() - t0) / 1000).toFixed(1)} s`);
+}
+// ---- height ruler and compare figure (View) ----------------------------------------------------------
+const viewX = () => compare.on ? compare.x / 2 : 0;  // between the two when comparing
+function markHeights() {
+  ruler.mark('main', ch.bodyValues?.height ?? null, -0.6, ruler.x, 0xffd21f);
+  ruler.mark('compare', compare.loaded ? compare.height ?? null : null, compare.x - 0.6, compare.x + 0.6, 0xbdbdbd);
+}
+// what Compare with shows: a skeleton's default, or the character picked from a file
+let compareFile = null;  // { doc, name }
+async function updateCompare() {
+  const before = viewX(), sel = $('compareWith').value;
+  const want = !$('compare').checked ? null : sel === 'file' ? compareFile?.doc : sel === 'same' ? ch.doc?.skeleton : sel;
+  const name = !want ? '' : typeof want === 'string' ? `the ${BUILD_NAMES[want] || want.toLowerCase()} default` : compareFile.name;
+  if (want) status.textContent = `Loading ${name} to compare with…`;
+  await compare.show(want || null, ch);
+  if (want) showStatus(`Comparing with ${name}`);
+  // keep the view where it was, moved over by as much as the middle moved
+  const dx = viewX() - before;
+  controls.target.x += dx; camera.position.x += dx;
 }
 function showStatus(prefix) {
   const shown = [...ch.parts.values()].filter(p => p.mesh).length;
@@ -456,7 +494,7 @@ function renderPreview() {
   const cam = new THREE.PerspectiveCamera(30, 3 / 4, 0.05, 200);
   cam.position.set(ctr.x, ctr.y + h * 0.04, ctr.z + h * 0.56 / Math.tan(THREE.MathUtils.degToRad(15)));
   cam.lookAt(ctr);
-  const hidden = [grid, ch.rig?.helper].filter(o => o && o.visible);
+  const hidden = [grid, ch.rig?.helper, ruler.group, ...compare.hide()].filter(o => o && o.visible);
   hidden.forEach(o => (o.visible = false));
   renderer.setPixelRatio(1); renderer.setSize(600, 800, false);
   scene.updateMatrixWorld(); ch.afterMatrixUpdate();
@@ -479,7 +517,7 @@ function applyOptions() {
 }
 
 // ---- start --------------------------------------------------------------------------------------
-const sheetView = { renderer, scene, ch, lights: [key, rim], characterBox, hide: () => [grid, ch.rig?.helper],
+const sheetView = { renderer, scene, ch, lights: [key, rim], characterBox, hide: () => [grid, ch.rig?.helper, ruler.group, ...compare.hide()],
                     status: t => (status.textContent = t) };  // for the character sheet export (sheet.js)
 setupAbout($('about'));
 $('version').textContent = 'v' + VERSION;
@@ -509,18 +547,37 @@ sel.onchange = () => { if (!sel.value) return; shown = sel.value; ch.fileInfo = 
 document.addEventListener('costume-open', e => { if (!shared.costumes.includes(e.detail)) sel.value = shown = ''; });
 $('blankM').onclick = async () => { ch.fileInfo = null; open(await blank('Male')); };
 $('blankF').onclick = async () => { ch.fileInfo = null; open(await blank('Female')); };
-setupFiles({ ch, open, renderPreview, status: t => (status.textContent = t), loadButton: $('loadCostume'),
+const files = setupFiles({ ch, open, renderPreview, status: t => (status.textContent = t), loadButton: $('loadCostume'),
              saveButton: $('saveCostume'), dropTarget: document.body });
 for (const id of ['rawMask', 'normals', 'wire', 'applyBody', 'mirror', 'showSkel', 'showGrid', 'bounce', 'cloth', 'showHidden', 'loopWings']) $(id).onchange = applyOptions;
+$('showRuler').onchange = () => { ruler.visible = $('showRuler').checked; };
+$('compare').onchange = updateCompare;
+// a character from a file: Load's picker (a costume, costume JSON or demo player), into the compare figure
+let comparePrev = $('compareWith').value;
+$('compareWith').onchange = async () => {
+  const sel = $('compareWith');
+  if (sel.value !== 'pick') { comparePrev = sel.value; if ($('compare').checked) updateCompare(); return; }
+  sel.value = comparePrev;  // until a character is picked
+  await files.pickFile({ open: async (doc, info) => {
+    compareFile = { doc, name: info?.character || doc.name || 'the character from the file' };
+    sel.value = comparePrev = 'file';  // shown as "a character from a file…"; the status line names it
+    $('compare').checked = true;
+    await updateCompare();
+  } });
+};
 $('loopWings').addEventListener('change', () => { if (!$('loopWings').checked) ch.replayWings(); });
-// Wind on the cloth (speed 0-10 like the game's sky settings, heading, gusts)
-for (const [id, key, min, max, step, fmt] of [['windSpeed', 'speed', 0, 10, 0.1, v => v.toFixed(1)],
-                                              ['windHeading', 'heading', -180, 180, 5, v => v + '°'],
-                                              ['windGusts', 'gusts', 0, 1, 0.05, v => Math.round(v * 100) + '%']]) {
+// Wind on the cloth (speed 0-10 like the game's sky settings, heading, gusts); the numbers can be typed
+for (const [id, key, min, max, step, fmt, typed] of [
+    ['windSpeed', 'speed', 0, 10, 0.1, v => v.toFixed(1), { hint: '0 to 10, in tenths' }],
+    ['windHeading', 'heading', -180, 180, 5, v => v + '°', { hint: '-180° to 180°, in steps of 5', unit: '°' }],
+    ['windGusts', 'gusts', 0, 1, 0.05, v => Math.round(v * 100) + '%',
+     { hint: '0% to 100%, in steps of 5', unit: '%', toShown: v => v * 100, fromShown: n => n / 100 }]]) {
   const show = v => { $(id + 'Val').textContent = fmt(v); };
   const sl = gameSlider({ min, max, step, value: ch.wind[key], onInput: v => { ch.wind[key] = v; show(v); } });
   sl.setAttribute('aria-label', 'Wind ' + key);
   $(id).replaceWith(sl); sl.id = id; show(ch.wind[key]);
+  editableValue($(id + 'Val'), { parse: numberParser({ min, max, step, ...typed }), hint: typed.hint, label: 'wind ' + key,
+                                 apply: v => { sl.value = v; ch.wind[key] = v; show(v); } });
 }
 // Shake: sway the whole character side to side for a moment (the bouncers see the movement)
 $('shake').onclick = () => {
@@ -532,7 +589,7 @@ $('shake').onclick = () => {
   };
   step();
 };
-window.editor = { THREE, camera, controls, ch, open, shared, panel, body, renderPreview, sheetView };  // debug handle
+window.editor = { THREE, scene, camera, controls, ch, compare, ruler, open, shared, panel, body, renderPreview, sheetView };  // debug handle
 // start on a Freeform costume (the creator's own starting point), else the first one
 const first = ['Archetype_Freeform_Free_F_01', 'Archetype_Freeform_Free_M_01'].map(n => shared.costumes.findIndex(c => c.name === n))
   .find(i => i >= 0) ?? shared.costumes.findIndex(c => /Freeform/i.test(c.name));

@@ -53,7 +53,7 @@ The left panel has the game's three creator screens as tabs.
 
 At the top:
 
-- **New male / New female** start a blank costume.
+- **New masculine / New feminine** start a blank costume.
 - The drop-down loads one of the game's starting costumes. Pick the same one again to undo your changes.
 - **Load** opens a costume file or a demo recording. Its file picker starts in the game's `Live\screenshots` folder (where saved costumes are), then in whichever folder you last loaded from, such as `Live\demos`. You can also drag a file onto the page.
 - **Save** writes a costume file.

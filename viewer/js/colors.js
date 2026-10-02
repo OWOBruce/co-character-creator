@@ -10,7 +10,7 @@
 // Palettes come from the skeleton: BodyColorSet0 (Hero_Colors, 323), SkinColorSet (Hero_Skin, 97) and
 // ColorQuadSet (Hero_Colorquads, 25 four-colour schemes).
 import { partOn } from './rules.js';
-import { gameSlider } from './ui.js';
+import { gameSlider, editableValue, numberParser } from './ui.js';
 
 export const LINK = { None: 0, All: 1, Mirror: 2, Group: 3, MirrorGroup: 4, Different: 5 };
 export const DEFAULT_SHARED = [[230, 230, 230, 255], [40, 60, 150, 255], [30, 30, 30, 255], [200, 30, 30, 255]];
@@ -128,9 +128,12 @@ export function openPalette(anchor, opts) {
   if (opts.glow) {
     const row = document.createElement('div'); row.className = 'glowRow';
     const out = document.createElement('span'); out.textContent = glow;
-    const inp = gameSlider({ min: 0, max: opts.glow.max || 10, step: 1, value: glow,
+    const max = opts.glow.max || 10;
+    const inp = gameSlider({ min: 0, max, step: 1, value: glow,
       onInput: v => { glow = v; out.textContent = v; opts.onPreview(opts.current, glow); },
       onChange: () => { picked = opts.current; commit(false); } });
+    editableValue(out, { parse: numberParser({ min: 0, max, step: 1 }), hint: `0 to ${max}`, label: 'glow',
+                         apply: v => { inp.value = v; glow = v; out.textContent = v; picked = opts.current; commit(false); } });
     row.append('Glow', inp, out); box.append(row);
   }
   document.body.append(box);
