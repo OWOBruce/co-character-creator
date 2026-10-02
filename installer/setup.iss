@@ -86,9 +86,10 @@ var
 begin
   Data := ExpandConstant('{localappdata}\{#AppName}');
   if (CurUninstallStep = usPostUninstall) and DirExists(Data) and not UninstallSilent then
-    if MsgBox('Also delete the data the editor built from your game files, and its settings?' + #13#10 + #13#10 +
-              'Choose No to keep them, so a reinstall starts straight away instead of rebuilding. ' +
-              'Costumes you saved for the game are not affected either way.',
+    if MsgBox('Also delete the CO Costume Editor''s own working data and settings?' + #13#10 + #13#10 +
+              'This is the piece catalog the editor made when it first started (about 175 MB, in ' + Data + '). ' +
+              'Choose No to keep it, so a reinstall starts straight away.' + #13#10 + #13#10 +
+              'Champions Online itself and the costumes you saved are never changed or deleted, whichever you choose.',
               mbConfirmation, MB_YESNO) = IDYES then
       DelTree(Data, True, True, True);
 end;
