@@ -294,6 +294,7 @@
         <label><input type="checkbox" id="showGrid"> Floor grid</label>
         <label title="The game's jiggle bones (hair, ears, backpacks...)"><input type="checkbox" id="bounce" checked> Bouncers</label>
         <label title="Simulate capes, skirts and scarves with the game's cloth settings. Applies to pieces loaded afterwards."><input type="checkbox" id="cloth" checked> Cloth</label>
+        <label title="Wings flap once when picked or loaded. Tick to keep them flapping."><input type="checkbox" id="loopWings"> Loop wings</label>
         <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
         <button id="shake" type="button" title="Sway the character to see the bouncers move">Shake</button>
       </div>
@@ -445,7 +446,8 @@ function renderPreview() {
 function applyOptions() {
   Object.assign(ch.options, { rawMask: $('rawMask').checked, normals: $('normals').checked, wireframe: $('wire').checked,
                               body: $('applyBody').checked, mirror: $('mirror').checked,
-                              bounce: $('bounce').checked, cloth: $('cloth').checked, showHidden: $('showHidden').checked });
+                              bounce: $('bounce').checked, cloth: $('cloth').checked, showHidden: $('showHidden').checked,
+                              loopWings: $('loopWings').checked });
   ch.applyOptions();
   if (ch.rig) ch.rig.helper.visible = $('showSkel').checked;
   grid.visible = $('showGrid').checked;
@@ -483,7 +485,8 @@ $('blankM').onclick = async () => { ch.fileInfo = null; open(await blank('Male')
 $('blankF').onclick = async () => { ch.fileInfo = null; open(await blank('Female')); };
 setupFiles({ ch, open, renderPreview, status: t => (status.textContent = t), loadButton: $('loadCostume'),
              saveButton: $('saveCostume'), dropTarget: document.body });
-for (const id of ['rawMask', 'normals', 'wire', 'applyBody', 'mirror', 'showSkel', 'showGrid', 'bounce', 'cloth', 'showHidden']) $(id).onchange = applyOptions;
+for (const id of ['rawMask', 'normals', 'wire', 'applyBody', 'mirror', 'showSkel', 'showGrid', 'bounce', 'cloth', 'showHidden', 'loopWings']) $(id).onchange = applyOptions;
+$('loopWings').addEventListener('change', () => { if (!$('loopWings').checked) ch.replayWings(); });
 // Wind on the cloth (speed 0-10 like the game's sky settings, heading, gusts)
 for (const [id, key, min, max, step, fmt] of [['windSpeed', 'speed', 0, 10, 0.1, v => v.toFixed(1)],
                                               ['windHeading', 'heading', -180, 180, 5, v => v + '°'],

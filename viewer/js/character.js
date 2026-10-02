@@ -160,7 +160,7 @@ export class Character {
     this.tokens = new Map();  // bone -> latest request (so a slow load can't overwrite a newer pick)
     this.anim = null;
     this.options = { rawMask: false, normals: true, wireframe: false, body: true, mirror: true, bounce: true, cloth: true,
-                     showHidden: false };
+                     showHidden: false, loopWings: false };
     this.wind = new Wind(); this.windTime = 0; this.lastRoot = null;
   }
 
@@ -377,8 +377,13 @@ export class Character {
     const mode = this.mode ?? 'idle';
     const name = sub.def.moodAnim?.[this.doc.stance]?.[mode]?.[this.doc.mood] || sub.def.anim?.[this.doc.stance]?.[mode];
     sub.anim = name && this.mode ? await loadPose(name) : null;
+    sub.start = performance.now();  // wings flap once from here (when picked, loaded or the stance changes)
     if (sub.anim) setFrame(sub, sub.anim, 0, null, true);
   }
+  // Wings flap once and then hold still, unless options.loopWings; tails, gliders and the rest keep looping.
+  isWings(sub) { return /wings/i.test(sub.name || sub.key); }
+  // Flap the wings once more (after looping is turned off, so they settle instead of stopping mid-beat).
+  replayWings() { const now = performance.now(); for (const sub of this.subs()) if (this.isWings(sub)) sub.start = now; }
   // Tail/wing sliders are the ones tagged with this sub-skeleton; they drive its own scale groups.
   updateSubBody(sub) {
     sub.bodyState = computeBody(sub, { ...this.cat.body, groups: sub.def.groups }, this.bodyValues, { sub: sub.name });
@@ -419,7 +424,13 @@ export class Character {
       // stance started, so t is clamped: a negative frame index would read outside the track (NaN pose)
       const t = Math.max(0, (now - this.anim.start) / 1000 * 30);
       for (const l of this.anim.layers) setFrame(this.rig, l.pose, Math.floor(t) % l.pose.frames, l.bones, l.allPos);
-      for (const sub of this.subs()) if (sub.anim) setFrame(sub, sub.anim, Math.floor(t) % sub.anim.frames, null, true);
+      for (const sub of this.subs()) {
+        if (!sub.anim) continue;
+        const frame = this.isWings(sub) && !this.options.loopWings
+          ? Math.min(sub.anim.frames - 1, Math.max(0, Math.floor((now - sub.start) / 1000 * 30)))
+          : Math.floor(t) % sub.anim.frames;
+        setFrame(sub, sub.anim, frame, null, true);
+      }
     }
   }
   // after scene.updateMatrixWorld()
