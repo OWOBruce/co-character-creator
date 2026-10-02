@@ -97,8 +97,9 @@
   .reportList code { font-size:11px; color:var(--muted); }
   .reportList .r-error b { color:#ff9a7a; } .reportList .r-warning b { color:var(--gold); } .reportList .r-info b { color:#9fc4ff; }
   .reportDialog .row { justify-content:flex-end; margin-top:8px; }
-  .buildNote { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-               gap:8px; text-align:center; padding:20px; background:#0a1a3acc; z-index:5; }
+  /* the whole window while the editor is built: before the first build there's no art for the panel either */
+  .buildNote { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+               gap:8px; text-align:center; padding:20px; background:radial-gradient(ellipse at 50% 35%, #17407e, #081a3a 70%); z-index:40; }
   .buildNote .bnTitle { font:26px var(--title); letter-spacing:1px; color:var(--gold); }
   .buildNote .bnStep { font:700 15px var(--body); color:var(--text); }
   .buildNote .bnHint { font:400 12px var(--body); color:var(--muted); }
@@ -107,6 +108,36 @@
   .buildNote .bnFill { width:0; height:100%; background:linear-gradient(90deg, var(--gold2), var(--gold)); transition:width .8s ease-out; }
   .buildNote .bnPct { font:22px var(--title); letter-spacing:1px; color:var(--text); }
   .buildNote .bnError { max-width:90%; white-space:pre-wrap; text-align:left; font:12px monospace; color:#ff9a7a; }
+  /* first run, no game folder (source-ui.js firstRun): plain CSS, as the game's art isn't there yet */
+  body.noGame #app { display:none; }
+  .firstRun { position:fixed; inset:0; z-index:40; overflow:auto; display:flex; align-items:center; justify-content:center;
+              padding:16px; box-sizing:border-box; background:radial-gradient(ellipse at 50% 35%, #17407e, #081a3a 70%); }
+  .frBox { width:min(540px, 100%); margin:auto; padding:22px 26px; box-sizing:border-box; border-radius:12px;
+           background:#0c2046; border:3px solid var(--gold2); box-shadow:0 0 0 3px #000, 0 16px 40px #000c; }
+  .frBox h2 { margin:0 0 12px; font:34px/1.05 var(--title); letter-spacing:1px; color:var(--gold); transform:rotate(-1.5deg);
+              text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 3px 4px 0 #0008; }
+  .frBox p { margin:0 0 12px; font:400 15px/1.45 var(--body); color:var(--text); }
+  .frBox .frWarn { color:#ffcf8a; }
+  .frBox button { border:2px solid #000; border-radius:8px; background:linear-gradient(#2a7ae0, #1650a8); border-image:none;
+                  box-shadow:0 3px 0 #000; }
+  .frBox button:hover:not(:disabled) { background:linear-gradient(#3a8af0, #1d60c0); }
+  .frBox button:disabled { opacity:.5; cursor:default; }
+  .frBox .frBig { display:block; width:100%; margin:0 0 8px; padding:12px 14px; font-size:24px; overflow-wrap:anywhere;
+                  color:#231500; text-shadow:none; background:linear-gradient(var(--gold), var(--gold2)); }
+  .frBox .frBig:hover:not(:disabled) { background:linear-gradient(#fff27a, var(--gold)); color:#231500; }
+  .frFound .frBig { font:700 15px var(--body); text-align:left; }
+  .frBox .frHint { font-size:12.5px; color:var(--muted); }
+  .frOr { margin:4px 0 6px; font:400 13px var(--body); color:var(--muted); }
+  .frRow { display:flex; gap:6px; }
+  .frRow input { flex:1; min-width:0; padding:8px 10px; font:700 13px var(--body); color:var(--text); background:#061532;
+                 border:2px solid #3d7fdc; border-radius:6px; outline:none; }
+  .frRow input:focus { border-color:var(--gold); }
+  .frRow button { padding:6px 16px; font-size:18px; }
+  .frState { min-height:1.4em; margin:8px 0 4px; font:700 13px var(--body); color:var(--gold); overflow-wrap:anywhere; }
+  .frState.bad { color:#ff9a7a; }
+  .frHelp { margin-top:10px; font:400 13px/1.45 var(--body); color:var(--muted); }
+  .frHelp summary { background:none; padding:0; font-size:17px; }
+  .frHelp ul { margin:8px 0 0; padding-left:20px; } .frHelp li { margin:4px 0; }
   .opts label { display:inline-flex; gap:4px; margin:2px 10px 2px 0; }
   input[type=checkbox] { accent-color: var(--gold2); }
   #status { position:absolute; left:14px; bottom:10px; font:18px var(--title); letter-spacing:.8px; color:var(--gold);

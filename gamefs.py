@@ -30,10 +30,14 @@ def find_piggs(folder):
     if not folder:
         return None
     folder = os.path.abspath(os.path.expanduser(folder.strip().strip('"')))
-    for sub in ('', 'piggs', os.path.join('Live', 'piggs'), os.path.join('Champions Online', 'Live', 'piggs')):
-        p = os.path.join(folder, sub)
-        if os.path.isfile(os.path.join(p, 'character.hogg')):
-            return p
+    # the install, a folder inside it, or one just above it (players often pick the Steam folder, a Steam
+    # library or the Arc Games folder); Steam's install has a second "Champions Online" inside
+    for base in ((), ('Champions Online',), ('common', 'Champions Online'), ('steamapps', 'common', 'Champions Online'),
+                 ('Arc Games', 'Champions Online')):
+        for sub in ((), ('piggs',), ('Live', 'piggs'), ('Champions Online', 'Live', 'piggs')):
+            p = os.path.join(folder, *base, *sub)
+            if os.path.isfile(os.path.join(p, 'character.hogg')):
+                return p
     return None
 
 
@@ -48,10 +52,65 @@ def steam_libraries():
     return list(dict.fromkeys(libs))
 
 
+def registry_installs():
+    """Champions Online folders Windows knows about: Steam's own folders, and the install locations in the
+    uninstall entries (Steam's "Steam App 217980" and Arc's both have one). -> (steam folders, installs)"""
+    try:
+        import winreg
+    except ImportError:
+        return [], []
+
+    def value(hive, key, name):
+        try:
+            with winreg.OpenKey(hive, key) as k:
+                return str(winreg.QueryValueEx(k, name)[0])
+        except OSError:
+            return None
+    steam = [value(winreg.HKEY_CURRENT_USER, r'Software\Valve\Steam', 'SteamPath'),
+             value(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\WOW6432Node\Valve\Steam', 'InstallPath'),
+             value(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Valve\Steam', 'InstallPath')]
+    installs = []
+    for hive in (winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER):
+        for root in (r'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+                     r'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'):
+            try:
+                with winreg.OpenKey(hive, root) as k:
+                    names = [winreg.EnumKey(k, i) for i in range(winreg.QueryInfoKey(k)[0])]
+            except OSError:
+                continue
+            for n in names:
+                if 'champions online' in (value(hive, root + '\\' + n, 'DisplayName') or '').lower():
+                    installs.append(value(hive, root + '\\' + n, 'InstallLocation'))
+    return [os.path.normpath(p) for p in steam if p], [p for p in installs if p]
+
+
+def fixed_drives():
+    """The local hard drives (C:\\, D:\\, ...): not network or removable ones, which can be slow to look at."""
+    try:
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        mask = k32.GetLogicalDrives()
+        return [d for d in (f'{chr(65 + i)}:\\' for i in range(26) if mask >> i & 1) if k32.GetDriveTypeW(d) == 3]
+    except (AttributeError, OSError):
+        return []
+
+
 def candidates():
-    """Installs found on this machine."""
-    found = [os.path.join(lib, 'steamapps', 'common', 'Champions Online') for lib in steam_libraries()] + OTHER_INSTALLS
-    return [c for c in dict.fromkeys(found) if find_piggs(c)]
+    """Installs found on this machine: where Windows says it is, Steam libraries, Arc's folder, and the usual
+    places on each drive."""
+    steam, installs = registry_installs()
+    STEAM_ROOTS[:] = list({os.path.normcase(p): p for p in reversed(steam + STEAM_ROOTS)}.values())[::-1]
+    usual = [os.path.join(d, *sub) for d in fixed_drives() for sub in (
+        ('SteamLibrary', 'steamapps', 'common', 'Champions Online'), ('Steam', 'steamapps', 'common', 'Champions Online'),
+        ('Games', 'Steam', 'steamapps', 'common', 'Champions Online'), ('Games', 'SteamLibrary', 'steamapps', 'common', 'Champions Online'),
+        ('Arc Games', 'Champions Online'), ('Games', 'Arc Games', 'Champions Online'), ('Games', 'Champions Online'),
+        ('Champions Online',))]
+    found = installs + [os.path.join(lib, 'steamapps', 'common', 'Champions Online') for lib in steam_libraries()] \
+        + OTHER_INSTALLS + usual
+    unique = {}
+    for c in found:
+        unique.setdefault(os.path.normcase(os.path.normpath(c)), c)
+    return [c for c in unique.values() if find_piggs(c)]
 
 
 def load_settings():

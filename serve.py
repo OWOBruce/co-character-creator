@@ -183,13 +183,34 @@ def use_folder(folder, save=False):
     return src
 
 
+def picker_owner():
+    """An invisible window on top for a native picker to belong to. Windows only lets the program the player is
+    using bring a window forward, and that's the browser, so the picker would open behind the editor; a tap of
+    Alt (which Windows takes as the player acting) lets this one come to the front."""
+    import tkinter
+    root = tkinter.Tk()
+    root.overrideredirect(True)
+    root.attributes('-alpha', 0.0)
+    root.attributes('-topmost', True)
+    root.geometry('1x1+200+200')
+    root.update()
+    try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        user32.keybd_event(0x12, 0, 0, 0)  # Alt down, up
+        user32.keybd_event(0x12, 0, 2, 0)
+        user32.SetForegroundWindow(user32.GetParent(root.winfo_id()) or root.winfo_id())
+    except (AttributeError, OSError):
+        pass
+    root.lift()
+    root.focus_force()
+    return root
+
+
 def browse_for_folder(initial):
     """A native folder picker on this machine (the server runs locally). Returns the path or None."""
-    import tkinter
     from tkinter import filedialog
-    root = tkinter.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
+    root = picker_owner()
     try:
         path = filedialog.askdirectory(parent=root, initialdir=initial or None, mustexist=True,
                                        title='Choose your Champions Online folder')
@@ -200,11 +221,8 @@ def browse_for_folder(initial):
 
 def browse_for_file(initial):
     """A native Open dialog on this machine for a costume, costume JSON or demo recording. Returns the path or None."""
-    import tkinter
     from tkinter import filedialog
-    root = tkinter.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
+    root = picker_owner()
     try:
         path = filedialog.askopenfilename(parent=root, initialdir=initial or None, title='Load a costume or demo recording',
                                           filetypes=[('Costumes and demo recordings', '*.jpg *.jpeg *.json *.demo'),
@@ -477,7 +495,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(self._body)
                 return
             try:
-                folder = browse_for_folder(SOURCE.folder)
+                # no folder yet: start where games usually are
+                start = SOURCE.folder or next((p for p in (r'C:\Program Files (x86)\Steam\steamapps\common',
+                                                           r'C:\Program Files (x86)', r'C:\Program Files') if os.path.isdir(p)), None)
+                folder = browse_for_folder(start)
             except Exception as e:  # no display / tkinter missing
                 folder = None
                 self.send_json({'error': f'Could not open a folder picker: {e}'}, 500)
@@ -491,7 +512,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return
         if not folder or not find_piggs(folder):
             self.send_json({**SOURCE.info(), 'rejected': folder,
-                            'error': 'No Champions Online archives (Live/piggs/*.hogg) in ' + (folder or '(empty)')}, 400)
+                            'error': (f"That folder doesn't have Champions Online's game files (Live\\piggs) in it: {folder}"
+                                      if folder else 'Type or choose a folder first')}, 400)
         else:
             src = use_folder(folder, save=True)
             self.send_json({**src.info(), 'changed': True})

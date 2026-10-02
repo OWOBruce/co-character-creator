@@ -2,7 +2,8 @@
 // account name written into saved costume files (kept in the browser, file-ui.js). Shows the
 // folder in use and lets the player pick another, with the server's folder picker or by typing a path.
 // A change reloads the page, since every loaded mesh and texture came from the old folder.
-// The dialog opens by itself when the server has no usable folder (there is nothing to draw with).
+// With no usable folder there is nothing to draw with (even the editor's art comes from the game), so the
+// page shows a welcome screen that asks for the folder instead (firstRun).
 import { savedAccount } from './file-ui.js';
 
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
@@ -18,6 +19,7 @@ async function api(body) {
 export async function waitForBuild(view) {
   let info;
   try { info = await api(); } catch { return true; }  // not served by serve.py: nothing to wait for
+  if (!info.ok) { firstRun(info); return new Promise(() => {}); }  // the page reloads once there's a folder
   const busy = i => ['checking', 'building'].includes(i.build?.state);
   if (!busy(info) && info.build?.state !== 'error') return true;
   const note = el('div', 'buildNote'); view.append(note);
@@ -122,5 +124,60 @@ export async function setupSettings(button, opts = {}) {
     input.focus();
   };
   button.onclick = open;
-  if (!info.ok) open();
+}
+
+// The first time (or when the game has moved): a whole-page welcome that asks where the game is. Drawn
+// with plain CSS (.firstRun in index.html), since the editor's own art is built from the game files.
+function firstRun(info) {
+  document.body.classList.add('noGame');
+  const page = el('div', 'firstRun'), box = el('div', 'frBox');
+  box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'frHead');
+  const head = el('h2', null, 'Welcome to the CO Costume Editor'); head.id = 'frHead';
+  const why = el('p', null, 'The editor draws every costume piece straight from your own copy of Champions Online, '
+    + "so it needs to know where the game is installed. It couldn't find it by itself.");
+  const moved = info.saved ? el('p', 'frWarn', `The game used to be in ${info.saved}, but it isn't there any more.`) : null;
+  // installs found on this PC (when the saved one has gone but another is there)
+  const found = el('div', 'frFound');
+  for (const f of info.found || []) {
+    const b = el('button', 'frBig', 'Use ' + f); b.type = 'button';
+    b.onclick = () => apply({ path: f });
+    found.append(b);
+  }
+  const browse = el('button', 'frBig', 'Find my game folder…'); browse.type = 'button';
+  const tip = el('p', 'frHint', "A folder window opens: pick the Champions Online folder (the one with a Live folder "
+    + 'in it) and press Select Folder. Picking the folder above it, such as Steam or Arc Games, works too.');
+  const or = el('div', 'frOr', 'or paste the folder’s address');
+  const row = el('div', 'frRow'), input = el('input'), use = el('button', null, 'Use'); use.type = 'button';
+  input.type = 'text'; input.spellcheck = false; input.setAttribute('aria-label', 'Champions Online folder');
+  input.placeholder = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Champions Online';
+  row.append(input, use);
+  const state = el('div', 'frState'); state.setAttribute('role', 'status'); state.setAttribute('aria-live', 'polite');
+  const help = el('details', 'frHelp'), sum = el('summary', null, 'Where is my game installed?');
+  const steps = el('ul');
+  steps.append(
+    el('li', null, 'Steam: in your Library, right-click Champions Online, then Manage › Browse local files. Copy the '
+      + "address from the top of the window that opens and paste it above."),
+    el('li', null, 'Arc: usually C:\\Program Files (x86)\\Arc Games\\Champions Online.'),
+    el('li', null, "The game has to be installed on this PC. The editor only reads its files and never changes them."));
+  help.append(sum, steps);
+  box.append(head, why, ...(moved ? [moved] : []), found, browse, tip, or, row, state, help);
+  page.append(box);
+  document.body.append(page);
+
+  const busy = on => { for (const b of box.querySelectorAll('button')) b.disabled = on; input.disabled = on; };
+  async function apply(body) {
+    busy(true); state.classList.remove('bad');
+    state.textContent = body.browse ? 'Waiting for you to pick a folder…' : 'Checking…';
+    let res;
+    try { res = await api(body); } catch { res = { error: 'The editor stopped responding. Close it and start it again.' }; }
+    if (res.changed) { state.textContent = 'Found it! Getting the editor ready…'; setTimeout(() => location.reload(), 400); return; }
+    busy(false);
+    state.textContent = res.cancelled ? '' : res.error || '';
+    state.classList.toggle('bad', !res.cancelled);
+    if (res.rejected) { input.value = res.rejected; input.focus(); }
+  }
+  browse.onclick = () => apply({ browse: true });
+  use.onclick = () => apply({ path: input.value });
+  input.onkeydown = e => { if (e.key === 'Enter') apply({ path: input.value }); };
+  (found.firstChild || browse).focus();
 }
