@@ -37,10 +37,16 @@
            border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
   select option, select optgroup { background:var(--deep); color:var(--text); }
   .row { display:flex; gap:6px; align-items:center; }
-  .windOpts { display:grid; grid-template-columns:auto 1fr 3.5em; gap:4px 8px; align-items:center; margin-top:8px; }
+  .windOpts { display:grid; grid-template-columns:5em 1fr 3.5em; gap:4px 8px; align-items:center; margin-top:8px; }  /* Light's and Wind's line up */
   .windOpts .gslider { width:100%; }
   .windVal { text-align:right; font-variant-numeric:tabular-nums; }
-  .windNote { grid-column:1 / -1; font-size:12px; opacity:.75; line-height:1.3; }
+  .shakeRow { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .windNote { font-size:12px; opacity:.75; line-height:1.3; }
+  .lightHead { display:flex; justify-content:space-between; align-items:center; }
+  .lightHead button { font-size:13px; padding:1px 8px; }
+  .lightHead button:disabled { opacity:.45; cursor:default; }
+  .lightOpts input[type=color] { width:44px; height:22px; padding:0; border:1px solid #000; border-radius:4px; background:none; cursor:pointer; }
+  .lightOpts.off { opacity:.45; }
   .titleRow { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
   .titleRow h1 { margin:0; }
   .titleRow button { font-size:14px; padding:2px 7px; }
@@ -162,7 +168,8 @@
   .frHelp { margin-top:10px; font:400 13px/1.45 var(--body); color:var(--muted); }
   .frHelp summary { background:none; padding:0; font-size:17px; }
   .frHelp ul { margin:8px 0 0; padding-left:20px; } .frHelp li { margin:4px 0; }
-  .opts #compareWith { width:auto; margin:0 10px 0 -6px; font-size:12px; padding:0 2px; vertical-align:middle; }
+  .opts .compareRow { display:flex; align-items:center; }
+  .opts #compareWith { width:auto; min-width:0; margin:0; font-size:12px; padding:0 2px; }
   .opts label { display:inline-flex; gap:4px; margin:2px 10px 2px 0; }
   input[type=checkbox] { accent-color: var(--gold2); }
   #version { position:absolute; right:12px; bottom:8px; font:400 11px var(--body); color:#8a9bb8; opacity:.75;
@@ -180,6 +187,10 @@
   .mainTabs button { flex:1; font-size:16px; padding:4px 1px; white-space:nowrap; }
   .fileRow { gap:4px; } .fileRow button { white-space:nowrap; font-size:14px; padding:3px 5px; }
   .viewOpts { margin-top:12px; padding-top:10px; border-top:1px solid #9fc4ff73; }
+  .viewTabs { display:flex; gap:2px; margin:8px 0 6px; }
+  .viewTabs button { flex:1; font-size:14px; padding:2px 1px; white-space:nowrap; }
+  /* the pages share one cell, so the block is as tall as the tallest and the tabs don't move when switching */
+  .viewPages { display:grid; } .viewPage { grid-area:1 / 1; } .viewPage.away { visibility:hidden; }
 
   /* boxes inside the panel */
   .bodyBox, .colorsBox { margin:6px 0 8px; padding:4px 6px; border:6px solid transparent;
@@ -316,29 +327,50 @@
     <div id="tab-costume" class="tabPage"><div id="parts"></div></div>
     <div id="tab-body" class="tabPage" hidden><div id="bodySliders"></div></div>
     <div id="tab-stance" class="tabPage" hidden><div id="stancePanel"></div></div>
-    <details class="viewOpts"><summary>View</summary>
-      <div class="opts">
-        <label><input type="checkbox" id="play" checked> Play</label>
-        <label><input type="checkbox" id="mirror" checked> Mirror X</label>
-        <label><input type="checkbox" id="showSkel"> Skeleton</label>
-        <label><input type="checkbox" id="normals" checked> Normal maps</label>
-        <label><input type="checkbox" id="wire"> Wireframe</label>
-        <label><input type="checkbox" id="rawMask"> Raw masks</label>
-        <label><input type="checkbox" id="applyBody" checked> Body sliders</label>
-        <label><input type="checkbox" id="showGrid"> Floor grid</label>
-        <label title="A measuring stick beside the character, marked at the height the Height slider gives (hair and hats don't count)"><input type="checkbox" id="showRuler"> Height ruler</label>
-        <label title="Another character beside yours, in the same stance: a default in grey at the game's default body, or one from a saved costume or demo"><input type="checkbox" id="compare"> Compare with</label><select id="compareWith" aria-label="Compare with"><option value="same">the same body type</option><option value="Male">a masculine default</option><option value="Female">a feminine default</option><option value="file" hidden>a character from a file…</option><option value="pick">a character from a file…</option></select>
-        <label title="The game's jiggle bones (hair, ears, backpacks...)"><input type="checkbox" id="bounce" checked> Bouncers</label>
-        <label title="Simulate capes, skirts and scarves with the game's cloth settings. Applies to pieces loaded afterwards."><input type="checkbox" id="cloth" checked> Cloth</label>
-        <label title="Wings flap once when picked or loaded. Tick to keep them flapping."><input type="checkbox" id="loopWings"> Loop wings</label>
-        <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
-        <button id="shake" type="button" title="Sway the character to see the bouncers move">Shake</button>
+    <details class="viewOpts"><summary>View options</summary>
+      <div class="viewTabs" role="tablist" aria-label="View options"><button type="button" role="tab" data-view="light" class="on">Light</button><button type="button" role="tab" data-view="motion">Motion</button><button type="button" role="tab" data-view="scene">Scene</button><button type="button" role="tab" data-view="inspect">Inspect</button></div>
+      <div class="viewPages">
+      <div class="viewPage" id="view-light" role="tabpanel">
+        <div class="opts lightHead"><label title="Light the character the way the game's costume creator does: its lights, rim light and exposure. The lights stay where they are as you turn the view, so every side can be seen lit. The sliders below move and tint the main one. Untick for the editor's simpler lights."><input type="checkbox" id="gameLight" checked> Lighting</label><button id="lightReset" type="button" title="Back to the game creator's light">Reset</button></div>
+        <div class="windOpts lightOpts" id="lightOpts">
+          <span title="Where the main light comes from, round the character as you see it: 0° from the camera, negative from your left, positive from your right, ±180° from behind. It stays there as you turn the view.">Direction</span><span id="lightDirection"></span><span class="windVal" id="lightDirectionVal"></span>
+          <span title="How high the main light is: 0° level with the character, 90° straight overhead, negative from below">Angle</span><span id="lightAngle"></span><span class="windVal" id="lightAngleVal"></span>
+          <span title="How bright the main light is, against the creator's (100%). The ambient light and the rim stay as they are.">Brightness</span><span id="lightBrightness"></span><span class="windVal" id="lightBrightnessVal"></span>
+          <span>Colour</span><span><input type="color" id="lightColour" aria-label="Light colour" title="The main light's colour (its highlights follow it)"></span><span></span>
+        </div>
       </div>
-      <div class="windOpts" title="Wind on the cloth. The game takes it from each map's sky; its outdoor wind blows at about 1.5.">
-        <span>Wind</span><span id="windSpeed"></span><span class="windVal" id="windSpeedVal"></span>
-        <span>Direction</span><span id="windHeading"></span><span class="windVal" id="windHeadingVal"></span>
-        <span>Gusts</span><span id="windGusts"></span><span class="windVal" id="windGustsVal"></span>
-        <span class="windNote">The game's outdoor wind is about 1.5. Stronger wind makes cloth flutter hard, as in the game.</span>
+      <div class="viewPage away" id="view-motion" role="tabpanel" inert>
+        <div class="opts">
+          <label><input type="checkbox" id="play" checked> Play</label>
+          <label title="Wings flap once when picked or loaded. Tick to keep them flapping."><input type="checkbox" id="loopWings"> Loop wings</label>
+          <label title="The game's jiggle bones (hair, ears, backpacks...)"><input type="checkbox" id="bounce" checked> Bouncers</label>
+          <label title="Simulate capes, skirts and scarves with the game's cloth settings. Applies to pieces loaded afterwards."><input type="checkbox" id="cloth" checked> Cloth</label>
+        </div>
+        <div class="windOpts" title="Wind on the cloth. The game takes it from each map's sky; its outdoor wind blows at about 1.5.">
+          <span>Wind</span><span id="windSpeed"></span><span class="windVal" id="windSpeedVal"></span>
+          <span>Direction</span><span id="windHeading"></span><span class="windVal" id="windHeadingVal"></span>
+          <span>Gusts</span><span id="windGusts"></span><span class="windVal" id="windGustsVal"></span>
+        </div>
+        <div class="shakeRow"><button id="shake" type="button" title="Sway the character to see the bouncers move">Shake</button><span class="windNote">The game's outdoor wind is about 1.5. Stronger wind makes cloth flutter hard, as in the game.</span></div>
+      </div>
+      <div class="viewPage away" id="view-scene" role="tabpanel" inert>
+        <div class="opts">
+          <label><input type="checkbox" id="showGrid"> Floor grid</label>
+          <label title="A measuring stick beside the character, marked at the height the Height slider gives (hair and hats don't count)"><input type="checkbox" id="showRuler"> Height ruler</label>
+          <div class="compareRow"><label title="Another character beside yours, in the same stance: a default in grey at the game's default body, or one from a saved costume or demo"><input type="checkbox" id="compare"> Compare with</label><select id="compareWith" aria-label="Compare with"><option value="same">the same body type</option><option value="Male">a masculine default</option><option value="Female">a feminine default</option><option value="file" hidden>a character from a file…</option><option value="pick">a character from a file…</option></select></div>
+        </div>
+      </div>
+      <div class="viewPage away" id="view-inspect" role="tabpanel" inert>
+        <div class="opts">
+          <label><input type="checkbox" id="showSkel"> Skeleton</label>
+          <label><input type="checkbox" id="wire"> Wireframe</label>
+          <label><input type="checkbox" id="normals" checked> Normal maps</label>
+          <label><input type="checkbox" id="rawMask"> Raw masks</label>
+          <label><input type="checkbox" id="applyBody" checked> Body sliders</label>
+          <label><input type="checkbox" id="mirror" checked> Mirror X</label>
+          <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
+        </div>
+      </div>
       </div>
     </details>
   </div>
@@ -376,6 +408,7 @@ import { setupAbout } from './js/about.js';
 import { VERSION } from './js/version.js';
 import { HeightRuler } from './js/ruler.js';
 import { CompareFigure } from './js/compare.js';
+import { setGameLighting, turnLighting, getSun, setSun, lightingReady } from './js/shader-graph.js';
 
 const $ = id => document.getElementById(id);
 const BUILD_NAMES = { Male: 'masculine', Female: 'feminine' };  // the skeletons, as the page names them
@@ -390,8 +423,18 @@ camera.position.set(0, 3.2, 11);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 3, 0);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444450, 1.4));
-const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 6, 5); scene.add(key);
-const rim = new THREE.DirectionalLight(0x9fb6ff, 1.0); rim.position.set(-4, 4, -5); scene.add(rim);
+const key = new THREE.DirectionalLight(0xffffff, 2.2); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9fb6ff, 1.0); scene.add(rim);
+// The lights turn with the camera about the vertical, as if the character turned in front of fixed lights
+// (as in the game's creator): turning the view shows each side lit. yaw: the camera's direction from the
+// character, in radians (0: in front).
+const LAMPS = [[key, new THREE.Vector3(3, 6, 5)], [rim, new THREE.Vector3(-4, 4, -5)]], UP = new THREE.Vector3(0, 1, 0);
+function turnLights(yaw) {
+  for (const [lamp, at] of LAMPS) lamp.position.copy(at).applyAxisAngle(UP, yaw);
+  turnLighting(yaw);
+}
+const fromTarget = new THREE.Vector3();
+turnLights(0);
 const grid = new THREE.GridHelper(10, 20, 0x9fc4ff, 0x5d86c4); grid.visible = false; scene.add(grid);
 const ruler = new HeightRuler(scene);              // View > Height ruler
 const compare = new CompareFigure(scene, blank);  // View > Compare with
@@ -412,6 +455,7 @@ renderer.setAnimationLoop(now => {
   lastFrame = now;
   try {  // an exception here would stop three's animation loop for good
     ch.tick(now, $('play').checked); compare.tick(now, $('play').checked); controls.update();
+    fromTarget.subVectors(camera.position, controls.target); turnLights(Math.atan2(fromTarget.x, fromTarget.z));
     if (compare.loaded) compare.follow(ch);
     if (ruler.visible) markHeights();
     scene.updateMatrixWorld();
@@ -519,7 +563,7 @@ function applyOptions() {
 }
 
 // ---- start --------------------------------------------------------------------------------------
-const sheetView = { renderer, scene, ch, lights: [key, rim], characterBox, hide: () => [grid, ch.rig?.helper, ruler.group, ...compare.hide()],
+const sheetView = { renderer, scene, ch, turnLights, characterBox, hide: () => [grid, ch.rig?.helper, ruler.group, ...compare.hide()],
                     status: t => (status.textContent = t) };  // for the character sheet export (sheet.js)
 setupAbout($('about'));
 $('version').textContent = 'v' + VERSION;
@@ -532,6 +576,21 @@ for (const b of document.querySelectorAll('.mainTabs button')) b.onclick = () =>
   for (const x of document.querySelectorAll('.mainTabs button')) x.classList.toggle('on', x === b);
   for (const t of ['costume', 'body', 'stance']) $('tab-' + t).hidden = t !== b.dataset.tab;
 };
+// View's tabs (Light, Motion, Scene, Inspect); the last one picked comes back next time
+const viewTabs = [...document.querySelectorAll('.viewTabs button')];
+function showViewTab(name) {
+  if (!viewTabs.some(b => b.dataset.view === name)) name = 'light';
+  for (const b of viewTabs) {
+    const on = b.dataset.view === name;
+    b.classList.toggle('on', on); b.setAttribute('aria-selected', on);
+    const page = $('view-' + b.dataset.view); page.classList.toggle('away', !on); page.inert = !on;
+  }
+}
+for (const b of viewTabs) b.onclick = () => {
+  showViewTab(b.dataset.view);
+  try { localStorage.setItem('co.viewTab', b.dataset.view); } catch { /* private mode */ }
+};
+try { showViewTab(localStorage.getItem('co.viewTab')); } catch { showViewTab('light'); }
 const sel = $('costume');
 for (const skel of ['Male', 'Female']) {
   const og = document.createElement('optgroup'); og.label = skel;
@@ -581,6 +640,39 @@ for (const [id, key, min, max, step, fmt, typed] of [
   editableValue($(id + 'Val'), { parse: numberParser({ min, max, step, ...typed }), hint: typed.hint, label: 'wind ' + key,
                                  apply: v => { sl.value = v; ch.wind[key] = v; show(v); } });
 }
+// The main light (View > Light): the creator's sun, moved, brightened or tinted. It's the game lighting's,
+// so it's greyed out with Lighting unticked (or without lighting.json).
+const lightSliders = {};
+const toHex = c => '#' + c.map(x => Math.round(Math.min(1, Math.max(0, x)) * 255).toString(16).padStart(2, '0')).join('');
+const fromHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+for (const [id, key, min, max, step, fmt, typed] of [
+    ['lightDirection', 'direction', -180, 180, 1, v => Math.round(v) + '°', { hint: '-180° to 180°', unit: '°' }],
+    ['lightAngle', 'angle', -90, 90, 1, v => Math.round(v) + '°', { hint: '-90° to 90°', unit: '°' }],
+    ['lightBrightness', 'brightness', 0, 2, 0.05, v => Math.round(v * 100) + '%',
+     { hint: '0% to 200%, in steps of 5', unit: '%', toShown: v => v * 100, fromShown: n => n / 100 }]]) {
+  const show = v => { $(id + 'Val').textContent = fmt(v); };
+  const sl = gameSlider({ min, max, step, value: getSun()[key], onInput: v => { setSun({ [key]: v }); show(v); } });
+  sl.setAttribute('aria-label', 'Light ' + key);
+  $(id).replaceWith(sl); sl.id = id; show(getSun()[key]);
+  editableValue($(id + 'Val'), { parse: numberParser({ min, max, step, ...typed }), hint: typed.hint, label: 'light ' + key,
+                                 apply: v => { sl.value = v; setSun({ [key]: v }); show(v); } });
+  lightSliders[key] = { sl, show };
+}
+$('lightColour').oninput = () => setSun({ colour: fromHex($('lightColour').value) });
+function showLight() {
+  const sun = getSun();
+  for (const [key, { sl, show }] of Object.entries(lightSliders)) { sl.value = sun[key]; show(sun[key]); }
+  $('lightColour').value = toHex(sun.colour);
+}
+let creatorLight = null;  // the creator's sun, for Reset
+function lightUsable() {
+  const on = $('gameLight').checked && !!creatorLight;
+  $('lightOpts').inert = !on; $('lightOpts').classList.toggle('off', !on); $('lightReset').disabled = !on;
+}
+lightUsable();
+lightingReady.then(sun => { creatorLight = sun; if (sun) showLight(); lightUsable(); });
+$('lightReset').onclick = () => { if (creatorLight) { setSun({ ...creatorLight, colour: [...creatorLight.colour] }); showLight(); } };
+$('gameLight').onchange = () => { setGameLighting($('gameLight').checked); lightUsable(); };
 // Shake: sway the whole character side to side for a moment (the bouncers see the movement)
 $('shake').onclick = () => {
   const t0 = performance.now(), g = ch.group;

@@ -61,12 +61,17 @@ At the top:
 - **Settings → Export character sheet…** saves a 3840 × 2160 picture of the current character: close-ups of the face from the left, front and right, and the whole character from the front, left, back and right, on the tailor's blue backdrop, white or black. You choose where to save it.
 - **About** says who made the editor, thanks the Adventurers supergroup for their help with testing, and has the legal notice.
 
-The **View** options under the 3D view control the preview only; none of them change the costume:
+**View options**, at the bottom of the left panel, change the preview only; none of them change the costume. They're in four tabs (the editor remembers which one you had open):
 
-- the floor grid;
-- cloth and jiggle physics, plus **Shake** to see them move;
-- wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
-- **Show hidden psionics**: effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
+- **Light**
+  - **Lighting**: the character is lit the way the game's costume creator lights it (on by default). The lights stay put as you turn the view, as if the character turned in front of them, so you can see every side lit. Untick it for the editor's simpler lights.
+  - Move the main light round the character (**Direction**: 0° from the camera, negative from your left) and up or down (**Angle**: 90° is overhead, negative from below), and change its **Brightness** and **Colour**. **Reset** puts back the game creator's light. These work with **Lighting** on.
+- **Motion**
+  - **Play** the animation, **Loop wings**, and the jiggle (**Bouncers**) and **Cloth** physics.
+  - Wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
+  - **Shake** sways the character to see the bouncers and cloth move.
+- **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours.
+- **Inspect**, for checking pieces: **Skeleton**, **Wireframe**, **Normal maps**, **Raw masks**, **Body sliders**, **Mirror X**, and **Show hidden psionics**. Effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
 
 Drag in the 3D view to turn the camera, and scroll to zoom.
 

@@ -185,7 +185,7 @@ The sidebar has the game's three screens as tabs: Costume, Body, and Stance & Mo
 - The costume creator's greyscale 9-slice kits (`CC_Panel_Greyscale_*`, `CC_Paddle_Greyscale_*`: a black ink outline around a white fill that the game tints) are assembled into 24×24 border-image sheets and tinted blue (panels, buttons) or gold (selected).
 - It also copies the segmented slider parts (`Widgets/slider`), the colour-button frame and glow, the category header glow, the zippatone strip, and the tailor backdrop `Screen_BG_Tailor_01` (as `backdrop.jpg`).
 
-The 3D view is transparent over that backdrop, and the floor grid is optional under View. Sliders are a small widget (`gameSlider`) built from the game's bar, fill, thumb and middle-marker pieces. Two-sided ranges fill from 0 and show the marker. It works with drag and with the keyboard. The game's fonts (Blambot FX Pro, CC Dave Gibbons) are commercial, so the page uses Google Fonts' Bangers and Comic Neue in their place.
+The 3D view is transparent over that backdrop, and the floor grid is optional (View → Scene). The View options ("View → …" in these notes) are in four tabs (Light, Motion, Scene, Inspect). Their pages share one grid cell, with the others hidden by `visibility` and `inert`, so the block is as tall as the tallest page and the tab row doesn't move when switching. The last tab picked is kept in localStorage (`co.viewTab`). Sliders are a small widget (`gameSlider`) built from the game's bar, fill, thumb and middle-marker pieces. Two-sided ranges fill from 0 and show the marker. It works with drag and with the keyboard. The game's fonts (Blambot FX Pro, CC Dave Gibbons) are commercial, so the page uses Google Fonts' Bangers and Comic Neue in their place.
 
 ### Saved costume files (`viewer/js/costume-file.js`, `costume-hash.js`, `file-ui.js`)
 
@@ -226,7 +226,7 @@ A player is usually created twice with the same `ContainerID`, and the last one 
 ### Character sheet (`viewer/js/sheet.js`)
 
 Settings → Export character sheet renders a 3840×2160 PNG with the page's own renderer, the same way the saved-costume preview is drawn. Every view is drawn in one go, so the pose is the same in all of them.
-- **Body views:** front, left, back and right, with an orthographic camera. The vertices are sampled once, and each view's cell is as wide as the character is from that side. One scale (pixels per foot) fits the tallest and the widest views. The key and rim lights turn with the camera.
+- **Body views:** front, left, back and right, with an orthographic camera. The vertices are sampled once, and each view's cell is as wide as the character is from that side. One scale (pixels per foot) fits the tallest and the widest views. The lights (and the reflection map) turn with the camera, through the page's `turnLights`.
 - **Faces:** three close-ups stacked on the left: three-quarter from the character's left, front, and three-quarter from the right, because the two sides of a costume can differ. A perspective camera (20°) looks along the head bone's facing (tilt halved), turned ±45°, at the head piece's extent. Each is masked with a radial gradient so it fades out at the edges. The sheet has no name on it.
 - **Detail:** each view is rendered at 2× (when the GPU allows) and scaled down.
 - **Saving:** the browser's save dialog (`showSaveFilePicker`) is opened before drawing, while the click still counts. A download is used where the dialog isn't supported.
@@ -276,7 +276,6 @@ A costume material's `Material` (catalog `shader`, e.g. `Avatar_Metal`, `Costume
 - **Not the game's:**
   - Screen refraction: the refracted background is drawn as the background itself, via additive blending.
   - The runtime values of oscillators (`1 + A·sin(2π·f·t + phase)`; the materials store 1 as the idle value), scrolling (rate × seconds) and TimeGradient (its maximum).
-  - Backlighting (`BacklightInShadow`) and light bleed.
 
 ### Cloth (`viewer/js/cloth.js`)
 
@@ -346,7 +345,7 @@ Read from `GameClient.exe` (`dynCloth*.c`) and described here in our own words. 
   - We push out of cylinders radially only, and collide inside each iteration rather than once before the constraints.
   - We ignore the character's scale, and our Loop subdivision rounds off and slightly shrinks the outline.
 
-### Creator lighting, traced 2026-10-02 (not ported yet)
+### Creator lighting, traced 2026-10-02 (`shader-graph.js`, `lighting.json`)
 
 - **The creator's sky is in the client data:** `bin/Skies.bin`, table `SkyInfo`, holds 450 skies, including `Sky_Player_Costume_Creator`, `Headshot_Sky` and `Master_Exterior`. The exe names it as the costume editor sky (`CostumeCreation_SetSky`). Its values (HSV, where V can exceed 1 as an intensity):
   - ambient (0, 0, 0.5);
@@ -358,23 +357,35 @@ Read from `GameClient.exe` (`dynCloth*.c`) and described here in our own words. 
   - background (211°, 0.68, 0.5);
   - **Exposure 1.3**, LightRange 3, LightAdaptation 0.4;
   - bloom (rate 1.1, range 8);
-  - one luminary, the sun: SkyDome `default_sun`, Angle 150°, RotationAxis (10, −2.5, −3). How that becomes a direction hasn't been traced.
+  - one luminary, the sun: SkyDome `default_sun`, Angle 150°, RotationAxis (10, −2.5, −3).
+- **Sun direction** (`0xf389e0` → `0xf38c40`): a luminary circles its sky's RotationAxis `d`. With `u = normalize(Y × d)` and `v = normalize(d × u)`, the direction toward it is `normalize(cos θ·u − sin θ·v)` (plus the dome's Position / 8000), where `θ = Angle + 90°`. With no luminary, it is `(−1, 1, 1)` normalised.
+  - The creator's sun is toward (0.34, 0.84, 0.42) in the game's space: 57° up, in front of the character (+Z), on the viewer's left. That assumes the creator character faces +Z, as the viewer's does.
+- **Colours:** HSV → RGB in the usual way, with V as the brightness (`build_web.hsv_rgb`), plus the sky's character-lighting HSV offsets (all 0 in the creator sky).
+- **`lighting.json`** (`build_web.lighting_json`, from `bin/Skies.bin`) holds these as RGB in the game's gamma space, the sun direction in game space, and Exposure, LightRange and LightAdaptation.
 - **`Master_Exterior` also has wind:** speed 1.5 ± 1.5, direction (0.707, 0, 0.707), turbulence 0.5. The creator sky sets no wind, so this may be what the creator uses.
 - **Light model** (`LightingModels/Standard.LightingModel`, `light_inc.hlsl`, `vs_inc.hlsl`):
   - **Key light:** `d = N·L` is wrapped by the material's light bleed (`d·bleed.y + bleed.x`). The lit side gets `key × saturate(d')`; the side facing away gets `secondary × saturate(−d')`.
   - **Specular:** `pow(saturate(L·R), 128·SpecularExponent) × specular colour`.
   - **Hemisphere:** `lerp(ground, sky, 0.5 + 0.5·N·up)`, plus `side × (1 − |N·up|)`.
   - **Ambient:** `ambient × AO × albedo`, faded by `1 − saturate(0.5 × key intensity × exposure)`.
-  - **Backlight:** `BacklightInShadow` materials add `in_shadow × backlight × lerp(1, albedo, 0.5) × a view-angle term`.
+  - **Backlight**, two kinds:
+    - The `BacklightInShadow` template flag (`0x1000`) adds `in_shadow × backlight × lerp(1, albedo, 0.5) × a view-angle term` in the lighting model. None of the costume templates set it.
+    - The `Backlight` template define (`ShaderGraph.Defines`; matched regardless of case, like `No_Delta_Normal_Ao`). The 4color mask templates set it, and they feed `CharacterBacklightColor` and `LightBleedTransform(0.6)` into Output's BackLightColor / BackLightBleed. `Output.phl` first applies `unlit *= unlit·0.65 + 0.35`. After lighting it does `colour *= 1.8·dot(normalize(N + (0, −0.65, 0)), V)` (view space), which brightens what faces the camera by up to about 1.6× and darkens the silhouette. Then `colour += backlight × (0.35 + albedo) × saturate(−N·V × bleed.y + bleed.x)`, a blue rim. This is much of the game's look.
+  - **Template flags:** 1 HAS_BUMP, 2 NoAlphaCutout, 8 NoHDR, 0x20 AlphaPassOnly, 0x40 NO_NORMALMAP, 0x80 NoTintForHDR, 0x100 AllowAlphaRef, 0x200 UseAmbientCube, 0x400 AllowRefMIPBias, 0x800 AlphaToCoverage, 0x1000 BacklightInShadow, 0x2000 UnlitInShadow.
+  - **AO** (no vertex colours on costumes) is the normal map's `saturate(N · geometric normal)`. The hemisphere direction is taken as world up (`sky_dome_direction_vs` wasn't traced).
 - **Exposure** (`0xf8cdf0`, `0xf8d090`) is auto-exposure:
-  - The target is `lerp(base, 2 × measured scene luminance, LightAdaptation) / Exposure`, approached at `LightAdaptationRate`.
-  - The output is multiplied by `1/target` (`exposure_transform.x`).
-  - With the creator's values the picture comes out roughly 1.3× brighter than the raw lighting. The base luminance (`+0x304`) hasn't been traced.
+  - The target is `lerp(LightRange, 2 × measured scene luminance, LightAdaptation) / Exposure`, approached at `LightAdaptationRate`. The base (`+0x304`) is the sky's LightRange, or 2 when it has none (`0xed1760`).
+  - The output is multiplied by `1/target` (`exposure_transform.x`; this is the non-HDR form, and HDR mode rescales for its buffer and tone-mapping pass).
+  - The editor takes the scene's luminance as 0.35 (`SCENE_LUMINANCE`), which gives `1.3 / (0.6·3 + 0.4·0.7)` ≈ **0.625**. The lights' 1.7 key, 0.5 ambient and 1.0 sky add up to well over 1, so this brings them back down.
 - **Reflection map (used):** the creator's sky names no `ReflectionCube`, so the game falls back to its default, `TerrainTest_cube` (`texture_library/system/cubemaps`: a 128² DXT1 cube with mips, cloudy blue sky with a sun glow, dark below). The default is chosen in sky blending (`0xf396c0`) and at material binding (`0xfaf4c0`): the material's own texture, then the sky's, then the default. The ambient cube defaults to `default_ambient_cube`. `ReflectionSimple` materials use the matching `_spheremap`.
   - The reflection is sampled with the world-space reflection vector and multiplied by `ReflectionColorMask`. It is then brought into HDR space (`× exposure_transform.y`, `Output.phl`), so the final exposure leaves reflected sky at its own brightness.
-  - The editor uses it (`shader-graph.js` `setGameReflections`; `dds.js` reads DDS cube maps). The faces go up as stored, since D3D and WebGL lay cube faces out alike, and the direction has X mirrored back to the game's space. No exposure yet, so `y` is taken as 1.
+  - The editor uses it (`shader-graph.js` `setGameReflections`; `dds.js` reads DDS cube maps). The faces go up as stored, since D3D and WebGL lay cube faces out alike, and the direction has X mirrored back to the game's space. With the game's lighting the reflection is divided by the exposure (`y = 1/x`); with the earlier lights it isn't.
   - The earlier plain sky/ground gradient is kept (`setGameReflections(false)`), no longer offered on the page; it had a View → Game reflections switch while the two were compared. A region of the creator map could override the map; nothing traced suggests it does.
-- **Ours today:** three.js Phong with a white hemisphere light (1.4), a white key (2.2) and a blue rim (1.0). It has no light bleed, no secondary fill, no ambient fade, no backlight and no exposure.
+- **In the editor** (`shader-graph.js`), the graph materials replace three's lighting with this model, computed in the game's gamma space and converted to linear only for output. The uniforms are shared (`LIGHT`), filled from `lighting.json`.
+  - View → Light → **Lighting** (on by default) chooses this model; unticked, the graph materials use the earlier three.js Phong lights: a white hemisphere light (1.4), a white key (2.2) and a blue rim (1.0). Those lights also light the non-graph materials (the grey compare figure, the ruler) either way.
+  - **The lights turn with the view.** The creator turns the character in front of a fixed camera and fixed lights; the editor orbits its camera instead. So every frame the page (`turnLights` in `index.html`) turns the sun, the reflection map (`turnLighting`, the `coTurn` uniform) and the Phong key and rim about the vertical by the camera's yaw around its target. Looking from any side shows that side lit as the front is, as on a turntable. Only yaw turns them: orbiting up or down leaves the sun where it is, and the hemisphere's up is still world up. The character sheet turns them per view the same way.
+  - The View → Light sliders set the sun (`setSun`; `getSun`, and `lightingReady` resolves to the creator's): direction round from the camera and angle above level (in the viewer's space, before the turn), brightness, and colour. The colour is the key light's at full strength, normalised to its brightest channel (the creator's is #ffe2cc at 1.7). The specular light is tinted by the same per-channel ratio to the creator's colour, and both scale with the brightness. The ambient, hemisphere, secondary (shadow-side) and back lights stay the creator's. The block is greyed out (inert) with Lighting unticked, since the Phong lamps don't follow it. It isn't saved between sessions. The character sheet uses whatever is set.
+  - Not yet: bloom, the auto-exposure's frame-by-frame measuring, shadows, fog, and the halftone model.
 
 ## File formats
 
@@ -438,7 +449,7 @@ These are exported by `body_json()` in `rig_data.py` and applied by `computeBody
 - 59 geometries have no mesh: 57 weapons, an NPC barrel and an empty placeholder. None of them is in the patcher's manifest (`Live/.patch/FightclubClient.manifest`), so the game doesn't ship them either. About ten are naming slips that a file with an `_01` suffix (or without a leading `_`) would answer, e.g. `Weapon_Dagger` → `weapon_dagger_01.mset`; the rest look like retired weapon definitions. Every texture is found (the one without an image is the `None` placeholder).
 - Item definitions (reward and store item names) are server-side, so unlock sources come from the unlock-costume folder names. Costume sets use `PermTokenTypePlayer(...)` expressions.
 - Cloth is simulated with the game's settings but not its exact solver; tessellation uses Loop subdivision rather than the game's own scheme, with the particles held by the body and the mesh's corners kept in place (plain Loop smoothing rounds the cape's top corners off the shoulders). The cloth's response to wind is ported, but the wind itself (speed, heading, gusts) is set in the viewer, since the creator's sky wasn't found at first; it's in `bin/Skies.bin` (see "Creator lighting"). Sub-skeleton bouncers (`Core_Tail_Lizzard_Bouncer`) are not run; no player mesh is weighted to them.
-- Materials use the game's shader graphs, but the creator's lights (in `bin/Skies.bin`) aren't used yet (see "Creator lighting"), screen refraction is approximated by additive blending, and backlighting / light bleed and the runtime formulas of oscillators and scrolling aren't ported. The per-part custom reflection / specularity a saved costume can carry (kept as-is in `customExtra`) isn't applied yet; the material's defaults are.
+- Materials use the game's shader graphs and lighting model with the creator sky's lights (see "Creator lighting"); the exposure is fixed (the scene's luminance assumed), bloom isn't drawn, screen refraction is approximated by additive blending, and the runtime formulas of oscillators and scrolling aren't ported. The per-part custom reflection / specularity a saved costume can carry (kept as-is in `customExtra`) isn't applied yet; the material's defaults are.
 - Weapons are left out: the Weapons region and the 'Attachment Weapon' slots aren't offered or drawn (`rules.isWeaponBone`). A loaded costume's weapon parts stay in the document, so saving keeps them.
 - `ExcludedCategories` (used only by deprecated categories) is not enforced.
 - Pieces weighted to helper bones follow the body sliders as the game computes them (ported 2026-09-30). The earlier model cancelled CounterScale only for the bone itself, and left the body-mass track's scale uninherited. With that model, Webwork's `M_Back_Holoforce_Arachnid_02_F` (blended `Ribs` / `Muscle_Lat01_L/R` / `HeadBouncer`) came apart under her waist and head sliders. What remains is `Player_Chest_Length −50` squashing `Ribs` to 0.8 height, which is also what the game computes. This hasn't been compared with an in-game screenshot.

@@ -34,6 +34,7 @@ OTHER_BINS = {  # name -> (table, skip_hi); checked against the earlier decodes 
     'DynMove': ('DynMove', 0),
     'DynBouncer': ('DynBouncerGroupInfo', B.HI_NO_BIN), 'DynClothInfo': ('DynClothInfo', B.HI_NO_BIN),
     'DynClothCol': ('DynClothCollisionInfo', B.HI_NO_BIN),
+    'Skies': ('SkyInfo', B.HI_NO_BIN),
 }
 
 

@@ -381,6 +381,71 @@ def costume_state(c):
                       for p in c['Part'] if p['Geometry']]}
 
 
+CREATOR_SKY = 'Sky_Player_Costume_Creator'  # the costume editor's sky (CostumeCreation_SetSky)
+
+
+def hsv_rgb(h, s, v):
+    """A sky colour (hue in degrees, saturation 0-1, value: brightness, can exceed 1) -> RGB."""
+    h = (h % 360) / 60
+    c = v * s
+    x = c * (1 - abs(h % 2 - 1))
+    r, g, b = [(c, x, 0), (x, c, 0), (0, c, x), (0, x, c), (x, 0, c), (c, 0, x)][int(h) % 6]
+    return [round(k + v - c, 4) for k in (r, g, b)]
+
+
+def sun_direction(dome):
+    """Toward a luminary, in the game's space (GameClient 0xf38c40 / 0xf389e0): it circles the sky's
+    RotationAxis d; at Angle (+ 90 degrees) it lies along cos(a) u - sin(a) v, where u = Y x d and v = d x u."""
+    t = (dome.get('SkyDomeTime') or [{}])[0]
+    a = math.radians((t.get('Angle') or 0) + 90)
+    d = dome.get('RotationAxis') or [0, 1, 0]
+    n = math.sqrt(sum(k * k for k in d)) or 1
+    d = [k / n for k in d]
+    if d[1] >= 0.999999:
+        u, v = [1, 0, 0], [0, 0, -1]
+    elif d[1] <= -0.999999:
+        u, v = [1, 0, 0], [0, 0, 1]
+    else:
+        u = [d[2], 0, -d[0]]
+        n = math.sqrt(u[0] ** 2 + u[2] ** 2); u = [k / n for k in u]
+        v = [d[1] * u[2] - d[2] * u[1], d[2] * u[0] - d[0] * u[2], d[0] * u[1] - d[1] * u[0]]
+        n = math.sqrt(sum(k * k for k in v)); v = [k / n for k in v]
+    p = [math.cos(a) * u[i] - math.sin(a) * v[i] + (t.get('Position') or [0, 0, 0])[i] / 8000 for i in range(3)]
+    n = math.sqrt(sum(k * k for k in p)) or 1
+    return [round(k / n, 4) for k in p]
+
+
+def lighting_json():
+    """lighting.json: the creator sky's lights for the material shaders (shader-graph.js), from bin/Skies.bin.
+    Colours are RGB in the game's (gamma) space; directions are in the game's space."""
+    skies = {s['FNNoPath']: s for s in gamedata.records('Skies')}
+    sky = skies[CREATOR_SKY]
+    sun = (sky.get('SkySun') or [{}])[0]
+    char = (sky.get('SkyCharacterLighting') or [{}])[0]
+    behaviour = (sky.get('SkyLightBehavior') or [{}])[0]
+
+    def colour(key, offset=None):  # the sky's colour plus the character lighting's HSV offset
+        h, s, v = sun.get(key) or [0, 0, 0]
+        dh, ds, dv = (char.get(offset) if offset else None) or [0, 0, 0]
+        return hsv_rgb(h + dh, min(1, max(0, s + ds)), max(0, v + dv))
+    luminary = next((d for d in sky.get('SkyDome') or [] if d.get('Luminary')), None)
+    return {
+        'sky': CREATOR_SKY,
+        'ambient': colour('AmbientHSV', 'AmbientHSVOffset'),
+        'skyLight': colour('SkyLightHSV', 'SkyLightHSVOffset'),
+        'groundLight': colour('GroundLightHSV', 'GroundLightHSVOffset'),
+        'sideLight': colour('SideLightHSV', 'SideLightHSVOffset'),
+        'diffuse': colour('DiffuseHSV', 'DiffuseHSVOffset'),
+        'secondaryDiffuse': colour('SecondaryDiffuseHSV', 'SecondaryDiffuseHSVOffset'),
+        'specular': colour('SpecularHSV', 'SpecularHSVOffset'),
+        'backlight': hsv_rgb(*(char.get('BacklightHSV') or [0, 0, 0])),
+        'sunDirection': sun_direction(luminary) if luminary else [-0.5774, 0.5774, 0.5774],  # else (-1, 1, 1), as the game
+        'exposure': behaviour.get('Exposure') or 1, 'lightRange': behaviour.get('LightRange') or 2,
+        'lightAdaptation': behaviour.get('LightAdaptation') or 0,
+        'reflectionCube': sky.get('ReflectionCube') or 'TerrainTest_cube',
+    }
+
+
 def main():
     os.makedirs(os.path.join(OUT, 'catalog'), exist_ok=True)
     # the tracks are written once per build (export_track skips existing files), so start clean
@@ -408,6 +473,7 @@ def main():
         shaders = shader_json({m['shader'] for s in SKELETONS
                                for m in json.load(open(os.path.join(OUT, 'catalog', s + '.json')))['materials'].values()})
     json.dump(shaders, open(os.path.join(OUT, 'catalog', 'shaders.json'), 'w'), separators=(',', ':'))
+    json.dump(lighting_json(), open(os.path.join(OUT, 'catalog', 'lighting.json'), 'w'), indent=1)
     print(f"shaders: {len(shaders['materials'])} materials, {len(shaders['templates'])} templates, "
           f"{len(shaders['ops'])} operation types, {len(shaders['images'])} images")
     # starting costumes a player could make: none with an NPC-only piece or material (weapons aside)

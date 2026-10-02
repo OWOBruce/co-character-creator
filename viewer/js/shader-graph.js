@@ -5,18 +5,31 @@
 // Each template is compiled once to GLSL: every operation is one block below, written from the game's own
 // HLSL for it (shaders/D3D/ops/*.phl), on vec4 values like the game's assembler. Inputs an edge doesn't
 // feed become uniforms (material value, else the template's fixed value, else the operation's default),
-// so materials sharing a template share the program. The graph's Output feeds the game's lighting model
-// (shaders/D3D/LightingModels/Standard.LightingModel + ops/Output.phl), mapped onto three's Phong lights:
+// so materials sharing a template share the program. The graph's Output feeds the lighting:
 //   albedo  = LitColor;  reflection_weight = ReflectionWeight (1 - ReflectionAddPercent),
 //             add = ReflectionWeight ReflectionAddPercent,  refl = env(reflect(view, N)) x ReflectionColorMask
-//   albedo  = lerp(albedo, albedo refl, reflection_weight)
-//   colour  = albedo (diffuse + ambient) + SpecularValue SpecularColor x pow(dot(L, R), 128 SpecularExponent)
-//             + lerp(Unlit, Unlit refl, reflection_weight) + add refl
-// Colours are computed in the game's (gamma) space and converted to linear for three's lighting.
+//   albedo  = lerp(albedo, albedo refl, reflection_weight);  unlit = lerp(Unlit, Unlit refl, reflection_weight) + add refl
+// then the game's lighting model (below), or with setGameLighting(false) three's Phong lights:
+//   colour  = albedo (diffuse + ambient) + SpecularValue SpecularColor x pow(dot(L, R), 128 SpecularExponent) + unlit
+// Colours are computed in the game's (gamma) space and converted to linear for output (or for three's lights).
 // The reflection cube is the game's own default, TerrainTest_cube: the game uses it whenever the sky names
 // none, and the creator's (Sky_Player_Costume_Creator) doesn't (sky blending 0xf396c0, material binding
 // 0xfaf4c0). setGameReflections(false) puts back the plain sky / ground gradient used before (kept, not
 // offered on the page).
+// Lighting is the game's own model (Standard.LightingModel, light_inc.hlsl, ops/Output.phl), lit by the
+// creator sky's lights (lighting.json from bin/Skies.bin), in the game's gamma space:
+//   ambient = Ambient + lerp(GroundLight, SkyLight, 0.5 + 0.5 N.up) + SideLight (1 - |N.up|) 0.7
+//   d = N.L wrapped by the material's LightBleed (d bleed.y + bleed.x)
+//   diffuse = Diffuse saturate(d) + SecondaryDiffuse AO saturate(-d)        (L: toward the sun)
+//   colour = albedo diffuse + SpecularValue SpecularColor Specular pow(L.R, exponent)
+//            + ambient AO albedo (1 - saturate(0.4 (diffuse . (0.5, 0.6, 0.5)) exposure)) + unlit
+//   Backlight templates (the 4color masks): unlit *= unlit 0.65 + 0.35 first; then colour *=
+//     1.8 dot(normalize(N - 0.65 screen-up), V) and += Backlight (0.35 + albedo) saturate(-N.V bb.y + bb.x)
+//   on screen: colour x exposure, where exposure = Exposure / lerp(LightRange, 2 x scene luminance,
+//   LightAdaptation) (0xf8d090 / 0xf8cdf0); the scene's luminance is taken as SCENE_LUMINANCE here.
+//   AO is the normal map's own (saturate(N . geometric normal)); reflections are scaled by 1 / exposure.
+// setGameLighting(false) goes back to three's Phong lights with the page's lamps (View > Lighting, unticked).
+// The sun and the reflection map turn with the camera (turnLighting), as the creator's turntable would.
 // Not the game's: screen refraction (drawn as additive over the background), and the runtime values of
 // oscillators / scrolling (1 + A sin / rate x time).
 import * as THREE from 'three';
@@ -28,6 +41,61 @@ export function tickShaders(now) { graphTime.value = (now / 1000) % 3600; }
 
 // What every material reflects (one uniform, shared, so switching it changes them all)
 const ENV = { value: null };
+
+// The game's lights (shared uniforms; filled from data/catalog/lighting.json)
+const SCENE_LUMINANCE = 0.35;  // the auto-exposure's measured brightness, assumed (the creator's backdrop is mid-blue)
+const v3 = () => ({ value: new THREE.Vector3() });
+export const LIGHT = {
+  coGame: { value: false }, coExposure: { value: 1 }, coSunDir: v3(), coTurn: { value: new THREE.Vector2(1, 0) },
+  coAmbient: v3(), coSky: v3(), coGround: v3(), coSide: v3(), coKey: v3(), coSecondary: v3(), coSpecLight: v3(),
+  coBacklight: v3(),
+};
+let lighting = null, useGameLight = true;
+export function setGameLighting(on) { useGameLight = on; LIGHT.coGame.value = on && !!lighting; }
+// The creator turns the character in front of a fixed camera and fixed lights. Here the camera orbits
+// instead, so the sun and the reflection map turn with it about the vertical: turning the view shows each
+// side lit as the creator would. yaw: the camera's direction from the character, in radians (0: in front).
+const sun = new THREE.Vector3(0, 1, 0), UP = new THREE.Vector3(0, 1, 0);  // toward the sun, seen from the front
+let turned = 0;
+export function turnLighting(yaw) {
+  turned = yaw;
+  LIGHT.coTurn.value.set(Math.cos(yaw), Math.sin(yaw));
+  LIGHT.coSunDir.value.copy(sun).applyAxisAngle(UP, yaw);
+}
+// The sun as the player sets it (View > Light), seen from the front: direction in degrees round from the
+// camera (negative: from the viewer's left, ±180: from behind), angle in degrees above level, brightness
+// (x the creator's) and colour (the key light's at full strength, 0-1 RGB in the game's gamma space).
+// The colour tints the specular light by as much as it changes the key's. The other lights stay the creator's.
+const sunSet = { direction: 0, angle: 90, brightness: 1, colour: [1, 1, 1] };
+let sunDefault = null, keyPeak = 1;  // the creator's, once lighting.json has loaded; its key light's brightest channel
+export const getSun = () => ({ ...sunSet, colour: [...sunSet.colour] });
+export function setSun(changes) {
+  Object.assign(sunSet, changes);
+  if (!lighting) return;
+  const d = THREE.MathUtils.degToRad(sunSet.direction), a = THREE.MathUtils.degToRad(sunSet.angle);
+  sun.set(Math.sin(d) * Math.cos(a), Math.sin(a), Math.cos(d) * Math.cos(a));
+  turnLighting(turned);
+  const c = sunSet.colour, b = sunSet.brightness, was = sunDefault.colour;
+  LIGHT.coKey.value.set(...c.map(x => x * keyPeak * b));
+  LIGHT.coSpecLight.value.set(...lighting.specular.map((s, i) => s * (was[i] > 0 ? c[i] / was[i] : c[i]) * b));
+}
+// Resolves to the creator's sun ({ direction, angle, brightness, colour }), or null without lighting.json
+export const lightingReady = fetch('data/catalog/lighting.json').then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))).then(l => {
+  lighting = l;
+  const set = (u, rgb) => LIGHT[u].value.set(...rgb);
+  set('coAmbient', l.ambient); set('coSky', l.skyLight); set('coGround', l.groundLight); set('coSide', l.sideLight);
+  set('coSecondary', l.secondaryDiffuse); set('coBacklight', l.backlight);
+  // toward the sun, from the game's space into the viewer's (which mirrors X), as the reflections
+  const s = new THREE.Vector3(-l.sunDirection[0], l.sunDirection[1], l.sunDirection[2]).normalize();
+  keyPeak = Math.max(...l.diffuse) || 1;
+  sunDefault = { direction: THREE.MathUtils.radToDeg(Math.atan2(s.x, s.z)), angle: THREE.MathUtils.radToDeg(Math.asin(s.y)),
+                 brightness: 1, colour: l.diffuse.map(x => x / keyPeak) };
+  setSun({ ...sunDefault, colour: [...sunDefault.colour] });
+  const a = Math.min(1, Math.max(0, l.lightAdaptation));
+  LIGHT.coExposure.value = l.exposure / (l.lightRange * (1 - a) + 2 * SCENE_LUMINANCE * a);
+  setGameLighting(useGameLight);
+  return { direction: sunDefault.direction, angle: sunDefault.angle, brightness: 1, colour: [...sunDefault.colour] };
+}).catch(e => { console.warn('lighting', e); return null; });
 const GAME_REFLECTION = 'dds/system/cubemaps/TerrainTest_cube.dds';
 let gameCube = null;  // the game's map, once asked for: a promise of the texture (null if it can't be read)
 let useGame = false;
@@ -80,7 +148,7 @@ const OPS = {
   colorvalue: (i, o) => `${o.result} = ${i.color};`,
   color0: (i, o) => `${o.color0} = ${i.defaultinput};`,
   texcoord0: (i, o) => `${o.texcoord0} = ${i.defaultinput};`,
-  characterbacklightcolor: (i, o) => `${o.result} = ${i.backlightcolor};`,
+  characterbacklightcolor: (i, o) => `${o.result} = vec4(coBacklight, 1.0);`,  // the sky's character backlight
   lerp: (i, o) => `${o.result} = mix(${i.b}, ${i.a}, ${i.weight});`,
   lerp_ignorealpha: (i, o) => `${o.result} = vec4(mix(${i.b}, ${i.a}, ${i.weight}).xyz, 1.0);`,
   lerp4: (i, o) => `{ vec4 w = ${i.weight}; ${o.result} = w.x * ${i.a} + w.y * ${i.b} + w.z * ${i.c} + w.w * ${i.d}; }`,
@@ -127,6 +195,7 @@ const OUTPUT_DEFAULTS = {
   litcolor: [0, 0, 0, 1], alpha: [1, 1, 1, 1], normal: [0, 0, 1, 0], specularcolor: [1, 1, 1, 1], specularvalue: [0, 0, 0, 0],
   specularexponent: [0.0625, 0, 0, 0], unlitcolor: [0, 0, 0, 0], alpharef: [0.6, 0, 0, 0], reflectionweight: [0, 0, 0, 0],
   reflectioncolormask: [1, 1, 1, 1], reflectionaddpercent: [0, 0, 0, 0],
+  lightbleed: [0, 1, 0, 0], backlightcolor: [0, 0, 0, 0], backlightbleed: [0, 1, 0, 0],
 };
 
 const compiled = new Map();  // template name -> program description
@@ -182,6 +251,7 @@ export function compileTemplate(shaders, name) {
   const hasRefract = t.ops.some(op => op.type === 'refract');
   const prog = {
     name, uniforms, textures, flags: t.flags, reflection: t.reflection, hasRefract, usesColors,
+    backlight: !!out.in.backlightcolor,  // the templates with the Backlight define (the 4color masks) feed it
     alphaConnected: !!out.in.alpha,
     glsl: `vec4 coDiscard; vec4 ${[...new Set(declared)].join(', ')};\n${lines.join('\n')}\n` +
       Object.entries(outIn).map(([k, e]) => `vec4 co_${k} = ${e};`).join('\n'),
@@ -215,7 +285,7 @@ export function createGraphMaterial(shaders, shaderName) {
   mat.normalMap = FLAT_NORMAL;  // turns on three's tangent frame (tbn); the graph supplies the normal
   const u = {
     coTime: graphTime, coColor0: { value: new THREE.Vector4(1, 1, 1, 1) }, coTint: { value: new THREE.Vector4(1, 1, 1, 1) },
-    coEnv: ENV,
+    coEnv: ENV, ...LIGHT,
     coRawMask: { value: false }, coNormals: { value: true },
   };
   for (const [name, spec] of Object.entries(prog.uniforms)) {
@@ -232,6 +302,8 @@ export function createGraphMaterial(shaders, shaderName) {
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         uniform float coTime; uniform vec4 coColor0, coTint; uniform samplerCube coEnv; uniform bool coRawMask;
+        uniform bool coGame; uniform float coExposure; uniform vec2 coTurn; uniform vec3 coSunDir, coAmbient, coSky, coGround, coSide, coKey,
+          coSecondary, coSpecLight, coBacklight;
         ${prog.uniformDecl}
         vec3 coSRGBToLinear( vec3 c ) { c = max(c, 0.0); return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }
         vec3 coLit; float coAlpha; vec3 coSpecColor; float coSpecExp;`)
@@ -247,9 +319,15 @@ export function createGraphMaterial(shaders, shaderName) {
         vec3 coRefl = vec3( 0.0 );
         // the reflection direction in world space, then in the game's (left-handed: the viewer mirrors X)
         ${prog.reflection ? `{ vec3 r = ( vec4( reflect( -coView, normal ), 0.0 ) * viewMatrix ).xyz;
+          r = vec3( coTurn.x * r.x - coTurn.y * r.z, r.y, coTurn.y * r.x + coTurn.x * r.z );  // the map turned with the view
           coRefl = textureCube( coEnv, vec3( -r.x, r.yz ) ).rgb * co_reflectioncolormask.xyz; }` : 'coReflW = 0.0; coReflAdd = 0.0;'}
+        vec3 coUnlitIn = co_unlitcolor.xyz;
+        if ( coGame ) {
+          coRefl /= coExposure;  // reflections are in the exposure's light units (Output.phl InvToneMapLDR)
+          ${prog.backlight ? 'coUnlitIn *= coUnlitIn * 0.65 + 0.35;  // Backlight templates' : ''}
+        }
         vec3 coAlbedo = mix( co_litcolor.xyz, co_litcolor.xyz * coRefl, coReflW );
-        vec3 coUnlit = mix( co_unlitcolor.xyz, co_unlitcolor.xyz * coRefl, coReflW ) + coReflAdd * coRefl;
+        vec3 coUnlit = mix( coUnlitIn, coUnlitIn * coRefl, coReflW ) + coReflAdd * coRefl;
         coAlpha = clamp( co_alpha.w, 0.0, 1.0 );
         ${prog.flags & 2 || mat.transparent ? '' : 'if ( coAlpha < co_alpharef.x ) discard; coAlpha = 1.0;'}
         // the draw's tint colour (Output.phl: unlit and albedo times v.color0, alpha times its alpha)
@@ -261,7 +339,28 @@ export function createGraphMaterial(shaders, shaderName) {
       .replace('#include <lights_phong_fragment>', `BlinnPhongMaterial material;
         material.diffuseColor = diffuseColor.rgb; material.specularColor = coSpecColor;
         material.specularShininess = coSpecExp; material.specularStrength = 1.0;`)
-      .replace('#include <lights_phong_pars_fragment>', PHONG_PARS);
+      .replace('#include <lights_phong_pars_fragment>', PHONG_PARS)
+      .replace('#include <opaque_fragment>', `
+        if ( coGame ) {  // the game's lighting model (see the top of shader-graph.js), in its gamma space
+          vec3 N = normal, V = coView, R = reflect( -coView, N );  // coView: toward the eye
+          vec3 Ng = normalize( vNormal );
+          #ifdef DOUBLE_SIDED
+            Ng *= faceDirection;
+          #endif
+          float ao = clamp( dot( N, Ng ), 0.0, 1.0 );
+          vec3 L = normalize( ( viewMatrix * vec4( coSunDir, 0.0 ) ).xyz );
+          float up = dot( N, normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz ) );
+          vec3 amb = coAmbient + mix( coGround, coSky, up * 0.5 + 0.5 ) + coSide * ( 1.0 - abs( up ) ) * 0.7;
+          float d = dot( N, L ) * co_lightbleed.y + co_lightbleed.x;
+          vec3 diff = coKey * clamp( d, 0.0, 1.0 ) + coSecondary * ao * clamp( -d, 0.0, 1.0 );
+          float spec = pow( clamp( dot( L, R ), 0.0, 1.0 ), coSpecExp );
+          float fade = 1.0 - clamp( 0.4 * dot( diff, vec3( 0.5, 0.6, 0.5 ) ) * coExposure, 0.0, 1.0 );
+          vec3 c = coAlbedo * diff + coSpecColor * coSpecLight * spec + amb * ao * coAlbedo * fade + coUnlit;
+          ${prog.backlight ? `c *= dot( normalize( N + vec3( 0.0, -0.65, 0.0 ) ), V ) * 1.8;
+          c += coBacklight * ( 0.35 + coAlbedo ) * clamp( -dot( N, V ) * co_backlightbleed.y + co_backlightbleed.x, 0.0, 1.0 );` : ''}
+          outgoingLight = coSRGBToLinear( c * coExposure );
+        }
+        #include <opaque_fragment>`);
   };
   return mat;
 }

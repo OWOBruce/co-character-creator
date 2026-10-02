@@ -6,8 +6,8 @@
 // move down (and shrink a little) to make room. Saved where the player chooses (the browser's save
 // dialog), or downloaded where that dialog isn't available.
 //
-// Every view is drawn in the same instant, so the idle pose is the same in all of them. The key and rim
-// lights turn with the camera, so each side is lit as the front is.
+// Every view is drawn in the same instant, so the idle pose is the same in all of them. The lights turn
+// with the camera, so each side is lit as the front is (the page turns them back on its next frame).
 import * as THREE from 'three';
 
 const W = 3840, H = 2160, MARGIN = 60;
@@ -133,10 +133,10 @@ export function drawName(g, name, fit, x, y, w, h) {
   g.restore();
 }
 
-// view: { renderer, scene, ch, lights: [DirectionalLight], hide: () => [objects to hide], characterBox }
+// view: { renderer, scene, ch, turnLights: yaw (radians) => (), hide: () => [objects to hide], characterBox }
 // name: as for fitName, or null (or empty text) for none
 export async function renderSheet(view, background, name = null) {
-  const { renderer, scene, ch, lights } = view;
+  const { renderer, scene, ch, turnLights } = view;
   const bg = BACKGROUNDS[background] || BACKGROUNDS.blue;
   const sheet = document.createElement('canvas'); sheet.width = W; sheet.height = H;
   const g = sheet.getContext('2d');
@@ -151,7 +151,6 @@ export async function renderSheet(view, background, name = null) {
   // renderer state to put back
   const size = renderer.getSize(new THREE.Vector2()), ratio = renderer.getPixelRatio();
   const clear = renderer.getClearColor(new THREE.Color()), clearAlpha = renderer.getClearAlpha();
-  const lightPos = lights.map(l => l.position.clone());
   const hidden = view.hide().filter(o => o && o.visible);
   hidden.forEach(o => (o.visible = false));
   const gl = renderer.getContext();
@@ -162,8 +161,7 @@ export async function renderSheet(view, background, name = null) {
   // with the lights turned by deg as the camera is
   const shot = (w, h, deg, cam) => {
     const ss = Math.max(1, Math.min(2, Math.floor(maxSize / Math.max(w, h))));
-    const turn = new THREE.Matrix4().makeRotationY(THREE.MathUtils.degToRad(deg));
-    lights.forEach((l, i) => l.position.copy(lightPos[i]).applyMatrix4(turn));
+    turnLights(THREE.MathUtils.degToRad(deg));
     cam.updateProjectionMatrix();
     renderer.setPixelRatio(1); renderer.setSize(w * ss, h * ss, false);
     renderer.setClearColor(0x000000, 0);
@@ -243,7 +241,6 @@ export async function renderSheet(view, background, name = null) {
       g.drawImage(pic, face.x, face.y + i * (face.size + face.gap));
     });
   } finally {
-    lights.forEach((l, i) => l.position.copy(lightPos[i]));
     renderer.setPixelRatio(ratio); renderer.setSize(size.x, size.y, false);
     renderer.setClearColor(clear, clearAlpha);
     hidden.forEach(o => (o.visible = true));
