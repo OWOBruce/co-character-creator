@@ -23,7 +23,9 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'tools'))
-BUILD_INFO = os.path.join(HERE, 'viewer', 'data', 'build.json')
+from paths import data  # noqa: E402
+
+BUILD_INFO = data('viewer', 'data', 'build.json')
 VERSION = 3  # bump when the build's output format changes, to force a rebuild
 
 

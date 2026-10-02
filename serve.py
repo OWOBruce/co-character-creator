@@ -47,9 +47,11 @@ import threading
 from functools import lru_cache
 
 from gamefs import GameFS, candidates, default_folder, find_piggs, load_settings, renders_folder, save_settings
+from paths import INSTALLED, claude_workspace, data
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, 'viewer')
+DATA_ROOT = data('viewer')  # data/ and ui/ (what the build made) are here: the same folder unless installed
 ASSET_DIRS = ('bin/geobin/', 'dds/')
 
 
@@ -261,6 +263,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=ROOT, **kw)
+
+    def translate_path(self, path):
+        if DATA_ROOT != ROOT and path.lstrip('/').split('/', 1)[0] in ('data', 'ui'):
+            root, self.directory = self.directory, DATA_ROOT
+            try:
+                return super().translate_path(path)
+            finally:
+                self.directory = root
+        return super().translate_path(path)
 
     def send_bytes(self, body, ctype, status=200):
         self.send_response(status)
@@ -563,6 +574,11 @@ def show(url, app):
 
 def main():
     args = sys.argv[1:]
+    if INSTALLED:
+        try:
+            claude_workspace()
+        except OSError as e:
+            print('Could not set up the Claude Code folder:', e)
     opt = lambda name: args[args.index(name) + 1] if name in args and args.index(name) + 1 < len(args) else None
     # the port: an argument, else the PORT environment variable (preview tools), else 8765
     port = next((int(a) for a in args if a.isdigit()), int(os.environ.get('PORT') or 8765))

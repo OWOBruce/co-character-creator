@@ -31,8 +31,10 @@ sys.path.insert(0, os.path.join(HERE, 'tools'))
 import gamedata  # noqa: E402
 from mset import MSet  # noqa: E402
 
-DATA = os.path.join(HERE, 'viewer', 'data', 'catalog')
-OUT = os.path.join(HERE, 'index')
+from paths import data  # noqa: E402
+
+DATA = data('viewer', 'data', 'catalog')
+OUT = data('index')
 SKELETONS = ('Female', 'Male')
 DEV = re.compile(r'^\s*(NPC|UNUSED|SCALE TEST|DEPRECATED)\b', re.I)
 INLINE_PATTERNS = 12  # longer pattern lists go to pattern-lists.md

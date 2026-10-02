@@ -30,7 +30,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 class Schema:
-    def __init__(self, path=os.path.join(HERE, '..', 'catalog', 'schema.json')):
+    def __init__(self, path=None):
+        if path is None:  # catalog/ is in the editor's data folder (paths.py)
+            import sys
+            sys.path.insert(0, os.path.join(HERE, '..'))
+            from paths import data
+            path = data('catalog', 'schema.json')
         self.tables = json.load(open(path))
         self.by_name = {}
         for va, t in self.tables.items():

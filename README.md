@@ -16,8 +16,9 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 1. Download **`CO-Costume-Editor-<version>-Setup.exe`** from the [latest release](https://github.com/codexheroes/co-character-creator/releases/latest) and run it.
    - Windows may say **"Windows protected your PC"**, because the installer isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
-   - It installs just for you, without asking for admin rights, into `%LOCALAPPDATA%\Programs\CO Costume Editor`, and adds the editor to the Start menu (and the desktop, if you tick that box).
-   - To update, run a newer installer: it keeps the data built from your game and your settings. Uninstall it from Windows' **Installed apps**.
+   - It installs into `C:\Program Files\CO Costume Editor` (Windows asks for admin rights), or, if you choose **Install for me only**, into your own `%LOCALAPPDATA%\Programs` without them. It adds the editor to the Start menu (and the desktop, if you tick that box).
+   - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
+   - To update, run a newer installer: it keeps that data. Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
    - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`CO Costume Editor.exe`**.
 2. Start **CO Costume Editor** from the Start menu (the installer can start it for you the first time).
 3. The editor opens in its own window (Microsoft Edge or Google Chrome with no tabs or address bar; without either, your normal browser).
@@ -87,7 +88,7 @@ The editor then checks the costume. It fixes what it can (for example, it snaps 
 
 ### With Claude Code
 
-The editor comes with a skill for [Claude Code](https://claude.com/claude-code), **build-costume** (in `.claude\skills`). Open Claude Code in the editor's folder (with the installer, `%LOCALAPPDATA%\Programs\CO Costume Editor`) and describe a character: "make me a cowgirl", "make her a space cowboy", "more glow". Claude picks pieces from the index, writes and checks the costume, loads it into the editor in its browser pane, and looks at it close up for pieces poking through each other before showing you. It can also restyle a character from a `Costume_*.jpg` you drop in. Start the editor once first, so the index is built. When you like the result, use **Save** in the editor to put it into the game.
+The editor comes with a skill for [Claude Code](https://claude.com/claude-code), **build-costume** (in `.claude\skills`). Open Claude Code in the editor's folder (with the installer, its data folder `%LOCALAPPDATA%\CO Costume Editor`, which the editor sets up for this when it starts) and describe a character: "make me a cowgirl", "make her a space cowboy", "more glow". Claude picks pieces from the index, writes and checks the costume, loads it into the editor in its browser pane, and looks at it close up for pieces poking through each other before showing you. It can also restyle a character from a `Costume_*.jpg` you drop in. Start the editor once first, so the index is built. When you like the result, use **Save** in the editor to put it into the game.
 
 ## If something goes wrong
 
@@ -96,7 +97,7 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 - **The packages won't install:** check your internet connection. Or open a command prompt in the editor's folder and run `python -m pip install -r requirements.txt`.
 - **"Port 8765 is in use":** another program is using that port. Run `python serve.py 8766` from a command prompt in the editor's folder, then open `http://localhost:8766`.
 - **The game folder isn't accepted:** pick the folder that contains `Champions Online\Live\piggs`. The main install folder, its inner `Champions Online` folder, `Live` or `piggs` all work.
-- **The build failed:** the page shows the error. Starting the editor again retries. You can also force a clean rebuild with `python build.py --force`.
+- **The build failed:** the page shows the error. Starting the editor again retries. You can also force a clean rebuild with `python build.py --force`. With the installed editor, delete `%LOCALAPPDATA%\CO Costume Editor\viewer\data\build.json` and start it again.
 
 ## Limits
 
@@ -115,7 +116,7 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 
 ## Privacy
 
-Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above. Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` in its own folder.
+Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above. Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
 
 ## Feedback and source code
 

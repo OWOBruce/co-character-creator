@@ -14,11 +14,13 @@ from atrk import Track  # noqa: E402
 from skel import Skeleton  # noqa: E402
 import gamedata  # noqa: E402  (game files from the install's archives)
 
-OUT = os.path.join(HERE, 'viewer', 'data')
+from paths import data  # noqa: E402
+
+OUT = data('viewer', 'data')
 
 
 def load(name):
-    return json.load(open(os.path.join(HERE, 'catalog', name + '.json'), encoding='utf-8'))
+    return json.load(open(data('catalog', name + '.json'), encoding='utf-8'))
 
 
 TEX = {t['name']: t for t in load('textures')}

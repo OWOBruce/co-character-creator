@@ -16,7 +16,10 @@ import sys
 from pe import PE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, '..', 'catalog', 'schema.json')
+sys.path.insert(0, os.path.join(HERE, '..'))
+from paths import data  # noqa: E402
+
+OUT = data('catalog', 'schema.json')
 
 
 def main(out=OUT, exe=None):

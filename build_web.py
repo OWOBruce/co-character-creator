@@ -18,12 +18,14 @@ sys.path.insert(0, os.path.join(HERE, 'tools'))
 import rig_data as ec  # noqa: E402  (tracks, skeleton, body helpers)
 import gamedata  # noqa: E402
 
-OUT = os.path.join(HERE, 'viewer', 'data')
+from paths import data  # noqa: E402
+
+OUT = data('viewer', 'data')
 SKELETONS = ('Male', 'Female')
 
 
 def load(name):
-    return json.load(open(os.path.join(HERE, 'catalog', name + '.json'), encoding='utf-8'))
+    return json.load(open(data('catalog', name + '.json'), encoding='utf-8'))
 
 
 def dds_url(image):

@@ -16,7 +16,9 @@ import struct
 from hogg import Hogg
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SETTINGS = os.path.join(HERE, 'settings.json')
+from paths import data  # noqa: E402
+
+SETTINGS = data('settings.json')
 STEAM_ROOTS = [r'C:\Program Files (x86)\Steam', r'C:\Program Files\Steam']
 OTHER_INSTALLS = [r'C:\Program Files (x86)\Arc Games\Champions Online', r'C:\Program Files\Arc Games\Champions Online',
                   r'C:\Program Files (x86)\Cryptic Studios\Champions Online']
@@ -60,6 +62,7 @@ def load_settings():
 
 
 def save_settings(s):
+    os.makedirs(os.path.dirname(SETTINGS), exist_ok=True)
     json.dump(s, open(SETTINGS, 'w', encoding='utf-8'), indent=2)
 
 

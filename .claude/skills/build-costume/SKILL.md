@@ -17,6 +17,14 @@ those open their own window for the user, and the program quits when that window
 (`python --version` fails), run the same scripts through it, from the editor's folder:
 `"./CO Costume Editor.exe" costume_check.py ...`, and preview with `costume-viewer-app` instead of `costume-viewer`.
 
+**Installed editor:** when this folder has no `serve.py` but has a `CLAUDE.md`, you're in the installed editor's
+data folder (`%LOCALAPPDATA%\CO Costume Editor`): `index/` and `my_costumes/` are here, the program and its
+scripts are in the folder `CLAUDE.md` names. Run every script through the program by its full path, from here:
+`& "<program folder>\CO Costume Editor.exe" costume_check.py my_costumes\<name>.json` (it finds the script in
+its own folder; the file paths are from here). `costume_to_json.py` is at
+`.claude\skills\build-costume\costume_to_json.py` here; give the program that full path. `preview_start` with
+`costume-viewer` starts the installed program.
+
 ## Where the knowledge is
 
 All generated from the user's install (see the index's own guide for the full format):

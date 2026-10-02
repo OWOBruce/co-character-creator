@@ -16,7 +16,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..'))
-import gamedata  # noqa: E402  (decoded bins from the install's archives)
+import gamedata  # noqa: E402
+from paths import data  # noqa: E402  (decoded bins from the install's archives)
 # The character stands still in both: 'Idle' is set in the creator too (it only adds the empty
 # basebone idle on the body, but tails and wings have no creator-specific idle, only 'Idle' ones).
 # 'Costume' is the creator's costume-pose bit (CharacterCreation_ForceCostumeStance): its Stance & Mood
@@ -45,7 +46,7 @@ class StanceResolver:
         self.skelinfos = {s['Name'].lower(): s for s in _load('SkelInfos')}
         self.blendinfos = {b['BlendInfoName'].lower(): b for b in _load('BlendInfos')}
         self.skeldefs = {s['Name']: s for s in json.load(
-            open(os.path.join(HERE, '..', 'catalog', 'skeletons.json'), encoding='utf-8'))}
+            open(data('catalog', 'skeletons.json'), encoding='utf-8'))}
 
     @staticmethod
     def _sequencer_of(seq):

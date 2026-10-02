@@ -21,7 +21,9 @@ from functools import lru_cache
 from PIL import ImageColor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, 'viewer', 'data', 'catalog')
+from paths import data  # noqa: E402
+
+DATA = data('viewer', 'data', 'catalog')
 DEV = re.compile(r'^\s*(NPC|UNUSED|SCALE TEST|DEPRECATED)\b', re.I)
 TEXTURE_KINDS = {'pattern': 'Pattern', 'detail': 'Detail', 'diffuse': 'Diffuse', 'specular': 'Specular'}
 LINK_ALL, LINK_NONE = 1, 0  # PlayerCostume ColorLink: 1 = uses the costume's shared colours

@@ -34,7 +34,6 @@ def run(script, args):
 
 
 def main():
-    os.chdir(APP)
     sys.path[:0] = [APP, os.path.join(APP, 'tools')]
     args = sys.argv[1:]
     if args[:1] == ['-u']:
@@ -45,8 +44,9 @@ def main():
             sys.stdout = sys.stderr = open(os.path.join(LOG_DIR, 'build.log'), 'w', encoding='utf-8')
         else:
             sys.stdout.reconfigure(line_buffering=True)
-        run(args[0], args[1:])  # a relative path is taken from the program's folder
-        return
+        run(args[0], args[1:])  # a relative script path is taken from the program's folder; the folder it was
+        return                  # run from stays the working folder, for the paths given to the script
+    os.chdir(APP)
     # the editor: no console, so the server's messages go to a log
     os.makedirs(LOG_DIR, exist_ok=True)
     log = open(os.path.join(LOG_DIR, 'editor.log'), 'w', encoding='utf-8', buffering=1)

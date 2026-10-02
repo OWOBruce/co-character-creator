@@ -30,7 +30,9 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path[:0] = [ROOT, os.path.join(ROOT, 'tools')]
-DATA = os.path.join(ROOT, 'viewer', 'data')
+from paths import data  # noqa: E402
+
+DATA = data('viewer', 'data')
 KNOWN = json.load(open(os.path.join(HERE, 'known.json'), encoding='utf-8'))
 DEV = re.compile(r'^\s*(NPC|UNUSED|SCALE TEST|DEPRECATED)\b', re.I)
 ARGS = sys.argv[1:]
@@ -369,7 +371,7 @@ def t_checker(fail, note):
 
 def t_index(fail, note):
     """The costume index lists each piece once, with the right counts and no deprecated categories"""
-    idx_dir = os.path.join(ROOT, 'index')
+    idx_dir = data('index')
     everything = json.load(open(os.path.join(idx_dir, 'index.json'), encoding='utf-8'))
     checked = 0
     for sk, data in everything['skeletons'].items():

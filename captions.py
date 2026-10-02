@@ -26,17 +26,19 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, 'viewer', 'data')
-JOBS = os.path.join(DATA, 'render_jobs.json')
-CAPTIONS = os.path.join(HERE, 'captions', 'captions.json')
 sys.path.insert(0, HERE)
 from gamefs import renders_folder  # noqa: E402
+from paths import data  # noqa: E402
+
+DATA = data('viewer', 'data')
+JOBS = os.path.join(DATA, 'render_jobs.json')
+CAPTIONS = os.path.join(HERE, 'captions', 'captions.json')
 RENDERS = renders_folder()  # settings.json rendersFolder, else %LOCALAPPDATA%/CO Costume Editor/renders
 SAFE = re.compile(r'^[A-Za-z0-9_.-]+$')  # geometry names usable as file names (all of them, in practice)
 
 
 def index():
-    return json.load(open(os.path.join(HERE, 'index', 'index.json'), encoding='utf-8'))['skeletons']
+    return json.load(open(data('index', 'index.json'), encoding='utf-8'))['skeletons']
 
 
 def catalog(sk):

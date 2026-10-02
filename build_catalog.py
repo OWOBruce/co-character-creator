@@ -12,7 +12,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools'))
 import gamedata  # noqa: E402
 
-CATALOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog')
+from paths import data  # noqa: E402
+
+CATALOG = data('catalog')
 
 BINS = gamedata.BINS
 

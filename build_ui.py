@@ -12,7 +12,9 @@ from PIL import Image
 from gamefs import open_game
 
 THEME = 'Champions_PC_Theme'
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'viewer', 'ui')
+from paths import data  # noqa: E402
+
+OUT = data('viewer', 'ui')
 
 # tints for the greyscale kits (the game's blue / gold comic palette)
 TINTS = {

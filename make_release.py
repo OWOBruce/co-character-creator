@@ -30,7 +30,7 @@ import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILES = ['README.md', 'LICENSE', 'DEVELOPER.md', 'start.bat', 'requirements.txt', 'index_guide.md', 'app_launcher.py', 'app.ico', 'buildprogress.py',
-         'serve.py', 'build.py', 'build_catalog.py', 'build_web.py', 'build_ui.py', 'build_index.py',
+         'serve.py', 'paths.py', 'build.py', 'build_catalog.py', 'build_web.py', 'build_ui.py', 'build_index.py',
          'rig_data.py', 'costume_check.py', 'gamefs.py', 'gamedata.py', 'hogg.py', 'make_release.py',
          'viewer/index.html', 'viewer/test.html', 'viewer/render.html', 'captions.py', 'describe.py', 'captions/TAGS.md',
          # what each piece looks like (the captioning pass; build_index.py folds it into the costume index)
