@@ -12,6 +12,16 @@ function pixelTexture(r, g, b, a) {
   t.needsUpdate = true;
   return t;
 }
+// View options > Inspect > Colour regions: each piece flat in the colour slot each part takes, from its
+// colour mask (w0 = 1 - R - G - B for colour 1, R for 2, G for 3, B for 4, the skin on skin materials),
+// grey where the mask's alpha leaves the texture's own colour. Shared with shader-graph.js.
+export const REGION_GLSL = /* glsl */`
+  vec3 coRegionColour( vec4 t, float tinted ) {
+    float w0 = clamp( 1.0 - dot( t.xyz, vec3( 1.0 ) ), 0.0, 1.0 );
+    vec3 c = w0 * vec3( 1.0, 0.82, 0.12 ) + t.x * vec3( 0.92, 0.16, 0.16 ) + t.y * vec3( 0.16, 0.78, 0.22 ) + t.z * vec3( 0.16, 0.38, 1.0 );
+    return mix( vec3( 0.5 ), c, tinted );
+  }`;
+
 export const DEFAULTS = {
   mask: pixelTexture(0, 0, 0, 255),       // all Colour0, fully tinted
   diffuse: pixelTexture(255, 255, 255, 255),
@@ -21,13 +31,12 @@ export const DEFAULTS = {
 const MAP_FRAGMENT = /* glsl */`
   vec4 coMask = coHasMask ? texture2D( map, vMapUv ) : vec4( 0.0, 0.0, 0.0, 1.0 );
   vec3 coCol;
-  if ( coRawMask ) coCol = coMask.rgb;
+  if ( coRawMask ) coCol = coRegionColour( coMask, coMask.a );  // Colour regions
   else {
     float coRest = max( 0.0, 1.0 - coMask.r - coMask.g - coMask.b );
     vec3 coTint = coRest * coColor[0] + coMask.r * coColor[1] + coMask.g * coColor[2] + coMask.b * coColor[3];
-    coCol = mix( vec3( 1.0 ), coTint, coMask.a );
+    coCol = mix( vec3( 1.0 ), coTint, coMask.a ) * texture2D( coDiffuse, vMapUv ).rgb;
   }
-  coCol *= texture2D( coDiffuse, vMapUv ).rgb;
   diffuseColor.rgb *= coSRGBToLinear( coCol );
 `;
 
@@ -65,7 +74,8 @@ export function createCostumeMaterial() {
       .replace('#include <common>', `#include <common>
         uniform vec3 coColor[4]; uniform bool coHasMask, coRawMask, coHasMuscle;
         uniform sampler2D coDiffuse, coMuscle; uniform vec4 coMuscleWeight;
-        vec3 coSRGBToLinear( vec3 c ) { return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }`)
+        vec3 coSRGBToLinear( vec3 c ) { return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }
+        ${REGION_GLSL}`)
       .replace('#include <map_fragment>', MAP_FRAGMENT);
     const line = 'vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;';
     const chunk = THREE.ShaderChunk.normal_fragment_maps;

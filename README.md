@@ -71,7 +71,13 @@ At the top:
   - Wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
   - **Shake** sways the character to see the bouncers and cloth move.
 - **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours. **Background** changes the colour behind the character: with **Comic art** ticked it recolours the tailor's comic page, unticked it's a plain colour. **Reset** puts back the tailor's blue. The left panel always keeps the tailor's blue, and the background isn't remembered between sessions.
-- **Inspect**, for checking pieces: **Skeleton**, **Wireframe**, **Normal maps**, **Raw masks**, **Body sliders**, **Mirror X**, and **Show hidden psionics**. Effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
+- **Inspect**, for checking pieces:
+  - **Skeleton** and **Wireframe** draw the bones and each piece's triangles.
+  - **Normal maps** (on by default) are the painted-on bumps: wrinkles, seams, stitching and muscle definition. Untick it to see each piece's bare shape.
+  - **Colour regions** shows which parts of each piece take which colour: 1 gold, 2 red, 3 green, 4 blue (the skin, on skin materials). Grey parts keep the texture's own colour.
+  - **Body sliders** (on by default) applies the Body tab's sliders. Untick it to see the skeleton at its default proportions.
+  - **Mirror X** (on by default) shows the character the way round the game does; the game's files are stored mirrored.
+  - **Show hidden psionics**: effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
 
 Drag in the 3D view to turn the camera, and scroll to zoom.
 

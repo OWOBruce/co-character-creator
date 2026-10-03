@@ -35,6 +35,7 @@
 import * as THREE from 'three';
 import { ddsCubeTexture } from './dds.js';
 import { ASSET_ROOT } from './catalog.js';
+import { REGION_GLSL } from './costume-material.js';
 
 export const graphTime = { value: 0 };  // seconds, advanced by tickShaders()
 export function tickShaders(now) { graphTime.value = (now / 1000) % 3600; }
@@ -157,10 +158,12 @@ const OPS = {
     ${o.result} = vec4(clamp(dot(vec4(t.xyz, w0), ${i.weight}), 0.0, 1.0)); }`,
   colortint4b: (i, o) => `{ vec4 t = ${i.tintcolormap}, d = ${i.diffuse}; float w0 = clamp(1.0 - dot(t.xyz, vec3(1.0)), 0.0, 1.0);
     vec4 r = w0 * ${i.color0} + t.x * ${i.color1} + t.y * ${i.color2} + t.z * ${i.color3};
-    r = mix(vec4(1.0), r, ${i.tintmask}); ${o.result} = vec4((d * r).xyz, d.w); }`,
+    r = mix(vec4(1.0), r, ${i.tintmask}); ${o.result} = vec4((d * r).xyz, d.w);
+    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coHasRegion = true; } }`,
   colortint4b_ignorealpha: (i, o) => `{ vec4 t = ${i.tintcolormap}, d = ${i.diffuse}; float w0 = clamp(1.0 - dot(t.xyz, vec3(1.0)), 0.0, 1.0);
     vec3 r = w0 * ${i.color0}.xyz + t.x * ${i.color1}.xyz + t.y * ${i.color2}.xyz + t.z * ${i.color3}.xyz;
-    r = mix(vec3(1.0), r, ${i.tintmask}.xyz); ${o.result} = vec4(d.xyz * r, 1.0); }`,
+    r = mix(vec3(1.0), r, ${i.tintmask}.xyz); ${o.result} = vec4(d.xyz * r, 1.0);
+    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coHasRegion = true; } }`,
   lightbleedtransform: (i, o) => `{ float l = ${i.lightbleed}.x; float y = 1.0 / (1.0 + l); ${o.result} = vec4(y * l, y, y, y); }`,
   fresnelterm_advanced: (i, o) => `{ float d = dot(coTS(${i.normal}.xyz), coView); ${o.result} = vec4(pow(clamp(1.0 - abs(d), 0.0, 1.0), ${i.tightness}.x)); }`,
   specular: (i, o) => `${o.speccolor} = ${i.specularcolor}; ${o.specexponent} = vec4(${i.specularexponent}.x);`,
@@ -306,12 +309,15 @@ export function createGraphMaterial(shaders, shaderName) {
           coSecondary, coSpecLight, coBacklight;
         ${prog.uniformDecl}
         vec3 coSRGBToLinear( vec3 c ) { c = max(c, 0.0); return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }
-        vec3 coLit; float coAlpha; vec3 coSpecColor; float coSpecExp;`)
+        vec3 coLit; float coAlpha; vec3 coSpecColor; float coSpecExp;
+        vec3 coRegion; bool coHasRegion;  // Colour regions: the first colour tint's (REGION_GLSL)
+        ${REGION_GLSL}`)
       .replace('#include <map_fragment>', '')
       .replace('#include <normal_fragment_maps>', `
         vec3 coView = normalize( vViewPosition );
         ${noNormals ? '' : '#define CO_USE_TBN'}
         #define coTS(n) ${noNormals ? 'normal' : 'normalize( tbn * (n) )'}
+        coHasRegion = false;
         ${prog.glsl}
         ${noNormals ? '' : 'normal = coTS( co_normal.xyz );'}
         float coReflW = co_reflectionweight.x * ( 1.0 - clamp( co_reflectionaddpercent.x, 0.0, 1.0 ) );
@@ -332,9 +338,13 @@ export function createGraphMaterial(shaders, shaderName) {
         ${prog.flags & 2 || mat.transparent ? '' : 'if ( coAlpha < co_alpharef.x ) discard; coAlpha = 1.0;'}
         // the draw's tint colour (Output.phl: unlit and albedo times v.color0, alpha times its alpha)
         coAlbedo *= coTint.rgb; coUnlit *= coTint.rgb; coAlpha *= coTint.a;
+        // Colour regions: flat, lit for the shape, no glow or reflection. A template without costume colours
+        // (the Fx materials) is tinted whole by colour 1.
+        ${prog.usesColors ? '' : 'coRegion = coRegionColour( vec4( 0.0 ), 1.0 ); coHasRegion = true;'}
+        if ( coRawMask && coHasRegion ) { coAlbedo = coRegion; coUnlit = vec3( 0.0 ); }
         diffuseColor = vec4( coSRGBToLinear( coAlbedo ), coAlpha );
         totalEmissiveRadiance += coSRGBToLinear( coUnlit );
-        coSpecColor = co_specularvalue.x * co_specularcolor.xyz;
+        coSpecColor = coRawMask && coHasRegion ? vec3( 0.0 ) : co_specularvalue.x * co_specularcolor.xyz;
         coSpecExp = clamp( co_specularexponent.x * 128.0, 0.25, 128.0 );`)
       .replace('#include <lights_phong_fragment>', `BlinnPhongMaterial material;
         material.diffuseColor = diffuseColor.rgb; material.specularColor = coSpecColor;

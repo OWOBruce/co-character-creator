@@ -366,12 +366,12 @@
       </div>
       <div class="viewPage away" id="view-inspect" role="tabpanel" inert>
         <div class="opts">
-          <label><input type="checkbox" id="showSkel"> Skeleton</label>
-          <label><input type="checkbox" id="wire"> Wireframe</label>
-          <label><input type="checkbox" id="normals" checked> Normal maps</label>
-          <label><input type="checkbox" id="rawMask"> Raw masks</label>
-          <label><input type="checkbox" id="applyBody" checked> Body sliders</label>
-          <label><input type="checkbox" id="mirror" checked> Mirror X</label>
+          <label title="Draw the bones the body and pieces are posed by"><input type="checkbox" id="showSkel"> Skeleton</label>
+          <label title="Draw each piece's triangles as lines, to see how it's modelled"><input type="checkbox" id="wire"> Wireframe</label>
+          <label title="The painted-on bumps: wrinkles, seams, stitching, panel lines and muscle definition. Untick to see each piece's bare shape, and tell real geometry from painted detail."><input type="checkbox" id="normals" checked> Normal maps</label>
+          <label title="Show which parts of each piece take which colour: 1 gold, 2 red, 3 green, 4 blue (the skin, on skin materials). Grey parts keep the texture's own colour."><input type="checkbox" id="rawMask"> Colour regions</label>
+          <label title="Apply the Body tab's sliders (height, build, face...). Untick to see the skeleton at its default proportions, e.g. to check whether a piece's stretching comes from a slider."><input type="checkbox" id="applyBody" checked> Body sliders</label>
+          <label title="The game's files are mirrored left to right; this turns the character back the way the game shows it. Untick to see the files as stored, left and right swapped."><input type="checkbox" id="mirror" checked> Mirror X</label>
           <label title="Effect materials (Psionic, Holoforce...) take their colour from the part's first colour; in black they're invisible in the game, and here. Tick to see them anyway."><input type="checkbox" id="showHidden"> Show hidden psionics</label>
         </div>
       </div>

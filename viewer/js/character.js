@@ -305,6 +305,7 @@ export class Character {
     const cols = costumeColorValues(p.part.colors, this.doc.skin, p.res.hasSkin, p.part.glow);
     const g = mat.userData.graph;
     g.uniforms.coColor0.value.set(...cols[0], 1);
+    g.uniforms.coRawMask.value = this.options.rawMask;  // View options > Inspect > Colour regions
     const tint = g.prog.usesColors ? [1, 1, 1] : cols[0];
     g.hidden = !g.prog.usesColors && tint.every(v => v <= 0);
     g.uniforms.coTint.value.set(...(g.hidden && this.options.showHidden ? [1, 1, 1] : tint), 1);
