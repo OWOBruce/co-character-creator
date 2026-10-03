@@ -374,9 +374,9 @@ def t_index(fail, note):
     idx_dir = data('index')
     everything = json.load(open(os.path.join(idx_dir, 'index.json'), encoding='utf-8'))
     checked = 0
-    for sk, data in everything['skeletons'].items():
+    for sk, skel in everything['skeletons'].items():
         seen = {}
-        for bone, slot in data['slots'].items():
+        for bone, slot in skel['slots'].items():
             entries = []
             for rel in slot['files']:
                 text = open(os.path.join(idx_dir, sk, rel), encoding='utf-8').read()

@@ -11,3 +11,6 @@ __pycache__/
 my_costumes/
 captions/batches.json
 .claude/settings.local.json
+
+# The project website (kept out of the repo; deployed separately)
+site/

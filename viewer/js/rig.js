@@ -56,11 +56,14 @@ export function resetPose(rig) {
   for (const b of rig.skeleton.bones) { b.position.copy(b.userData.bindPos); b.quaternion.copy(b.userData.bindQuat); }
 }
 
-// -> { layers: [{pose, bones: Set|null, allPos}], info } for a stance in 'creator' / 'idle' mode, with a mood
-export async function stanceAnimation(skeleton, stance, mode, mood) {
+// -> { layers: [{pose, bones: Set|null, allPos}], info } for a stance in 'creator' / 'idle' mode, with a mood.
+// legsFrom: another stance whose lower-body layer (Hips and legs) plays in place of this stance's.
+export async function stanceAnimation(skeleton, stance, mode, mood, legsFrom = null) {
   const stances = await loadStances();
-  const defs = mode && (stances.moods?.[skeleton]?.[stance]?.[mode]?.[mood] || stances[skeleton]?.[stance]?.[mode]);
+  let defs = mode && (stances.moods?.[skeleton]?.[stance]?.[mode]?.[mood] || stances[skeleton]?.[stance]?.[mode]);
   if (!defs?.length) return null;
+  const legs = legsFrom && stances[skeleton]?.[legsFrom]?.[mode]?.find(l => l.sequencer === 'Core_Blend_Lowerbody');
+  if (legs) defs = defs.map(l => l.sequencer === legs.sequencer ? legs : l);
   const layers = await Promise.all(defs.map(async l => ({
     pose: await loadPose(l.track), bones: l.bones.length ? new Set(l.bones.map(b => b.toLowerCase())) : null,
     allPos: l.sequencer === 'Core_Face' })));

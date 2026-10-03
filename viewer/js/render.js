@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { Character } from './character.js';
 import { loadCatalog } from './catalog.js';
 import { newPart, pickPiece } from './rules.js';
+import { setFrame } from './rig.js';
 
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -65,7 +66,9 @@ async function dress(job) {
   if (ch.rig?.helper) ch.rig.helper.visible = false;
   const bones = changes.filter(c => c.part).map(c => c.bone);
   if (!ch.parts.get(job.bone)?.mesh) throw new Error(ch.parts.get(job.bone)?.error || 'no mesh (not installed?)');
-  // stand still; let cloth settle (2 s of simulation) and the pose apply
+  // stand still; let cloth settle (2 s of simulation) and the pose apply. Wings hold the end of their flap,
+  // as in the editor (their first frame is the rest pose, folded straight back)
+  for (const sub of ch.subs()) if (ch.isWings(sub) && sub.anim) setFrame(sub, sub.anim, sub.anim.frames - 1, null, true);
   const cloth = bones.some(b => ch.parts.get(b)?.mesh?.userData.cloth);
   let now = performance.now();
   for (let i = 0; i < (cloth ? 120 : 2); i++) {
@@ -178,6 +181,7 @@ async function run() {
       if (!r.ok) throw new Error('saving failed: ' + r.status);
       const old = $('last').src; $('last').src = URL.createObjectURL(blob); if (old) URL.revokeObjectURL(old);
     } catch (e) {
+      console.error(`${job.skeleton} ${job.geometry}`, e);
       const li = document.createElement('li'); li.textContent = `${job.skeleton} ${job.geometry}: ${e.message}`; $('problems').append(li);
     }
     n++;

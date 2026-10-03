@@ -344,7 +344,10 @@ export class Character {
   async setStance(stance, mode = this.mode ?? 'idle') {
     this.doc.stance = stance; this.mode = mode;
     resetPose(this.rig);
-    this.anim = await stanceAnimation(this.doc.skeleton, stance, mode, this.doc.mood);
+    // Costume pose: the game keeps each stance's own legs under the shared upper-body pose, which looks
+    // wrong on crouched stances (Beast, Huge), so the editor always takes the legs from Average
+    const legsFrom = mode === 'creator' ? this.cat.stances.find(s => s.player && s.displayName === 'Average')?.name : null;
+    this.anim = await stanceAnimation(this.doc.skeleton, stance, mode, this.doc.mood, legsFrom);
     if (this.anim) { this.anim.start = performance.now(); this.anim.layers.forEach(l => setFrame(this.rig, l.pose, 0, l.bones, l.allPos)); }
     await Promise.all(this.subs().map(sub => this.animateSub(sub)));
     this.restartCloth();  // the pose jumps: cloth left where it was would be dragged through the body's shapes

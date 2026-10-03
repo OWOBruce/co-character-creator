@@ -6,7 +6,7 @@ import {
   isDev, regionCategory, visibleCategories, slotsFor, piecesFor, childSlots, pickPiece, pickCategory,
   materialsFor, texturesFor, partOn, isWeaponBone,
 } from './rules.js';
-import { partMaterial } from './catalog.js';
+import { drawnTexture, partMaterial } from './catalog.js';
 import {
   LINK, linkOf, palettes, slotChanges, sharedChanges, linkChanges, applyColorChanges, snapshotColors,
   openPalette, placePopup, css, DEFAULT_SHARED,
@@ -480,7 +480,7 @@ export class PartsPanel {
       for (const [kind, field] of [['Pattern', 'pattern'], ['Detail', 'detail'], ['Diffuse', 'diffuse'], ['Specular', 'specular']]) {
         const list = texturesFor(cat, mat.name, kind, this.opts).map(([n, t]) => ({ value: n, label: t.displayName || n, data: t }));
         if (!list.length) continue;
-        const cur = part[field] || mat.defaults?.[field] || '';
+        const cur = drawnTexture(cat, part, mat, field);  // what's drawn, also for a required texture left empty
         if (cur && !list.some(t => t.value === cur) && cat.textures[cur]) list.unshift({ value: cur, label: cat.textures[cur].displayName || cur, data: cat.textures[cur] });
         if (!mat.requires?.includes(field)) list.unshift({ value: '', label: '— none —', data: null });
         if (list.length < 2) continue;

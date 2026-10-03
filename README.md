@@ -43,11 +43,12 @@ The left panel has the game's three creator screens as tabs.
 - **Costume.** Pick pieces by region (head, upper body, lower body…). For the selected piece you can also set its material, pattern, colours and glow.
   - Hover over a piece in a list to preview it; press Esc to go back.
   - **Mirror left/right** keeps gloves, boots and similar pieces matched.
+  - **Try before you unlock.** Every piece in your game files is listed, including store items and pieces from lockboxes, events and perks that you can't buy right now, so you can see one on your character before spending anything on it.
   - **Hide locked** hides pieces you have to unlock. Pieces with a padlock are unlockable; a coin means a store item.
   - **Unlocks** (under the part list; gold, with a count, when something needs unlocking) lists every piece, material and pattern on the costume that needs an unlock, and how to get it: the C-Store, a lockbox, an event reward, a perk and so on, with the unlock item's name. Click one to jump to that part. It's read from the game files, so treat it as a strong hint: the editor can't see what your account owns.
 - **Body.** Height, body mass, muscle, and the face and body sliders, plus the game's body and head presets. Double-click a slider's name to reset it.
 - **Stance & Mood.** The character's stance and facial mood.
-  - **Costume pose** shows the creator's pose instead.
+  - **Costume pose** shows the creator's pose instead, standing on the Average stance's legs whatever the stance.
   - **T-pose** is handy for checking pieces.
   - While either pose is on, the stance and mood buttons are shaded; picking one switches back.
 

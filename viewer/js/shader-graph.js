@@ -237,7 +237,7 @@ export function compileTemplate(shaders, name) {
     const outs = {};
     for (const o of Object.keys(def.outputs).length ? Object.keys(def.outputs) : ['result']) { outs[o] = varOf(op, o); declared.push(outs[o]); }
     const x = {};
-    if (TEXTURE_INPUT[op.type]) { x.tex = `t${op.k}`; textures[x.tex] = { op: op.name, input: TEXTURE_INPUT[op.type] }; }
+    if (TEXTURE_INPUT[op.type]) { x.tex = `t${op.k}`; textures[x.tex] = { op: op.name, type: op.type, input: TEXTURE_INPUT[op.type] }; }
     const gen = OPS[op.type];
     const proxy = new Proxy(inputs, { get: (o, k) => o[k] ?? 'vec4(0.0)' });
     lines.push(gen ? gen(proxy, new Proxy(outs, { get: (o, k) => o[k] ?? 'coDiscard' }), x) : `// unsupported ${op.type}`);
@@ -420,4 +420,13 @@ export function shaderTextureSlots(shaders, shaderName) {
   const prog = compileTemplate(shaders, def.template);
   return Object.entries(prog.textures).map(([slot, spec]) => ({ slot, placeholder: (def.values[spec.op]?.[spec.input] || '').toLowerCase() }));
 }
-export function setGraphTexture(mat, slot, tex, fallback = WHITE) { mat.userData.graph.uniforms[slot].value = tex || fallback; }
+// TextureNormalDXT5nm's IsDXT5nm is the engine's, from the bound texture (TextureNormal_IsDXT5nm, hidden in the
+// material editor): the 1 the materials store is their placeholder's. Costume normal maps are uncompressed RGB,
+// whose missing alpha read as X tipped every normal onto the (per-triangle) tangent: faceted, dark Brushed and
+// Shiny Metal. The game's only DXT5nm texture is a DXT5 file, so a DXT5 normal map counts as one.
+export function setGraphTexture(mat, slot, tex, fallback = WHITE) {
+  const g = mat.userData.graph, t = tex || fallback, spec = g.prog.textures[slot];
+  g.uniforms[slot].value = t;
+  if (spec?.type === 'texturenormaldxt5nm')
+    setGraphValue(mat, spec.op, 'isdxt5nm', [t.isCompressedTexture && t.format === THREE.RGBA_S3TC_DXT5_Format ? 1 : 0, 0, 0, 0]);
+}

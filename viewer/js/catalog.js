@@ -45,14 +45,25 @@ export function partMaterial(cat, part) {
   return name ? { name, ...cat.materials[name] } : null;
 }
 
+// The texture a part draws for a field (pattern / diffuse / detail / specular): its own, else the material's
+// default, else, when the material requires one, its first texture of that kind. Saved costumes leave such a
+// texture empty (the Cosmic helmet's Shiny Metal: one pattern, no default) and the game draws that one.
+// Saving still writes what the part holds (file-ui.js).
+const KINDS = { pattern: 'Pattern', diffuse: 'Diffuse', detail: 'Detail', specular: 'Specular' };
+export function drawnTexture(cat, part, m, field) {
+  if (part[field]) return part[field];
+  if (m?.defaults?.[field]) return m.defaults[field];
+  if (!m?.requires?.includes(field)) return '';
+  return (m.textures || []).find(t => cat.textures[t]?.type.includes(KINDS[field])) || '';
+}
+
 // The part's textures by the placeholder each replaces in its material's shader (lower case -> image):
 // the game swaps a material's Default_Color_Mm, Default_Detail_N, M_Chest_Tight_01_N ... for the costume's
 // chosen pattern / detail / diffuse / specular textures and their extra textures (CostumeTexture OrigTexture).
 export function textureSwaps(cat, part) {
-  const m = partMaterial(cat, part) || { defaults: {} };
-  const d = m.defaults || {}, swaps = new Map();
+  const m = partMaterial(cat, part), swaps = new Map();
   for (const k of ['pattern', 'diffuse', 'detail', 'specular']) {
-    const t = cat.textures[part[k] || d[k]];
+    const t = cat.textures[drawnTexture(cat, part, m, k)];
     if (!t) continue;
     for (const e of [...t.extra, t]) if (e.replaces && e.image) swaps.set(e.replaces.toLowerCase(), e.image);
   }
@@ -64,10 +75,9 @@ export function resolvePart(cat, part) {
   const g = cat.geometries[part.geometry];
   if (!g) return null;
   const m = partMaterial(cat, part) || { defaults: {}, suppressMuscle: [0, 0, 0, 0] };
-  const d = m.defaults || {};
-  const pattern = part.pattern || d.pattern, diffuse = part.diffuse || d.diffuse, detail = part.detail || d.detail;
+  const [pattern, diffuse, detail] = ['pattern', 'diffuse', 'detail'].map(k => drawnTexture(cat, part, m, k));
   // the shader's 'Muscles' map: the pattern's own *_Muscle_N extra, else the material's default
-  const pat = pattern && cat.textures[pattern];
+  const pat = pattern ? cat.textures[pattern] : null;  // ('' when the part draws none: glass, screens)
   const muscle = pat?.extra.find(e => e.texture && /muscle/i.test(e.texture) && e.image)?.image || m.muscle || null;
   return {
     geometry: g, material: m.name || null, shader: m.shader || null, hasSkin: !!m.hasSkin, suppressMuscle: m.suppressMuscle,
