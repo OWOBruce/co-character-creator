@@ -103,16 +103,40 @@ export function placePopup(box, anchor) {
 
 export const css = c => `rgb(${c[0]},${c[1]},${c[2]})`;
 
+// ---- colour dropper ---------------------------------------------------------------------------
+// The popup's pipette takes the colour a character has at a spot, and its glow (pick.js). index.html registers
+// how: start({ unpreview(), hover(rgba|null, glow), pick(rgba, glow), cancel() }) -> stop(). It calls unpreview()
+// before each reading, so a reading is the piece's own colour, not the one being previewed on it. The glow is
+// taken only where the popup offers glow (the slot's material allows it); elsewhere just the colour.
+let dropper = null;
+export function setColourDropper(start) { dropper = start; }
+const PIPETTE = (tube, cap) => `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>`
+  + `<g stroke='#000' stroke-width='1.3' stroke-linejoin='round'><path d='M2 22l1.1-3.2 7.7-7.8 2.2 2.2-7.8 7.7z' fill='${tube}'/>`
+  + `<path d='M11.8 9.1l4.2-4.2a2.2 2.2 0 0 1 3.1 3.1l-4.2 4.3z' fill='${cap}'/><path d='M9.8 10l1.4-1.4 4.2 4.2-1.4 1.4z' fill='${cap}'/></g></svg>`;
+// the cursor while picking: a pipette, its tip (2, 22) the spot
+export const DROPPER_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(PIPETTE('#fff', '#ffd84a'))}") 2 22, copy`;
+// the nearest palette colour (a picked colour is one already, unless the costume was loaded with another)
+const nearest = (list, c) => list.reduce((best, x) => ((x[0] - c[0]) ** 2 + (x[1] - c[1]) ** 2 + (x[2] - c[2]) ** 2
+  < (best[0] - c[0]) ** 2 + (best[1] - c[1]) ** 2 + (best[2] - c[2]) ** 2 ? x : best), list[0]);
+
 // ---- palette popup ----------------------------------------------------------------------------
-// opts: { title, colors: [[r,g,b,a]], current, glow: {value, max}|null, onPreview(rgba|null, glow), onCommit(rgba, glow), onCancel() }
+// opts: { title, colors: [[r,g,b,a]], current, glow: {value, max}|null, onPreview(rgba|null, glow), onCommit(rgba, glow), onCancel(),
+//         dropper: false to leave the pipette out (skin) }
 let open = null;
-addEventListener('keydown', e => { if (e.key === 'Escape' && open) { e.preventDefault(); open.cancel(); } });
-addEventListener('mousedown', e => { if (open && !open.el.contains(e.target) && !open.anchor.contains(e.target)) open.cancel(); });
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !open) return;
+  e.preventDefault();
+  if (open.picking) open.stopPicking(true); else open.cancel();  // Esc ends picking first, then closes
+});
+// a click outside closes it, except while picking from the character
+addEventListener('mousedown', e => { if (open && !open.picking && !open.el.contains(e.target) && !open.anchor.contains(e.target)) open.cancel(); });
 
 export function openPalette(anchor, opts) {
   open?.cancel();
   const box = document.createElement('div'); box.className = 'palette';
-  const head = document.createElement('div'); head.className = 'phead'; head.textContent = opts.title || 'Colour';
+  const head = document.createElement('div'); head.className = 'phead';
+  const title = document.createElement('span'); title.textContent = opts.title || 'Colour';
+  head.append(title);
   const grid = document.createElement('div'); grid.className = 'grid';
   let glow = opts.glow?.value ?? 0, picked = null;
   const cur = nearestIndex(opts.colors, opts.current || [0, 0, 0]);
@@ -136,9 +160,35 @@ export function openPalette(anchor, opts) {
                          apply: v => { inp.value = v; glow = v; out.textContent = v; picked = opts.current; commit(false); } });
     row.append('Glow', inp, out); box.append(row);
   }
+  // the pipette, top right: take the colour a spot on the character has (not for skin)
+  let stopPick = null;
+  const stopPicking = (unpreview = false) => {
+    if (!stopPick) return;
+    stopPick(); stopPick = null; drop.classList.remove('on'); open.picking = false;
+    if (unpreview) opts.onPreview(null, glow);
+  };
+  const drop = document.createElement('button'); drop.type = 'button'; drop.className = 'dropper';
+  if (dropper && opts.dropper !== false) {
+    drop.title = 'Pick a colour from the character: click a spot to take the colour that piece has there'
+      + (opts.glow ? ', and its glow' : '') + ' (Esc stops)';
+    drop.setAttribute('aria-label', 'Pick a colour from the character');
+    drop.innerHTML = PIPETTE('currentColor', 'currentColor');
+    const glowOf = g => (opts.glow ? Math.max(0, Math.min(opts.glow.max || 10, Math.round(g || 0))) : glow);
+    drop.onclick = () => {
+      if (stopPick) { stopPicking(true); return; }
+      drop.classList.add('on'); open.picking = true;
+      stopPick = dropper({
+        unpreview: () => opts.onPreview(null, glow),
+        hover: (rgba, g) => opts.onPreview(rgba ? nearest(opts.colors, rgba) : null, rgba ? glowOf(g) : glow),
+        pick: (rgba, g) => { stopPicking(); picked = nearest(opts.colors, rgba); glow = glowOf(g); commit(); },
+        cancel: () => stopPicking(true),
+      });
+    };
+    head.append(drop);
+  }
   document.body.append(box);
   placePopup(box, anchor);
-  const close = () => { box.remove(); open = null; };
+  const close = () => { stopPicking(); box.remove(); open = null; };
   const commit = (shut = true) => { opts.onCommit(picked, glow); if (shut) close(); };
-  open = { el: box, anchor, cancel: () => { close(); opts.onCancel(); } };
+  open = { el: box, anchor, picking: false, stopPicking, cancel: () => { close(); opts.onCancel(); } };
 }

@@ -15,7 +15,7 @@ import { Bouncers } from './bouncers.js';
 import { ClothSim } from './cloth.js';
 import { GameClothSim } from './cloth-game.js';
 import { Wind } from './wind.js';
-import { isWeaponBone } from './rules.js';
+import { isLeftOutBone } from './rules.js';
 import { buildRig, resetPose, setFrame, stanceAnimation, loadPose, computeBody, applyBodyMatrices } from './rig.js';
 
 const meshCache = new Map();     // url|model -> Promise<decoded mesh>
@@ -213,7 +213,7 @@ export class Character {
     if (part) { part = { ...part, bone }; if (i >= 0) this.doc.parts[i] = part; else this.doc.parts.push(part); }
     else if (i >= 0) this.doc.parts.splice(i, 1);
     if (!part) { this.removeMesh(bone); return; }
-    if (isWeaponBone(this.cat, bone)) { this.removeMesh(bone); return; }  // kept in the document, not drawn
+    if (isLeftOutBone(this.cat, bone)) { this.removeMesh(bone); return; }  // kept in the document, not drawn
     const res = resolvePart(this.cat, part);
     if (!res?.mesh) { this.removeMesh(bone); this.parts.set(bone, { part, res, mesh: null }); return; }
     try {

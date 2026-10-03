@@ -296,7 +296,7 @@
   /* pop-ups */
   .picker, .palette { position:fixed; z-index:10; border:8px solid transparent; border-image:url(ui/panel_dark.png) 8 fill / 8px stretch;
                       filter: drop-shadow(0 8px 18px #000a); }
-  .picker { width:320px; max-height:410px; display:flex; flex-direction:column; }
+  .picker { width:320px; max-height:min(410px, calc(100vh - 32px)); display:flex; flex-direction:column; }  /* 32: its border and 8 px above and below */
   .picker input { margin:4px; padding:3px 7px; color:var(--text); font:700 13px var(--body); outline:none;
                   border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
   .picker .list { overflow:auto; padding:0 2px 4px; scrollbar-color:#3d7fdc #0c2046; }
@@ -307,7 +307,11 @@
   .picker .item.missing { opacity:.45; }
   .palette { padding:4px; }
   .palette .phead { font:19px var(--title); letter-spacing:.8px; margin:0 2px 6px; color:var(--gold);
-                    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+                    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+                    display:flex; align-items:center; gap:6px; }
+  /* the colour dropper (colors.js): top right of a colour popup */
+  .palette .phead .dropper { margin-left:auto; padding:1px 3px; line-height:0; border-width:4px; }
+  .palette .phead .dropper svg { width:18px; height:18px; display:block; }
   .palette .grid { display:grid; grid-template-columns: repeat(19, 16px); gap:2px; }
   .palette .sw { width:16px; height:16px; padding:0; border:1px solid #000; border-radius:3px; border-image:none; }
   .palette .sw:hover { outline:2px solid var(--gold); z-index:1; border-image:none; }
@@ -412,7 +416,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Character } from './js/character.js';
 import { loadShared, loadCatalog } from './js/catalog.js';
-import { newPart, isWeaponBone } from './js/rules.js';
+import { newPart, isLeftOutBone } from './js/rules.js';
 import { PartsPanel } from './js/parts-panel.js';
 import { BodyPanel } from './js/body-panel.js';
 import { setupFiles } from './js/file-ui.js';
@@ -422,6 +426,8 @@ import { openSheetDialog } from './js/sheet.js';
 import { setupAbout } from './js/about.js';
 import { HeightRuler } from './js/ruler.js';
 import { CompareFigure } from './js/compare.js';
+import { setColourDropper, DROPPER_CURSOR } from './js/colors.js';
+import { pickColour } from './js/pick.js';
 import { setGameLighting, turnLighting, getSun, setSun, lightingReady } from './js/shader-graph.js';
 import { backdrop, applyBackdrop, TAILOR_BLUE } from './js/backdrop.js';
 
@@ -479,6 +485,36 @@ renderer.setAnimationLoop(now => {
   } catch (e) { console.error(e); }
 });
 
+// ---- colour dropper (a colour popup's pipette, colors.js): over the character view only, a pipette cursor;
+// hovering previews the colour the piece under it has at that spot, with its glow (pick.js); a click takes it. The camera
+// stays still meanwhile. Clicking where there's nothing to take (background, skin) keeps picking.
+setColourDropper(({ unpreview, hover, pick }) => {
+  const canvas = renderer.domElement;
+  let frame = 0, last = null;
+  const at = e => { unpreview(); return pickColour(renderer, scene, camera, [ch, compare.loaded ? compare.ch : null], e.clientX, e.clientY); };
+  const move = e => { last = e; frame ||= requestAnimationFrame(() => { frame = 0; const c = at(last); hover(c?.rgba || null, c?.glow); }); };
+  const down = e => {
+    if (e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    const c = at(e);
+    if (c) pick(c.rgba, c.glow); else hover(null);
+  };
+  const leave = () => { cancelAnimationFrame(frame); frame = 0; hover(null); };
+  controls.enabled = false;
+  canvas.style.cursor = DROPPER_CURSOR;
+  canvas.addEventListener('pointermove', move);
+  canvas.addEventListener('pointerdown', down, true);
+  canvas.addEventListener('pointerleave', leave);
+  return () => {
+    cancelAnimationFrame(frame);
+    controls.enabled = true;
+    canvas.style.cursor = '';
+    canvas.removeEventListener('pointermove', move);
+    canvas.removeEventListener('pointerdown', down, true);
+    canvas.removeEventListener('pointerleave', leave);
+  };
+});
+
 
 // ---- costume loading ----------------------------------------------------------------------------
 async function open(doc) {
@@ -517,7 +553,7 @@ async function updateCompare() {
 }
 function showStatus(prefix) {
   const shown = [...ch.parts.values()].filter(p => p.mesh).length;
-  const missing = ch.doc.parts.filter(p => !isWeaponBone(ch.cat, p.bone)).length - shown;  // weapons aren't drawn
+  const missing = ch.doc.parts.filter(p => !isLeftOutBone(ch.cat, p.bone)).length - shown;  // weapons and the bike aren't drawn
   status.textContent = `${prefix} · ${shown} parts${missing ? ` (${missing} not installed)` : ''} · ${ch.doc.skeleton}`;
 }
 // The character as drawn: sampled skinned vertices with the body sliders applied (height, leg length...).

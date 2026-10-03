@@ -159,11 +159,11 @@ const OPS = {
   colortint4b: (i, o) => `{ vec4 t = ${i.tintcolormap}, d = ${i.diffuse}; float w0 = clamp(1.0 - dot(t.xyz, vec3(1.0)), 0.0, 1.0);
     vec4 r = w0 * ${i.color0} + t.x * ${i.color1} + t.y * ${i.color2} + t.z * ${i.color3};
     r = mix(vec4(1.0), r, ${i.tintmask}); ${o.result} = vec4((d * r).xyz, d.w);
-    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coHasRegion = true; } }`,
+    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coSlot = coRegionSlot(t, ${i.tintmask}.x); coHasRegion = true; } }`,
   colortint4b_ignorealpha: (i, o) => `{ vec4 t = ${i.tintcolormap}, d = ${i.diffuse}; float w0 = clamp(1.0 - dot(t.xyz, vec3(1.0)), 0.0, 1.0);
     vec3 r = w0 * ${i.color0}.xyz + t.x * ${i.color1}.xyz + t.y * ${i.color2}.xyz + t.z * ${i.color3}.xyz;
     r = mix(vec3(1.0), r, ${i.tintmask}.xyz); ${o.result} = vec4(d.xyz * r, 1.0);
-    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coHasRegion = true; } }`,
+    if (!coHasRegion) { coRegion = coRegionColour(t, ${i.tintmask}.x); coSlot = coRegionSlot(t, ${i.tintmask}.x); coHasRegion = true; } }`,
   lightbleedtransform: (i, o) => `{ float l = ${i.lightbleed}.x; float y = 1.0 / (1.0 + l); ${o.result} = vec4(y * l, y, y, y); }`,
   fresnelterm_advanced: (i, o) => `{ float d = dot(coTS(${i.normal}.xyz), coView); ${o.result} = vec4(pow(clamp(1.0 - abs(d), 0.0, 1.0), ${i.tightness}.x)); }`,
   specular: (i, o) => `${o.speccolor} = ${i.specularcolor}; ${o.specexponent} = vec4(${i.specularexponent}.x);`,
@@ -289,7 +289,7 @@ export function createGraphMaterial(shaders, shaderName) {
   const u = {
     coTime: graphTime, coColor0: { value: new THREE.Vector4(1, 1, 1, 1) }, coTint: { value: new THREE.Vector4(1, 1, 1, 1) },
     coEnv: ENV, ...LIGHT,
-    coRawMask: { value: false }, coNormals: { value: true },
+    coRawMask: { value: false }, coNormals: { value: true }, coPick: { value: 0 },  // coPick: the colour dropper (pick.js)
   };
   for (const [name, spec] of Object.entries(prog.uniforms)) {
     const v = def.values[spec.op]?.[spec.input];
@@ -304,13 +304,13 @@ export function createGraphMaterial(shaders, shaderName) {
     const noNormals = mat.userData.graph.noNormals;
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform float coTime; uniform vec4 coColor0, coTint; uniform samplerCube coEnv; uniform bool coRawMask;
+        uniform float coTime, coPick; uniform vec4 coColor0, coTint; uniform samplerCube coEnv; uniform bool coRawMask;
         uniform bool coGame; uniform float coExposure; uniform vec2 coTurn; uniform vec3 coSunDir, coAmbient, coSky, coGround, coSide, coKey,
           coSecondary, coSpecLight, coBacklight;
         ${prog.uniformDecl}
         vec3 coSRGBToLinear( vec3 c ) { c = max(c, 0.0); return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }
         vec3 coLit; float coAlpha; vec3 coSpecColor; float coSpecExp;
-        vec3 coRegion; bool coHasRegion;  // Colour regions: the first colour tint's (REGION_GLSL)
+        vec3 coRegion; bool coHasRegion; float coSlot;  // Colour regions and the dropper: the first colour tint's (REGION_GLSL)
         ${REGION_GLSL}`)
       .replace('#include <map_fragment>', '')
       .replace('#include <normal_fragment_maps>', `
@@ -340,7 +340,7 @@ export function createGraphMaterial(shaders, shaderName) {
         coAlbedo *= coTint.rgb; coUnlit *= coTint.rgb; coAlpha *= coTint.a;
         // Colour regions: flat, lit for the shape, no glow or reflection. A template without costume colours
         // (the Fx materials) is tinted whole by colour 1.
-        ${prog.usesColors ? '' : 'coRegion = coRegionColour( vec4( 0.0 ), 1.0 ); coHasRegion = true;'}
+        ${prog.usesColors ? '' : 'coRegion = coRegionColour( vec4( 0.0 ), 1.0 ); coSlot = 0.0; coHasRegion = true;'}
         if ( coRawMask && coHasRegion ) { coAlbedo = coRegion; coUnlit = vec3( 0.0 ); }
         diffuseColor = vec4( coSRGBToLinear( coAlbedo ), coAlpha );
         totalEmissiveRadiance += coSRGBToLinear( coUnlit );
@@ -370,7 +370,10 @@ export function createGraphMaterial(shaders, shaderName) {
           c += coBacklight * ( 0.35 + coAlbedo ) * clamp( -dot( N, V ) * co_backlightbleed.y + co_backlightbleed.x, 0.0, 1.0 );` : ''}
           outgoingLight = coSRGBToLinear( c * coExposure );
         }
-        #include <opaque_fragment>`);
+        #include <opaque_fragment>`)
+      // a template without a colour tint has no slots: 5, nothing to take
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+        CO_PICK_OUTPUT( coHasRegion ? coSlot : 5.0 )`);
   };
   return mat;
 }

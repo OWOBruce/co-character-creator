@@ -11,11 +11,11 @@
 export const DEV_NAME = /^\s*(NPC|UNUSED|SCALE TEST|DEPRECATED)\b/i;
 export const isDev = x => DEV_NAME.test(x?.displayName || '');
 
-// Weapons are left out of the editor: the Weapons region and the 'Attachment Weapon' slots (sheathed
-// weapons on the back / hips). A costume's weapon parts are kept in the document (so saving a loaded
-// costume keeps them) but not offered or drawn.
-export function isWeaponBone(cat, bone) {
-  return cat.bones[bone]?.region === 'Weapons' || /_Weapon_(Melee|Ranged)$/i.test(bone);
+// Left out of the editor: weapons (the Weapons region and the 'Attachment Weapon' slots: sheathed weapons on
+// the back / hips) and the vehicle bike (the Vehicle Bike Attachpoint slot and its attachments). A costume's
+// parts there are kept in the document (so saving a loaded costume keeps them) but not offered or drawn.
+export function isLeftOutBone(cat, bone) {
+  return cat.bones[bone]?.region === 'Weapons' || /_Weapon_(Melee|Ranged)$|_Vehicle_Attach/i.test(bone);
 }
 
 export function regionOf(cat, name) { return cat.regions.find(r => r.name === name); }
@@ -62,7 +62,7 @@ export function piecesFor(cat, bone, category, opts = {}) {
 export function slotsFor(cat, region, category, opts = {}) {
   const def = categoryDef(cat, category), req = requiredBones(cat, category);
   return Object.entries(cat.bones)
-    .filter(([name, b]) => b.region === region.name && !b.isChild && (b.restrictedTo & 12) && !isWeaponBone(cat, name)
+    .filter(([name, b]) => b.region === region.name && !b.isChild && (b.restrictedTo & 12) && !isLeftOutBone(cat, name)
             && !def?.excludedBones.includes(name)
             && (req.has(name) || piecesFor(cat, name, category, opts).length))
     .sort((a, b) => a[1].order - b[1].order)
@@ -72,7 +72,7 @@ export function slotsFor(cat, region, category, opts = {}) {
 // Child slots a piece brings: [{bone, def (bone), options: [[name, geo]], required, default}]
 export function childSlots(cat, geometry, opts = {}) {
   const g = cat.geometries[geometry];
-  return (g?.childGeos || []).filter(c => cat.bones[c.bone] && !isWeaponBone(cat, c.bone)).map(c => ({
+  return (g?.childGeos || []).filter(c => cat.bones[c.bone] && !isLeftOutBone(cat, c.bone)).map(c => ({
     bone: c.bone, def: cat.bones[c.bone], required: c.required, default: c.default,
     options: c.options.filter(n => cat.geometries[n] && (opts.showDev || !isDev(cat.geometries[n])) && !(opts.hideLocked && cat.geometries[n].availability === 'unlock'))
       .map(n => [n, cat.geometries[n]]),

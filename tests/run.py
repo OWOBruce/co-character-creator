@@ -86,8 +86,8 @@ def catalog(sk):
     return json.load(open(os.path.join(DATA, 'catalog', sk + '.json'), encoding='utf-8'))
 
 
-def is_weapon_bone(cat, bone):  # as viewer/js/rules.js
-    return (cat['bones'].get(bone) or {}).get('region') == 'Weapons' or re.search(r'_Weapon_(Melee|Ranged)$', bone, re.I)
+def is_left_out_bone(cat, bone):  # weapons and the vehicle bike, as viewer/js/rules.js isLeftOutBone
+    return (cat['bones'].get(bone) or {}).get('region') == 'Weapons' or re.search(r'_Weapon_(Melee|Ranged)$|_Vehicle_Attach', bone, re.I)
 
 
 def model_index(models, hint):  # as MSet.modelIndex in viewer/js/mset.js
@@ -170,7 +170,7 @@ def player_meshes():
     for sk in ('Male', 'Female'):
         cat = catalog(sk)
         for n, g in cat['geometries'].items():
-            if g.get('mesh') and not is_weapon_bone(cat, g['bone']):
+            if g.get('mesh') and not is_left_out_bone(cat, g['bone']):
                 out.append((sk, n, g['mesh'], (g.get('model') or '').split('.')[-1]))
     return out
 
@@ -286,7 +286,7 @@ def t_placement(fail, note):
         cat = catalog(sk)
         bind = bind_positions(rig_data.skeleton_json(sk)[0]['bones'])
         for n, g in cat['geometries'].items():
-            if not g.get('mesh') or g.get('subSkeleton') or is_weapon_bone(cat, g['bone']):
+            if not g.get('mesh') or g.get('subSkeleton') or is_left_out_bone(cat, g['bone']):
                 continue
             base = os.path.splitext(os.path.basename(g['mesh']))[0]
             h = headers.get(f'{base}.{g.get("model")}'.lower()) or headers.get((g.get('model') or '').lower())

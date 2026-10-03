@@ -45,8 +45,9 @@ def load(name):
     return json.load(open(os.path.join(DATA, name + '.json'), encoding='utf-8'))
 
 
-def is_weapon_bone(cat, bone):
-    return (cat['bones'].get(bone) or {}).get('region') == 'Weapons' or re.search(r'_Weapon_(Melee|Ranged)$', bone, re.I)
+def is_left_out_bone(cat, bone):
+    """Weapons and the vehicle bike, which the editor leaves out (viewer/js/rules.js isLeftOutBone)."""
+    return (cat['bones'].get(bone) or {}).get('region') == 'Weapons' or re.search(r'_Weapon_(Melee|Ranged)$|_Vehicle_Attach', bone, re.I)
 
 
 def name_of(x, fallback):
@@ -381,7 +382,7 @@ def main():
                      'defaultMaterial': g.get('defaultMaterial'), 'materials': mats,
                      'children': [{'bone': c['bone'], 'required': c.get('required'), 'default': c.get('default'),
                                    'options': [o for o in c.get('options', []) if o in G and usable(o, G[o])]}
-                                  for c in g.get('childGeos', []) if not is_weapon_bone(cat, c['bone'])],
+                                  for c in g.get('childGeos', []) if not is_left_out_bone(cat, c['bone'])],
                      'cloth': bool(g.get('cloth'))}
             if 'hair' in g['bone'].lower():
                 entry['hair'] = hair_length(fs, g, lm)
@@ -446,12 +447,12 @@ def main():
                                  if not c.get('hidden') and not DEV.search(c.get('displayName') or '')), '']
             r_dir = os.path.join(sk_dir, slug(region['displayName']))
             slots = sorted(((b, d) for b, d in B.items() if d.get('region') == region['name'] and not d.get('isChild')
-                            and (d.get('restrictedTo', 0) & 12) and not is_weapon_bone(cat, b)),
+                            and (d.get('restrictedTo', 0) & 12) and not is_left_out_bone(cat, b)),
                            key=lambda x: x[1].get('order', 0))
             for bone, bd in slots:
                 pieces = sorted(((n, g) for n, g in G.items() if g['bone'] == bone and not g.get('isChild') and usable(n, g)),
                                 key=lambda x: (x[1].get('order', 0), x[1].get('displayName') or ''))
-                kids = [c for c in bd.get('children', []) if not is_weapon_bone(cat, c)]
+                kids = [c for c in bd.get('children', []) if not is_left_out_bone(cat, c)]
                 kid_pieces = {c: sorted(((n, g) for n, g in G.items() if g['bone'] == c and usable(n, g)),
                                         key=lambda x: (x[1].get('order', 0), x[1].get('displayName') or '')) for c in kids}
                 if not pieces and not any(kid_pieces.values()):

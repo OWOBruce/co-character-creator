@@ -11,7 +11,7 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 - **Windows**, with **Champions Online** installed (Steam or Arc).
 - About **320 MB** of free space: the editor itself, plus the data it builds from your game.
 - An **internet connection** while the editor is open: the page loads its 3D engine and fonts from the web (see [Dependencies](#dependencies)).
-- Microsoft Edge (part of Windows) or Google Chrome, for the editor's own window. Any other browser works too.
+- A modern web browser with WebGL; any up-to-date one works. Microsoft Edge (part of Windows) or Google Chrome is recommended: with either, the editor opens in its own window, without tabs or an address bar. With another browser it opens in a normal tab.
 - Nothing else to install: the program carries everything else it needs.
 
 ## Starting it
@@ -43,6 +43,7 @@ The left panel has the game's three creator screens as tabs.
 
 - **Costume.** Pick pieces by region (head, upper body, lower body…). For the selected piece you can also set its material, pattern, colours and glow.
   - Hover over a piece in a list to preview it; press Esc to go back.
+  - **Take a colour from the character:** in a colour box, click the pipette (top right), then click any spot on the character. You get the colour that piece has there, not the pixel's shade under the lights, whichever of its colours that is, and its glow too when the colour you're setting can glow. Hovering previews it; Esc stops. It works on a character shown with **Compare with**, too. Skin is left out.
   - **Mirror left/right** keeps gloves, boots and similar pieces matched.
   - **Try before you unlock.** Every piece in your game files is listed, including store items and pieces from lockboxes, events and perks that you can't buy right now, so you can see one on your character before spending anything on it.
   - **Hide locked** hides pieces you have to unlock. Pieces with a padlock are unlockable; a coin means a store item.
@@ -116,7 +117,7 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 
 ## Limits
 
-- Weapons aren't offered. A loaded costume keeps its weapons when you save it.
+- Weapons and the vehicle bike aren't offered. A loaded costume keeps them when you save it.
 - The preview is close to the game but not identical:
   - see-through effects and glow are approximations, and there's no bloom;
   - custom reflection and shine settings saved in a costume are kept but not shown yet.

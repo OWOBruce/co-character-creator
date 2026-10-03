@@ -20,7 +20,16 @@ export const REGION_GLSL = /* glsl */`
     float w0 = clamp( 1.0 - dot( t.xyz, vec3( 1.0 ) ), 0.0, 1.0 );
     vec3 c = w0 * vec3( 1.0, 0.82, 0.12 ) + t.x * vec3( 0.92, 0.16, 0.16 ) + t.y * vec3( 0.16, 0.78, 0.22 ) + t.z * vec3( 0.16, 0.38, 1.0 );
     return mix( vec3( 0.5 ), c, tinted );
-  }`;
+  }
+  // the colour dropper (pick.js): the slot most of this spot takes, 0-3, or 4 where the mask leaves the texture's colour
+  float coRegionSlot( vec4 t, float tinted ) {
+    if ( tinted < 0.5 ) return 4.0;
+    vec4 w = vec4( clamp( 1.0 - dot( t.xyz, vec3( 1.0 ) ), 0.0, 1.0 ), t.xyz );
+    float m = max( max( w.x, w.y ), max( w.z, w.w ) );
+    return w.x >= m ? 0.0 : w.y >= m ? 1.0 : w.z >= m ? 2.0 : 3.0;
+  }
+  // in pick mode (coPick: the piece's number) a spot writes which piece and slot it is instead of its colour
+  #define CO_PICK_OUTPUT( slot ) if ( coPick > 0.0 ) gl_FragColor = vec4( coPick / 255.0, ( slot ) / 255.0, 0.0, 1.0 );`;
 
 export const DEFAULTS = {
   mask: pixelTexture(0, 0, 0, 255),       // all Colour0, fully tinted
@@ -60,6 +69,7 @@ export function createCostumeMaterial() {
     coColor: { value: [0, 1, 2, 3].map(() => new THREE.Color(1, 1, 1)) },
     coHasMask: { value: false },
     coRawMask: { value: false },
+    coPick: { value: 0 },  // the colour dropper's pick mode (pick.js)
     coDiffuse: { value: DEFAULTS.diffuse },
     coMuscle: { value: DEFAULTS.normal },
     coHasMuscle: { value: false },
@@ -72,11 +82,13 @@ export function createCostumeMaterial() {
     Object.assign(shader.uniforms, u);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform vec3 coColor[4]; uniform bool coHasMask, coRawMask, coHasMuscle;
+        uniform vec3 coColor[4]; uniform bool coHasMask, coRawMask, coHasMuscle; uniform float coPick;
         uniform sampler2D coDiffuse, coMuscle; uniform vec4 coMuscleWeight;
         vec3 coSRGBToLinear( vec3 c ) { return mix( c / 12.92, pow( ( c + 0.055 ) / 1.055, vec3( 2.4 ) ), step( 0.04045, c ) ); }
         ${REGION_GLSL}`)
-      .replace('#include <map_fragment>', MAP_FRAGMENT);
+      .replace('#include <map_fragment>', MAP_FRAGMENT)
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+ CO_PICK_OUTPUT( coRegionSlot( coMask, coMask.a ) )`);
     const line = 'vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;';
     const chunk = THREE.ShaderChunk.normal_fragment_maps;
     if (!chunk.includes(line)) throw new Error('three.js normal chunk changed');

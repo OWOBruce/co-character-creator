@@ -197,6 +197,8 @@ class Checker:
                 self.add('info', where, f'"{g.get("displayName")}" has to be unlocked in the game')
             if (B.get(bone) or {}).get('region') == 'Weapons' or re.search(r'_Weapon_(Melee|Ranged)$', bone, re.I):
                 self.add('warning', where, 'weapons are kept in the costume but the editor doesn\'t show them')
+            elif re.search(r'_Vehicle_Attach', bone, re.I):
+                self.add('warning', where, 'the vehicle bike is kept in the costume but the editor doesn\'t show it')
             if bone in bones_seen:
                 self.add('error', where, f'{bone} already has {bones_seen[bone]}; a slot holds one piece')
                 continue

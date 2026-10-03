@@ -4,7 +4,7 @@
 // pattern/detail/diffuse textures, colours and child attachments.
 import {
   isDev, regionCategory, visibleCategories, slotsFor, piecesFor, childSlots, pickPiece, pickCategory,
-  materialsFor, texturesFor, partOn, isWeaponBone,
+  materialsFor, texturesFor, partOn, isLeftOutBone,
 } from './rules.js';
 import { drawnTexture, partMaterial } from './catalog.js';
 import {
@@ -129,7 +129,7 @@ export class PartsPanel {
   }
   skinPalette(anchor) {
     openPalette(anchor, {
-      title: 'Skin', colors: this.pal.skin, current: this.doc.skin, glow: null,
+      title: 'Skin', colors: this.pal.skin, current: this.doc.skin, glow: null, dropper: false,
       onPreview: rgba => this.setSkin(rgba, false), onCommit: rgba => this.setSkin(rgba, true), onCancel: () => this.setSkin(null, false),
     });
   }
@@ -250,13 +250,12 @@ export class PartsPanel {
     const list = el('div', 'list');
     box.append(search, list);
     document.body.append(box);
-    placePopup(box, anchor);
     let rows = [], active = -1, previewTimer = null;
     const preview = v => {
       clearTimeout(previewTimer);
       previewTimer = setTimeout(() => this.apply(changes(v), { preview: true }), 60);
     };
-    const draw = () => {
+    const draw = (scroll = true) => {
       const q = search.value.trim().toLowerCase();
       list.innerHTML = ''; rows = [];
       for (const it of items) {
@@ -271,13 +270,13 @@ export class PartsPanel {
         list.append(row); rows.push(row);
       }
       active = rows.findIndex(r => r.dataset.value === current);
-      mark(true);
+      mark(scroll);
     };
     const mark = scroll => rows.forEach((r, i) => { r.classList.toggle('active', i === active); if (scroll && i === active) r.scrollIntoView({ block: 'center' }); });
     const close = () => { clearTimeout(previewTimer); box.remove(); this.picker = null; };
     const done = async v => { close(); await this.apply(changes(v)); };
     list.onmouseleave = () => { clearTimeout(previewTimer); this.revert(); };
-    search.oninput = draw;
+    search.oninput = () => draw();
     this.picker = {
       el: box,
       cancel: () => { close(); this.revert(); },
@@ -289,7 +288,10 @@ export class PartsPanel {
         } else if (e.key === 'Enter' && rows[active]) { e.preventDefault(); done(rows[active].dataset.value); }
       },
     };
-    draw();
+    // placed once it's filled: placed while empty, it fitted, then the rows ran off the bottom of the window
+    draw(false);
+    placePopup(box, anchor);
+    mark(true);
     search.focus();
   }
 
@@ -375,7 +377,7 @@ export class PartsPanel {
                  unlockedBy: x.unlockedBy || [], unlocks: (x.unlockedBy || []).map(i => this.unlocks[i]).filter(Boolean) });
     };
     for (const part of doc.parts) {
-      if (isWeaponBone(cat, part.bone)) continue;  // kept from the file but not shown or edited here
+      if (isLeftOutBone(cat, part.bone)) continue;  // kept from the file but not shown or edited here
       const g = cat.geometries[part.geometry];
       add('Piece', g && { ...g, name: part.geometry }, part);
       add('Material', partMaterial(cat, part), part);

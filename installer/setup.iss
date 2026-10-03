@@ -47,7 +47,9 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
-CloseApplications=yes
+; the editor has no window of its own (the one players see is Edge's), so Windows can't ask it to close and
+; "yes" fails with "unable to close"; force ends it once the player agrees (it keeps nothing unsaved)
+CloseApplications=force
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
