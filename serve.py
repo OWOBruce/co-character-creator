@@ -21,7 +21,10 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
                 (then wherever the last file came from); answers the chosen file's bytes (X-File-Name: its name,
                 URL-encoded) or {"cancelled": true}
 /api/alive, /api/bye -> POST {"id"}: an editor page is open / has closed (for --quit-when-closed)
-/api/settings -> POST {"account"}: remember the account name for saved costumes in settings.json
+/api/settings -> POST {"account"} and/or {"checkUpdates"}: remember the account name for saved costumes, or
+                whether to look for new versions, in settings.json
+/api/update  -> GET: the newest release on GitHub {"version", "url"}, asked at most once a day, or {"off": true}
+                when Settings turns the check off (latest_release)
 /api/source  -> GET: the game folder in use, what was found, the saved account and the state of the editor's data (build);
                 POST {"path"}: use another folder; POST {"browse": true}: open a folder picker on this
                 machine and use what's chosen.
@@ -290,6 +293,36 @@ def gzipped(path, mtime):
         return gzip.compress(f.read(), 6)
 
 
+RELEASES = 'https://api.github.com/repos/codexheroes/co-character-creator/releases/latest'
+RELEASE_LOCK = threading.Lock()
+
+
+def latest_release():
+    """The newest published release, for the page's "new version" notice: {'version', 'url', 'checked'}.
+    GitHub is asked at most once a day; the answer is kept in settings.json (latestRelease), which also
+    answers when GitHub can't be reached (then asked again in an hour). {'off': True} when Settings turns
+    checking off (checkUpdates false). Nothing about the player or their costumes is sent."""
+    import time
+    import urllib.request
+    if load_settings().get('checkUpdates') is False:
+        return {'off': True}
+    with RELEASE_LOCK:
+        known = load_settings().get('latestRelease') or {}
+        if time.time() - known.get('checked', 0) < 86400:
+            return known
+        try:
+            req = urllib.request.Request(RELEASES, headers={'Accept': 'application/vnd.github+json',
+                                                            'User-Agent': 'CO-Costume-Editor'})
+            rel = json.loads(urllib.request.urlopen(req, timeout=5).read())
+            known = {'version': rel['tag_name'].lstrip('vV'), 'url': rel['html_url'], 'checked': time.time()}
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            known = {**known, 'checked': time.time() - 86400 + 3600}
+        s = load_settings()
+        s['latestRelease'] = known
+        save_settings(s)
+        return known
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
                       '.js': 'text/javascript', '.json': 'application/json', '.mset': 'application/octet-stream',
@@ -322,7 +355,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if clean == '/api/source':
             settings = load_settings()
             self.send_json({**SOURCE.info(), 'found': candidates(), 'saved': settings.get('gameFolder'),
-                            'account': settings.get('account', '')})
+                            'account': settings.get('account', ''), 'checkUpdates': settings.get('checkUpdates') is not False})
+            return None
+        if clean == '/api/update':
+            self.send_json(latest_release())
             return None
         if clean == '/api/test/costume-files':
             self.send_json(list(saved_costumes()))
@@ -464,13 +500,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_json({'ok': True})
             self.wfile.write(self._body)
             return
-        if path == '/api/settings':  # {"account"}: kept in settings.json, so every browser and window gets it
-            account = str(req.get('account', '')).strip().lstrip('@')[:64]
-            s = load_settings()
-            if s.get('account', '') != account:
-                s['account'] = account
+        if path == '/api/settings':  # {"account"}, {"checkUpdates"}: kept in settings.json, so every browser and window gets them
+            s, out = load_settings(), {'ok': True}
+            if 'account' in req:
+                out['account'] = str(req.get('account') or '').strip().lstrip('@')[:64]
+            if 'checkUpdates' in req:
+                out['checkUpdates'] = bool(req['checkUpdates'])
+            changed = {k: v for k, v in out.items() if k != 'ok' and s.get(k, '' if k == 'account' else True) != v}
+            if changed:
+                s.update(changed)
                 save_settings(s)
-            self.send_json({'ok': True, 'account': account})
+            self.send_json(out)
             self.wfile.write(self._body)
             return
         if path == '/api/file/open':  # Load: a native Open dialog, answered with the chosen file

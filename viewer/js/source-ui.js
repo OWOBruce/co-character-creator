@@ -1,10 +1,12 @@
-// Settings: the game folder the server reads meshes and textures from (serve.py /api/source), and the
-// account name written into saved costume files (kept in the browser, file-ui.js). Shows the
+// Settings: the game folder the server reads meshes and textures from (serve.py /api/source), the
+// account name written into saved costume files (kept in the browser, file-ui.js), and whether to look for
+// new versions (about.js; kept in settings.json, on unless turned off). Shows the
 // folder in use and lets the player pick another, with the server's folder picker or by typing a path.
 // A change reloads the page, since every loaded mesh and texture came from the old folder.
 // With no usable folder there is nothing to draw with (even the editor's art comes from the game), so the
 // page shows a welcome screen that asks for the folder instead (firstRun).
 import { savedAccount } from './file-ui.js';
+import { checkForUpdate, clearUpdate } from './about.js';
 
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
 
@@ -87,6 +89,18 @@ export async function setupSettings(button, opts = {}) {
     acc.onkeydown = e => { if (e.key === 'Escape' || e.key === 'Enter') box.remove(); };
     const accRow = el('div', 'gfRow'); accRow.append(acc);
     accSec.append(accRow, el('div', 'gfState', 'Saved costume files carry your account name. Save asks for the character name.'));
+    // new versions: serve.py asks GitHub at most once a day (/api/update), about.js shows a newer one
+    const updSec = el('div', 'gameFolder'), updLabel = el('label', 'gfCheck'), upd = el('input');
+    upd.type = 'checkbox'; upd.checked = info.checkUpdates !== false;
+    updLabel.append(upd, "Tell me when there's a new version");
+    upd.onchange = async () => {
+      info.checkUpdates = upd.checked;
+      await fetch('api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ checkUpdates: upd.checked }) }).catch(() => {});
+      if (upd.checked) checkForUpdate(); else clearUpdate();
+    };
+    updSec.append(el('div', 'gfLabel', 'Updates'), updLabel,
+      el('div', 'gfState', 'Once a day the editor asks GitHub which version is the newest. It sends nothing else: no costumes, settings or game details.'));
     // a picture of the current character from four sides (sheet.js), when the page provides it
     const sheetSec = el('div', 'gameFolder');
     if (opts.exportSheet) {
@@ -97,7 +111,7 @@ export async function setupSettings(button, opts = {}) {
     }
     const foot = el('div', 'row'), close = el('button', null, 'Close'); close.type = 'button';
     foot.append(close);
-    box.append(sec, accSec, ...(opts.exportSheet ? [sheetSec] : []), foot);
+    box.append(sec, accSec, updSec, ...(opts.exportSheet ? [sheetSec] : []), foot);
     document.body.append(box);
     const r = button.getBoundingClientRect();
     box.style.left = Math.max(8, Math.min(r.left, innerWidth - box.offsetWidth - 8)) + 'px';

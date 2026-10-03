@@ -20,7 +20,8 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
    - Windows may say **"Windows protected your PC"**, because the installer isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
    - It installs into `C:\Program Files\CO Costume Editor` (Windows asks for admin rights), or, if you choose **Install for me only**, into your own `%LOCALAPPDATA%\Programs` without them. It adds the editor to the Start menu (and the desktop, if you tick that box).
    - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
-   - To update, run a newer installer: it keeps that data. Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
+   - To update, run a newer installer. It says which version you have and offers to update it, in the same folder with the same choices, and keeps that data. (It asks first before reinstalling the same version or putting an older one over a newer one.) Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
+   - The editor tells you when a new version is out: the version number in the bottom-right corner says so, the **About** button gets a gold dot, and **About** has the download link. Turn this off in **Settings** → **Updates**.
    - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`CO Costume Editor.exe`**.
 2. Start **CO Costume Editor** from the Start menu (the installer can start it for you the first time).
 3. The editor opens in its own window (Microsoft Edge or Google Chrome with no tabs or address bar; without either, your normal browser).
@@ -129,7 +130,7 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 
 ## Privacy
 
-Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above. Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
+Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above, and, at most once a day, the number of the newest release from GitHub, so the editor can tell you about updates (nothing else is sent: no costumes, settings or game details; turn it off in **Settings** → **Updates**). Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
 
 ## Feedback and source code
 
