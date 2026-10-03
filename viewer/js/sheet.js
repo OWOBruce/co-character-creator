@@ -1,14 +1,15 @@
 // Character sheet: a 3840x2160 (16:9) PNG of the current character. Face close-ups that fade out at
 // their edges on the left (three-quarter from the character's left, front, three-quarter from the right:
 // the two sides of a costume can differ); front, left, back and right full-body views on the right. On
-// the tailor's blue backdrop, white or black. An optional name goes at the top left, in the player's
-// font and colour (solid or a top-to-bottom gradient), with a black outline unless turned off; the faces
-// move down (and shrink a little) to make room. Saved where the player chooses (the browser's save
+// the tailor's blue backdrop, white, black or the 3D view's background. An optional name goes at the top
+// left, in the player's font and colour (solid or a top-to-bottom gradient), with a black outline unless
+// turned off; the faces move down (and shrink a little) to make room. Saved where the player chooses (the browser's save
 // dialog), or downloaded where that dialog isn't available.
 //
 // Every view is drawn in the same instant, so the idle pose is the same in all of them. The lights turn
 // with the camera, so each side is lit as the front is (the page turns them back on its next frame).
 import * as THREE from 'three';
+import { drawBackdrop, backdropLightness } from './backdrop.js';
 
 const W = 3840, H = 2160, MARGIN = 60;
 // face close-ups (square), stacked; degrees turned from where the face points, towards the character's left
@@ -58,7 +59,13 @@ export const BACKGROUNDS = {
   blue: { label: 'Blue', text: '#ffd21f', outline: '#000', sub: '#a9c3ea' },
   white: { label: 'White', fill: '#ffffff', text: '#161616', outline: null, sub: '#555' },
   black: { label: 'Black', fill: '#000000', text: '#f2f2f2', outline: null, sub: '#999' },
+  view: { label: 'Same as view', view: true },  // the 3D view's (backdrop.js), lettered as blue or white
 };
+// A background as drawn: 'view' takes the 3D view's, with the blue's lettering, or the white's over a light colour
+function sheetBackground(key) {
+  const bg = BACKGROUNDS[key] || BACKGROUNDS.blue;
+  return bg.view ? { ...(backdropLightness() > 0.6 ? BACKGROUNDS.white : BACKGROUNDS.blue), fill: null, view: true } : bg;
+}
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 const loadImage = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
@@ -137,11 +144,12 @@ export function drawName(g, name, fit, x, y, w, h) {
 // name: as for fitName, or null (or empty text) for none
 export async function renderSheet(view, background, name = null) {
   const { renderer, scene, ch, turnLights } = view;
-  const bg = BACKGROUNDS[background] || BACKGROUNDS.blue;
+  const bg = sheetBackground(background);
   const sheet = document.createElement('canvas'); sheet.width = W; sheet.height = H;
   const g = sheet.getContext('2d');
   await document.fonts.load('52px Bangers').catch(() => {});  // the view labels
   if (bg.fill) { g.fillStyle = bg.fill; g.fillRect(0, 0, W, H); }
+  else if (bg.view && await drawBackdrop(g, W, H)) { /* the view's colour */ }
   else {  // the tailor backdrop, covering the sheet
     const img = await loadImage('ui/backdrop.jpg');
     const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
@@ -421,9 +429,11 @@ function nameControls(background) {
     if (!n) return;
     await loadNameFont(n.font);
     if (id !== drawn) return;  // a newer change is drawing
-    const bg = BACKGROUNDS[background()] || BACKGROUNDS.blue;
+    const bg = sheetBackground(background());
     g.clearRect(0, 0, canvas.width, canvas.height);
     g.fillStyle = bg.fill || '#123f86'; g.fillRect(0, 0, canvas.width, canvas.height);
+    if (bg.view) await drawBackdrop(g, canvas.width, canvas.height);
+    if (id !== drawn) return;
     // the sheet's name box at its own size, so the name fits the same way
     drawName(g, n, fitName(g, n, canvas.width, canvas.height), 0, 0, canvas.width, canvas.height);
   }

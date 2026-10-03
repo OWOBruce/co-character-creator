@@ -45,7 +45,10 @@
   .lightHead { display:flex; justify-content:space-between; align-items:center; }
   .lightHead button { font-size:13px; padding:1px 8px; }
   .lightHead button:disabled { opacity:.45; cursor:default; }
-  .lightOpts input[type=color] { width:44px; height:22px; padding:0; border:1px solid #000; border-radius:4px; background:none; cursor:pointer; }
+  .viewPages input[type=color] { width:44px; height:22px; padding:0; border:1px solid #000; border-radius:4px; background:none; cursor:pointer; }
+  .opts .bgRow { display:flex; align-items:center; gap:8px; margin-top:4px; }
+  .opts .bgRow label { margin:0; }
+  .bgRow button { font-size:13px; padding:1px 8px; margin-left:auto; }
   .lightOpts.off { opacity:.45; }
   .titleRow { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
   .titleRow h1 { margin:0; }
@@ -79,7 +82,7 @@
   .sheetDialog { width:320px; padding:6px; }
   .sheetDialog .hint { font:400 12px var(--body); color:var(--muted); margin:0 2px 8px; }
   .sheetDialog .bgChoices { display:flex; gap:6px; }
-  .sheetDialog .bgChoice { flex:1; }
+  .sheetDialog .bgChoice { flex:1 1 auto; white-space:nowrap; font-size:15px; padding:3px 6px; }
   .sheetDialog .row { justify-content:flex-end; margin-top:8px; }
   .sheetDialog .nameBox { margin-top:10px; }
   .sheetDialog .nameRow { display:flex; align-items:center; gap:6px; margin:0 0 6px; }
@@ -358,6 +361,7 @@
           <label><input type="checkbox" id="showGrid"> Floor grid</label>
           <label title="A measuring stick beside the character, marked at the height the Height slider gives (hair and hats don't count)"><input type="checkbox" id="showRuler"> Height ruler</label>
           <div class="compareRow"><label title="Another character beside yours, in the same stance: a default in grey at the game's default body, or one from a saved costume or demo"><input type="checkbox" id="compare"> Compare with</label><select id="compareWith" aria-label="Compare with"><option value="same">the same body type</option><option value="Male">a masculine default</option><option value="Female">a feminine default</option><option value="file" hidden>a character from a file…</option><option value="pick">a character from a file…</option></select></div>
+          <div class="bgRow" title="The 3D view's background. The left panel keeps the tailor's blue."><span>Background</span><input type="color" id="viewBg" aria-label="Background colour" title="The background's colour"><label title="The tailor's comic page, in the colour picked. Untick for a plain colour."><input type="checkbox" id="viewComic" checked> Comic art</label><button id="viewBgReset" type="button" title="Back to the tailor's blue comic page">Reset</button></div>
         </div>
       </div>
       <div class="viewPage away" id="view-inspect" role="tabpanel" inert>
@@ -409,6 +413,7 @@ import { VERSION } from './js/version.js';
 import { HeightRuler } from './js/ruler.js';
 import { CompareFigure } from './js/compare.js';
 import { setGameLighting, turnLighting, getSun, setSun, lightingReady } from './js/shader-graph.js';
+import { backdrop, applyBackdrop, TAILOR_BLUE } from './js/backdrop.js';
 
 const $ = id => document.getElementById(id);
 const BUILD_NAMES = { Male: 'masculine', Female: 'feminine' };  // the skeletons, as the page names them
@@ -673,6 +678,15 @@ lightUsable();
 lightingReady.then(sun => { creatorLight = sun; if (sun) showLight(); lightUsable(); });
 $('lightReset').onclick = () => { if (creatorLight) { setSun({ ...creatorLight, colour: [...creatorLight.colour] }); showLight(); } };
 $('gameLight').onchange = () => { setGameLighting($('gameLight').checked); lightUsable(); };
+// View options > Scene > Background: the 3D view's own (backdrop.js); the left panel keeps the page's
+function showBackdrop() {
+  applyBackdrop($('view'));
+  $('viewBg').value = backdrop.colour || TAILOR_BLUE; $('viewComic').checked = backdrop.comic;
+}
+$('viewBg').oninput = () => { backdrop.colour = $('viewBg').value; applyBackdrop($('view')); };
+$('viewComic').onchange = () => { backdrop.comic = $('viewComic').checked; applyBackdrop($('view')); };
+$('viewBgReset').onclick = () => { backdrop.colour = null; backdrop.comic = true; showBackdrop(); };
+showBackdrop();
 // Shake: sway the whole character side to side for a moment (the bouncers see the movement)
 $('shake').onclick = () => {
   const t0 = performance.now(), g = ch.group;

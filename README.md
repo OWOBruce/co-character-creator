@@ -58,7 +58,7 @@ At the top:
 - **Load** opens a costume file or a demo recording. Its file picker starts in the game's `Live\screenshots` folder (where saved costumes are), then in whichever folder you last loaded from, such as `Live\demos`. You can also drag a file onto the page.
 - **Save** writes a costume file.
 - **Settings** changes which game folder is used, and your account name for saved costume files. Both are kept in the editor's `settings.json`, so they're remembered between sessions and shared by the editor window and any browser.
-- **Settings → Export character sheet…** saves a 3840 × 2160 picture of the current character: close-ups of the face from the left, front and right, and the whole character from the front, left, back and right, on the tailor's blue backdrop, white or black. You choose where to save it.
+- **Settings → Export character sheet…** saves a 3840 × 2160 picture of the current character: close-ups of the face from the left, front and right, and the whole character from the front, left, back and right, on the tailor's blue backdrop, white, black, or the same background as the 3D view. You choose where to save it.
 - **About** says who made the editor, thanks the Adventurers supergroup for their help with testing, and has the legal notice.
 
 **View options**, at the bottom of the left panel, change the preview only; none of them change the costume. They're in four tabs (the editor remembers which one you had open):
@@ -70,7 +70,7 @@ At the top:
   - **Play** the animation, **Loop wings**, and the jiggle (**Bouncers**) and **Cloth** physics.
   - Wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
   - **Shake** sways the character to see the bouncers and cloth move.
-- **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours.
+- **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours. **Background** changes the colour behind the character: with **Comic art** ticked it recolours the tailor's comic page, unticked it's a plain colour. **Reset** puts back the tailor's blue. The left panel always keeps the tailor's blue, and the background isn't remembered between sessions.
 - **Inspect**, for checking pieces: **Skeleton**, **Wireframe**, **Normal maps**, **Raw masks**, **Body sliders**, **Mirror X**, and **Show hidden psionics**. Effect materials such as Psionic and Holoforce take their colour from the piece's first colour. In black they're invisible, in the game and in the editor, and this shows them anyway.
 
 Drag in the 3D view to turn the camera, and scroll to zoom.
