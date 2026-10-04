@@ -114,6 +114,13 @@ def build_runtime():
     print('Adding Pillow and numpy...', flush=True)
     subprocess.run([sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check', '--quiet', '--only-binary=:all:',
                     '--target', site, '-r', os.path.join(HERE, 'requirements.txt')], check=True)
+    # not used by the editor: the packages' own tests (numpy's are 16 MB), and the command-line launchers pip
+    # makes for them (bin/f2py.exe ...), unsigned programs that antivirus guesses about
+    shutil.rmtree(os.path.join(site, 'bin'), ignore_errors=True)
+    for root, dirs, _ in os.walk(site):
+        for d in [d for d in dirs if d == 'tests']:
+            shutil.rmtree(os.path.join(root, d))
+            dirs.remove(d)
     # tkinter, which the embeddable package leaves out: its module, its DLLs and Tcl/Tk's library, from this Python
     base = sys.base_prefix
     dlls = [p for p in glob.glob(os.path.join(base, 'DLLs', '*'))
@@ -123,10 +130,14 @@ def build_runtime():
     for p in dlls:
         if not os.path.exists(os.path.join(py, os.path.basename(p))):
             shutil.copy2(p, py)
-    skip = shutil.ignore_patterns('__pycache__', 'demos')
+    skip = shutil.ignore_patterns('__pycache__', 'demos', 'nmake', '*.lib', '*.sh')  # and Tcl's build-only files
     shutil.copytree(os.path.join(base, 'Lib', 'tkinter'), os.path.join(site, 'tkinter'), ignore=skip)
     if os.path.isdir(os.path.join(base, 'tcl')):
         shutil.copytree(os.path.join(base, 'tcl'), os.path.join(py, 'tcl'), ignore=skip)
+    # no programs but Python's own two (signed by the Python Software Foundation)
+    exes = [os.path.relpath(os.path.join(r, n), py) for r, _, names in os.walk(py) for n in names if n.lower().endswith('.exe')]
+    if sorted(exes) != ['python.exe', 'pythonw.exe']:
+        sys.exit('The bundled Python has programs besides python.exe and pythonw.exe: ' + ', '.join(exes))
     # The path: Python's own library, the packages, and the editor's folder and tools/ (python/ sits in the
     # editor's folder), since an embeddable Python doesn't add a script's own folder. No "import site", so
     # nothing from the player's own Python installs gets in.
