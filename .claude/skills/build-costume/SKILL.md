@@ -13,16 +13,16 @@ the game themselves with **Save** in the editor.
 
 Start the editor for yourself with `preview_start` (see "Check, then preview"), not `start.bat` or the program:
 those open their own window for the user, and the program quits when that window closes. The commands below say
-`python ...`. In the release, `CO Costume Editor.exe` carries its own Python, so when `python` isn't installed
-(`python --version` fails), run the same scripts through it, from the editor's folder:
-`"./CO Costume Editor.exe" costume_check.py ...`, and preview with `costume-viewer-app` instead of `costume-viewer`.
+`python ...`. The release carries its own Python in `python\`, so when `python` isn't installed
+(`python --version` fails), run the same scripts with it, from the editor's folder:
+`./python/python.exe costume_check.py ...`, and preview with `costume-viewer-app` instead of `costume-viewer`.
 
 **Installed editor:** when this folder has no `serve.py` but has a `CLAUDE.md`, you're in the installed editor's
 data folder (`%LOCALAPPDATA%\CO Costume Editor`): `index/` and `my_costumes/` are here, the program and its
-scripts are in the folder `CLAUDE.md` names. Run every script through the program by its full path, from here:
-`& "<program folder>\CO Costume Editor.exe" costume_check.py my_costumes\<name>.json` (it finds the script in
-its own folder; the file paths are from here). `costume_to_json.py` is at
-`.claude\skills\build-costume\costume_to_json.py` here; give the program that full path. `preview_start` with
+scripts are in the folder `CLAUDE.md` names. Run every script with the program's Python, giving the script's full
+path, from here: `& "<program folder>\python\python.exe" "<program folder>\costume_check.py"
+my_costumes\<name>.json` (the file paths are from here). `costume_to_json.py` is at
+`.claude\skills\build-costume\costume_to_json.py` here; run it the same way. `preview_start` with
 `costume-viewer` starts the installed program.
 
 **Somewhere else:** when this folder has neither `serve.py` nor a `CLAUDE.md` naming the editor's program, the
@@ -31,9 +31,9 @@ skill was installed into another project. Find the editor before anything else:
 1. The data folder, `%LOCALAPPDATA%\CO Costume Editor` (`$LOCALAPPDATA/CO Costume Editor` in bash). If it has a
    `CLAUDE.md`, that names the program folder, and `index/` and `my_costumes/` sit beside it. Without one (only
    logs, say), go on to 2.
-2. Else the program: `C:\Program Files\CO Costume Editor\CO Costume Editor.exe`, or
-   `%LOCALAPPDATA%\Programs\CO Costume Editor\CO Costume Editor.exe` (installed "for me only"). The
-   `installed.ini` beside it names the data folder.
+2. Else the program folder: `C:\Program Files\CO Costume Editor`, or
+   `%LOCALAPPDATA%\Programs\CO Costume Editor` (installed "for me only"), with `serve.py` and `python\python.exe`
+   in it. The `installed.ini` there names the data folder.
 3. Not there: ask the user where the editor is (a source checkout, with `serve.py` and `start.bat`, can be
    anywhere, and keeps `index/` in its own folder), or whether it's installed at all. If it isn't, give them the
    installer: https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe
@@ -43,13 +43,14 @@ skill was installed into another project. Find the editor before anything else:
 Then suggest reopening Claude Code in the data folder (or the source checkout), where everything is set up. If the
 user would rather stay here, work with full paths into the editor's folders:
 - Read the index from `<data folder>\index`, and write costumes to `<data folder>\my_costumes`.
-- Run the scripts through the program by its full path, giving it full file paths (it resolves them from the
-  current folder, not the data folder): `& "<program folder>\CO Costume Editor.exe" costume_check.py
-  "<data folder>\my_costumes\<name>.json"`. From a source checkout, `python "<checkout>\costume_check.py" ...`.
+- Run the scripts with the program's Python, giving full paths for the script and the files (they're resolved
+  from the current folder, not the data folder): `& "<program folder>\python\python.exe" "<program
+  folder>\costume_check.py" "<data folder>\my_costumes\<name>.json"`. From a source checkout,
+  `python "<checkout>\costume_check.py" ...`.
 - `preview_start` needs a `costume-viewer` entry in this project's `.claude/launch.json`. Ask before adding it
-  (it's the user's project), then add `{"name": "costume-viewer", "runtimeExecutable": "<program folder>\\CO
-  Costume Editor.exe", "runtimeArgs": ["serve.py"], "port": 8765, "autoPort": true}`, or for a source checkout
-  `"runtimeExecutable": "python", "runtimeArgs": ["<checkout>\\serve.py"]`.
+  (it's the user's project), then add `{"name": "costume-viewer", "runtimeExecutable": "<program
+  folder>\\python\\python.exe", "runtimeArgs": ["<program folder>\\serve.py"], "port": 8765, "autoPort": true}`, or
+  for a source checkout `"runtimeExecutable": "python", "runtimeArgs": ["<checkout>\\serve.py"]`.
 
 ## Where the knowledge is
 

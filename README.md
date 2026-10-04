@@ -22,7 +22,7 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
    - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
    - To update, run a newer installer. It says which version you have and offers to update it, in the same folder with the same choices, and keeps that data. (It asks first before reinstalling the same version or putting an older one over a newer one.) Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
    - The editor tells you when a new version is out: the version number in the bottom-right corner says so, the **About** button gets a gold dot, and **About** has the download link. Turn this off in **Settings** → **Updates**.
-   - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`CO Costume Editor.exe`**.
+   - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`start.bat`**. It uses the Python that comes in the zip; its console window stays open while the editor runs, and closing it stops the editor.
 2. Start **CO Costume Editor** from the Start menu (the installer can start it for you the first time).
 3. The editor opens in its own window (Microsoft Edge or Google Chrome with no tabs or address bar; without either, your normal browser).
    - Closing the editor window stops the editor.
@@ -124,10 +124,10 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 
 ## Dependencies
 
-- **Inside the program and the installer:** Python 3.10, [Pillow](https://python-pillow.org/) and [NumPy](https://numpy.org/) (reading the game's images and building the index), and tkinter (the folder and file pickers).
+- **Inside the installer and the zip:** Python 3.14 (python.org's embeddable package, signed by the Python Software Foundation), [Pillow](https://python-pillow.org/) and [NumPy](https://numpy.org/) (reading the game's images and building the index), and tkinter (the folder and file pickers).
 - **Loaded by the editor page when it opens** (this is why it needs the internet): [three.js](https://threejs.org/) 0.160 for the 3D view, from the jsDelivr CDN, and the Bangers and Comic Neue fonts from Google Fonts.
 - **Running from the source code:** Python 3.10 or newer, plus Pillow and NumPy (`requirements.txt`; `start.bat` installs them).
-- **For developers only:** [PyInstaller](https://pyinstaller.org/) and [Inno Setup 6](https://jrsoftware.org/isinfo.php) to make the program and installer, the `anthropic` package for writing the piece descriptions (`describe.py`), `capstone` for `tools\disasm.py`, and Node.js for one test. See [DEVELOPER.md](DEVELOPER.md).
+- **For developers only:** Python 3.14 and [Inno Setup 6](https://jrsoftware.org/isinfo.php) to make the installer, the `anthropic` package for writing the piece descriptions (`describe.py`), `capstone` for `tools\disasm.py`, and Node.js for one test. See [DEVELOPER.md](DEVELOPER.md).
 
 ## Privacy
 

@@ -1,7 +1,8 @@
 ; The Windows installer: CO-Costume-Editor-<version>-Setup.exe. Built by "python make_release.py --installer"
 ; (and by .github/workflows/release.yml on a version tag), which passes:
 ;   /DAppVersion=0.5.1          from viewer/js/version.js
-;   /DSourceDir=<folder>        the staged release: the editor's files plus CO Costume Editor.exe and _internal\
+;   /DAppNumber=0.5.1           the same in digits only, for Windows' version fields (0.7.0 for 0.7.0-rc1)
+;   /DSourceDir=<folder>        the staged release: the editor's files plus python\ (the Python that runs them)
 ;
 ; It installs into Program Files (asking for admin rights), or, if the player picks "only for me", into
 ; %LOCALAPPDATA%\Programs without them. Either way it writes installed.ini beside the program, which tells the
@@ -10,13 +11,17 @@
 ; over an older one leaves that data alone; build.py rebuilds it only if the build format changed.
 ; When the editor is installed already, Setup says which version and offers to update it (or asks before
 ; reinstalling the same one or replacing a newer one), then goes into the same folder with the same choices.
+; The shortcuts start the editor with the bundled Python, python.org's own pythonw.exe (no console):
+; python\pythonw.exe app_launcher.py.
 
 #define AppName "CO Costume Editor"
-#define AppExe "CO Costume Editor.exe"
 ; also names the uninstall entry Setup reads the installed version from
 #define AppGuid "31bd8f76-ba20-499d-a18a-e665ad382230"
 #ifndef AppVersion
   #error Pass /DAppVersion=x.y.z (make_release.py --installer does)
+#endif
+#ifndef AppNumber
+  #error Pass /DAppNumber=x.y.z (make_release.py --installer does)
 #endif
 #ifndef SourceDir
   #error Pass /DSourceDir=<staged release folder> (make_release.py --installer does)
@@ -31,7 +36,7 @@ AppPublisher=sadders1
 AppPublisherURL=https://github.com/codexheroes/co-character-creator
 AppSupportURL=https://github.com/codexheroes/co-character-creator/issues
 AppUpdatesURL=https://github.com/codexheroes/co-character-creator/releases
-VersionInfoVersion={#AppVersion}
+VersionInfoVersion={#AppNumber}
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 DefaultDirName={autopf}\{#AppName}
@@ -39,7 +44,7 @@ DisableProgramGroupPage=yes
 DisableDirPage=auto
 LicenseFile={#SourceDir}\LICENSE
 SetupIconFile={#SourceDir}\app.ico
-UninstallDisplayIcon={app}\{#AppExe}
+UninstallDisplayIcon={app}\app.ico
 UninstallDisplayName={#AppName}
 OutputBaseFilename=CO-Costume-Editor-{#AppVersion}-Setup
 ArchitecturesAllowed=x64compatible
@@ -55,8 +60,11 @@ CloseApplications=force
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [InstallDelete]
-; code from an older version that this one may no longer have (the editor's data is elsewhere)
+; code from an older version that this one may no longer have (the editor's data is elsewhere); up to 0.6.7
+; the program was CO Costume Editor.exe (PyInstaller) with its Python in _internal\
+Type: files; Name: "{app}\CO Costume Editor.exe"
 Type: filesandordirs; Name: "{app}\_internal"
+Type: filesandordirs; Name: "{app}\python"
 Type: filesandordirs; Name: "{app}\tools"
 Type: filesandordirs; Name: "{app}\viewer\js"
 Type: filesandordirs; Name: "{app}\__pycache__"
@@ -69,17 +77,19 @@ Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
 Filename: "{app}\installed.ini"; Section: "editor"; Key: "data"; String: "%LOCALAPPDATA%\{#AppName}"
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\python\pythonw.exe"; Parameters: """{app}\app_launcher.py"""; WorkingDir: "{app}"; IconFilename: "{app}\app.ico"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\python\pythonw.exe"; Parameters: """{app}\app_launcher.py"""; WorkingDir: "{app}"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Run]
 ; as the player, not as the administrator Setup ran as
-Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent runasoriginaluser
+Filename: "{app}\python\pythonw.exe"; Parameters: """{app}\app_launcher.py"""; WorkingDir: "{app}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent runasoriginaluser
 
 [UninstallDelete]
 Type: files; Name: "{app}\installed.ini"
 Type: filesandordirs; Name: "{app}\__pycache__"
 Type: filesandordirs; Name: "{app}\tools\__pycache__"
+; bytecode Python writes beside its own modules (tkinter's, for one)
+Type: filesandordirs; Name: "{app}\python"
 
 [Code]
 // An installed editor: its version from its uninstall entry (HKLM for all users, HKCU for "only for me"),

@@ -10,7 +10,7 @@
     },
     {
       "name": "costume-viewer-app",
-      "runtimeExecutable": "./CO Costume Editor.exe",
+      "runtimeExecutable": "./python/python.exe",
       "runtimeArgs": ["serve.py"],
       "port": 8765,
       "autoPort": true

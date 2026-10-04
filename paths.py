@@ -33,8 +33,8 @@ def claude_workspace():
     skill = os.path.join(CODE, '.claude', 'skills', 'build-costume')
     if os.path.isdir(skill):
         shutil.copytree(skill, data('.claude', 'skills', 'build-costume'), dirs_exist_ok=True)
-    exe = os.path.join(CODE, 'CO Costume Editor.exe')
-    run = {'runtimeExecutable': exe, 'runtimeArgs': ['serve.py'], 'port': 8765, 'autoPort': True}
+    python = os.path.join(CODE, 'python', 'python.exe')  # the bundled Python (make_release.py)
+    run = {'runtimeExecutable': python, 'runtimeArgs': [os.path.join(CODE, 'serve.py')], 'port': 8765, 'autoPort': True}
     json.dump({'version': '0.0.1', 'configurations': [{'name': 'costume-viewer', **run}, {'name': 'costume-viewer-app', **run}]},
               open(data('.claude', 'launch.json'), 'w', encoding='utf-8'), indent=2)
     os.makedirs(data('my_costumes'), exist_ok=True)
@@ -45,10 +45,10 @@ This is the installed editor's data folder: what it built from the game (`index/
 `viewer/ui/`), its `settings.json`, and `my_costumes/` for costumes made here. The program and its scripts are in
 `{CODE}`.
 
-Run the editor's scripts through the program, from this folder (it finds the script in its own folder; file
-paths you give it are from here), for example:
+Run the editor's scripts with the program's own Python, from this folder (give the script's full path; file
+paths you give the script are from here), for example:
 
-    & "{exe}" costume_check.py my_costumes\\<name>.json
+    & "{python}" "{os.path.join(CODE, 'costume_check.py')}" my_costumes\\<name>.json
 
 `preview_start` with `costume-viewer` starts the editor for you (`.claude/launch.json`). The build-costume skill
 (`.claude/skills/`) is copied from the program on every start, so don't edit it here.

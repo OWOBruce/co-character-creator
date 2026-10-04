@@ -3,7 +3,7 @@
 --open shows the editor in its own window (Edge or Chrome in app mode: no tabs or address bar), or in the
 default browser when neither is installed; --browser (which wins over --open) shows it in a normal browser tab. Either way the editor
 stays reachable at http://localhost:PORT/ from any browser while the server runs.
---quit-when-closed (the release's CO Costume Editor.exe, app_launcher.py, which has no console to close): stop
+--quit-when-closed (the installed editor's shortcut, app_launcher.py under pythonw.exe, with no console to close): stop
 once no editor page is open. Pages report in every 15 s and say goodbye when they close (/api/alive, /api/bye).
 
 /            -> viewer/
