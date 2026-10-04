@@ -29,10 +29,17 @@
   button { font:17px/1 var(--title); letter-spacing:.6px; color:var(--gold); cursor:pointer; padding:3px 8px;
            border:6px solid transparent; border-image:url(ui/button.png) 8 fill / 6px stretch; background:none;
            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
-  button:hover { border-image-source:url(ui/button_hover.png); color:#fff27a; }
+  /* hover: the button's own art brightened, with a gold glow round its shape. Not a swap to button_hover.png: that
+     loaded only on the first hover, and the button showed nothing until it came. Colour swatches and arrows have
+     their own hover (a brightened swatch would show the wrong colour). */
+  button:hover:not(:disabled, .chip, .sw, .quad, .nameSwatch, .arrow, .updateLink) {
+    filter:brightness(1.3) drop-shadow(0 0 3px #ffd21fb0); color:#fff27a; }
   button:active { transform:translateY(1px); }
   button.on, .tab.on, .mainTabs button.on, .links .link.on, button.choice.on, button.toggle.on {
            border-image-source:url(ui/button_on.png); color:#231500; text-shadow:none; }
+  /* a selected (gold) button keeps its dark lettering on hover, with a lighter touch: brightened as much as the
+     blue ones, its gold went pale enough to wash out the text */
+  button.on:hover:not(:disabled) { filter:brightness(1.08) drop-shadow(0 0 3px #fff9); color:#231500; }
   select { width:100%; font:700 13px var(--body); color:var(--text); padding:2px 4px; cursor:pointer;
            border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; background:none; }
   select option, select optgroup { background:var(--deep); color:var(--text); }
@@ -156,7 +163,7 @@
   .frBox .frWarn { color:#ffcf8a; }
   .frBox button { border:2px solid #000; border-radius:8px; background:linear-gradient(#2a7ae0, #1650a8); border-image:none;
                   box-shadow:0 3px 0 #000; }
-  .frBox button:hover:not(:disabled) { background:linear-gradient(#3a8af0, #1d60c0); }
+  .frBox button:hover:not(:disabled) { background:linear-gradient(#3a8af0, #1d60c0); filter:none; }
   .frBox button:disabled { opacity:.5; cursor:default; }
   .frBox .frBig { display:block; width:100%; margin:0 0 8px; padding:12px 14px; font-size:24px; overflow-wrap:anywhere;
                   color:#231500; text-shadow:none; background:linear-gradient(var(--gold), var(--gold2)); }
@@ -245,13 +252,22 @@
   /* item browser */
   .tabs { display:flex; flex-wrap:wrap; gap:2px; margin:4px 0 6px; }
   .tab { flex:1; font-size:15px; padding:3px 2px; line-height:1; }
+  .tab.nomatch:not(.on) { opacity:.45; }  /* the filter has nothing there */
+  .filterBar { display:flex; align-items:center; margin:0 0 6px; border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; }
+  .filterBar svg { width:14px; height:14px; flex:none; margin:0 3px 0 4px; fill:none; stroke:var(--muted); stroke-width:2; stroke-linecap:round; }
+  .filterBar.active svg { stroke:var(--gold); }
+  .filterBar input { flex:1; min-width:0; padding:3px 4px; border:0; background:none; outline:none; color:var(--text); font:700 13px var(--body); }
+  .filterBar input::placeholder { color:var(--muted); opacity:.75; font-weight:400; }
+  .filterBar .clear { flex:none; padding:0 5px; border:0; border-image:none; background:none; font:700 17px/1 var(--body); color:var(--muted); text-shadow:none; }
+  .filterBar .clear:hover { filter:none; color:var(--gold); }
+  .filterNote { font:400 12px/1.4 var(--body); color:var(--muted); padding:6px 2px; }
   .cycler { display:grid; grid-template-columns: 100px 18px 1fr 18px; align-items:center; gap:2px; margin:2px 0; }
   .cycler .lab { font:700 12px var(--body); color:var(--muted); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cycler.category { margin-bottom:6px; } .cycler.category .lab { font:17px var(--title); color:var(--gold); letter-spacing:.5px; }
   .cycler .name { display:flex; align-items:center; gap:4px; min-width:0; text-align:left; padding:1px 6px; line-height:1.25;
                   font:700 13px var(--body); color:var(--text); text-shadow:none;
                   border:5px solid transparent; border-image:url(ui/field.png) 8 fill / 5px stretch; }
-  .cycler .name:hover { border-image-source:url(ui/field_hover.png); color:#fff; }
+  .cycler .name:hover { filter:brightness(1.6); color:#fff; }  /* field_hover.png's lighter navy, with nothing to load */
   .cycler .name .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .arrow { width:18px; height:22px; padding:0; border:none; border-image:none; background:center/12px no-repeat; }
   .arrow:hover { border-image:none; }
@@ -259,14 +275,19 @@
   .arrow.right { background-image:url(ui/CC_Arrow_Right_Idle.png); } .arrow.right:hover { background-image:url(ui/CC_Arrow_Right_Mouseover.png); }
   .arrow:active.left { background-image:url(ui/CC_Arrow_Left_Pushed.png); } .arrow:active.right { background-image:url(ui/CC_Arrow_Right_Pushed.png); }
   .slot { border-top:1px solid #ffffff14; padding:2px 0; position:relative; }
-  .slot.selected { background:linear-gradient(90deg, #ffd21f22, transparent 70%); box-shadow: inset 3px 0 0 var(--gold); }
+  .slot.selected { background:linear-gradient(90deg, #ffd21f22, transparent 70%); }
+  /* the open slot's (and open attachment's) gold line, just left of its labels so it doesn't run through them */
+  .slot.selected::before, .childSlot.selected::before { content:''; position:absolute; top:0; bottom:0; left:-7px; width:3px; background:var(--gold); }
+  .childSlot.selected::before { left:-6px; width:2px; }
   .slot .swatches { position:absolute; right:26px; top:10px; display:flex; gap:1px; cursor:pointer; }
   .slot .swatches span { width:6px; height:11px; border:1px solid #000; }
-  .slot.selected .swatches { display:none; }
+  .slot.selected > .cycler .swatches { display:none; }
   .slot .cycler .name { padding-right:40px; }
   .details { padding:2px 0 6px 10px; }
   .cycler.sub { grid-template-columns: 90px 18px 1fr 18px; }
   .cycler.sub.child .lab { color:#cfe0ff; }
+  .childSlot { position:relative; }
+  .childSlot .swatches { top:8px; }
   .note { font-size:11px; color:#ff9d8a; padding-left:100px; }
   img.badge { height:15px; flex:none; filter: drop-shadow(0 0 1px #000); }
   .panelOpts { margin-top:8px; font-size:12px; } .panelOpts label { display:inline-flex; gap:3px; margin:2px 8px 2px 0; color:var(--muted); }

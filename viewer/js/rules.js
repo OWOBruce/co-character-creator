@@ -49,22 +49,30 @@ export function requiredBones(cat, category) {
   return new Set([...cat.requiredBones, ...(categoryDef(cat, category)?.requiredBones || [])]);
 }
 
+// Whether a top-level piece is offered to players. opts: { showDev, hideLocked }
+export function offered(g, opts = {}) {
+  return !g.isChild && g.availability !== 'npc' && (opts.showDev || !isDev(g)) && !(opts.hideLocked && g.availability === 'unlock');
+}
+
 // Pieces for a slot. opts: { showDev, hideLocked, keep } (keep: a piece name always listed)
 export function piecesFor(cat, bone, category, opts = {}) {
-  const ok = (n, g) => n === opts.keep || (g.availability !== 'npc' && (opts.showDev || !isDev(g))
-                                           && !(opts.hideLocked && g.availability === 'unlock'));
   return Object.entries(cat.geometries)
-    .filter(([n, g]) => g.bone === bone && !g.isChild && (!category || g.categories.includes(category)) && ok(n, g))
+    .filter(([n, g]) => g.bone === bone && !g.isChild && (!category || g.categories.includes(category)) && (n === opts.keep || offered(g, opts)))
     .sort((a, b) => a[1].order - b[1].order || a[1].displayName.localeCompare(b[1].displayName));
+}
+
+// Whether a region's category can have a slot on `bone` (slotsFor also wants a piece for it, or the bone required)
+export function slotAllowed(cat, region, category, bone) {
+  const b = cat.bones[bone];
+  return !!b && b.region === region.name && !b.isChild && !!(b.restrictedTo & 12) && !isLeftOutBone(cat, bone)
+         && !categoryDef(cat, category)?.excludedBones.includes(bone);
 }
 
 // Top-level slots of a region in its category, in menu order.
 export function slotsFor(cat, region, category, opts = {}) {
-  const def = categoryDef(cat, category), req = requiredBones(cat, category);
+  const req = requiredBones(cat, category);
   return Object.entries(cat.bones)
-    .filter(([name, b]) => b.region === region.name && !b.isChild && (b.restrictedTo & 12) && !isLeftOutBone(cat, name)
-            && !def?.excludedBones.includes(name)
-            && (req.has(name) || piecesFor(cat, name, category, opts).length))
+    .filter(([name]) => slotAllowed(cat, region, category, name) && (req.has(name) || piecesFor(cat, name, category, opts).length))
     .sort((a, b) => a[1].order - b[1].order)
     .map(([name, b]) => ({ bone: name, def: b, required: req.has(name) }));
 }

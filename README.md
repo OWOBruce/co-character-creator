@@ -41,8 +41,9 @@ Download the source from [GitHub](https://github.com/codexheroes/co-character-cr
 
 The left panel has the game's three creator screens as tabs.
 
-- **Costume.** Pick pieces by region (head, upper body, lower body…). For the selected piece you can also set its material, pattern, colours and glow.
+- **Costume.** Pick pieces by region (head, upper body, lower body…). For the selected piece you can also set its material, pattern, colours and glow, and those of the attachments some pieces bring (a pair of goggles' lenses, a robotic chest's arms).
   - Hover over a piece in a list to preview it; press Esc to go back.
+  - **Filter parts:** type in the box under the region tabs, say "goggles" or "speed gog", and only the slots with a matching piece stay, their lists narrowed to the matches. Tabs with nothing matching dim, and a note names the region's other categories that have more. Esc or × clears it.
   - **Take a colour from the character:** in a colour box, click the pipette (top right), then click any spot on the character. You get the colour that piece has there, not the pixel's shade under the lights, whichever of its colours that is, and its glow too when the colour you're setting can glow. Hovering previews it; Esc stops. It works on a character shown with **Compare with**, too. Skin is left out.
   - **Mirror left/right** keeps gloves, boots and similar pieces matched.
   - **Try before you unlock.** Every piece in your game files is listed, including store items and pieces from lockboxes, events and perks that you can't buy right now, so you can see one on your character before spending anything on it.
