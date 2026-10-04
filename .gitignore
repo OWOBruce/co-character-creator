@@ -9,6 +9,7 @@ __pycache__/
 
 # Personal / local, not part of the release
 my_costumes/
+updates/
 captions/batches.json
 .claude/settings.local.json
 

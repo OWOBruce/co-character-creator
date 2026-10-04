@@ -1,7 +1,7 @@
 """Local server for the costume editor: python serve.py [port] [--game FOLDER] [--open | --browser] [--quit-when-closed]
 
---open shows the editor in its own window (Edge or Chrome in app mode: no tabs or address bar), or in the
-default browser when neither is installed; --browser (which wins over --open) shows it in a normal browser tab. Either way the editor
+--open shows the editor in its own window (app mode: no tabs or address bar) in the default browser when that's
+Chrome, Edge, Brave or Vivaldi, else Edge or Chrome, or in a default browser tab when neither is installed; --browser (which wins over --open) shows it in a normal browser tab. Either way the editor
 stays reachable at http://localhost:PORT/ from any browser while the server runs.
 --quit-when-closed (the installed editor's shortcut, app_launcher.py under pythonw.exe, with no console to close): stop
 once no editor page is open. Pages report in every 15 s and say goodbye when they close (/api/alive, /api/bye).
@@ -25,7 +25,11 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
                 whether to look for new versions, in settings.json
 /api/update  -> GET: the newest release on GitHub {"version", "url"}, asked at most once a day, or {"off": true}
                 when Settings turns the check off (latest_release); ?force=1 (Settings' Check now) asks now,
-                and {"error": true} says GitHub couldn't be reached
+                and {"error": true} says GitHub couldn't be reached. Also {"current", "installable"}: this
+                version, and whether Update now can install a newer one
+/api/update/install -> POST {}: Update now (install_update): download the newest installer, check it against
+                GitHub's SHA-256 for it, start it and stop the editor; GET /api/update/status says how it's going
+/api/open    -> POST {"url"}: open one of the project's pages (GitHub, codexheroes.com) in the default browser
 /api/source  -> GET: the game folder in use, what was found, the saved account and the state of the editor's data (build);
                 POST {"path"}: use another folder; POST {"browse": true}: open a folder picker on this
                 machine and use what's chosen.
@@ -327,6 +331,117 @@ def latest_release(force=False):
         return {**known, 'error': True} if failed else known
 
 
+# ---- Update now ------------------------------------------------------------------------------------
+DOWNLOADS = 'https://github.com/codexheroes/co-character-creator/releases/download/'
+UPDATE = {'state': 'idle'}  # how Update now is getting on: idle, downloading (got, total), checking, starting,
+UPDATE_LOCK = threading.Lock()  # started, or error (error)
+# For testing Update now from the source: pretend to be this (older) version. The update check and Update now
+# then offer the newest release, which installs over the installed editor as usual.
+PRETEND = os.environ.get('CO_EDITOR_PRETEND_VERSION', '').strip()
+
+
+def editor_version():
+    """This editor's version (viewer/js/version.js, the one place it is set), or the one it pretends to be."""
+    if PRETEND:
+        return PRETEND
+    with open(os.path.join(ROOT, 'js', 'version.js'), encoding='utf-8') as f:
+        return re.search(r"VERSION = '([^']+)'", f.read()).group(1)
+
+
+def version_key(v):
+    """0.7.10 -> (0, 7, 10), for comparing versions"""
+    return tuple(int(n) for n in re.findall(r'\d+', str(v))[:3])
+
+
+def can_update():
+    """Update now is for the installed editor on Windows: a copy run from the source or the zip updates by hand."""
+    return sys.platform == 'win32' and (INSTALLED or bool(PRETEND))
+
+
+def install_update(server):
+    """Update now: download the newest release's installer from GitHub, check it against the SHA-256 GitHub lists
+    for it, start it as a double-click would, and stop the editor so the installer can replace it (its last page
+    offers to start the new one). Windows asks before the installer changes anything, and its virus scanner checks
+    the file as for any download. Runs in a thread; UPDATE says how far it got."""
+    import hashlib
+    import time
+    import urllib.request
+
+    def fail(message):
+        UPDATE.clear()
+        UPDATE.update(state='error', error=message)
+    step = 'ask'
+    try:
+        req = urllib.request.Request(RELEASES, headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'CO-Costume-Editor'})
+        rel = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        version, current = str(rel.get('tag_name', '')).lstrip('vV'), editor_version()
+        if version_key(version) <= version_key(current):
+            return fail(f'You already have the newest version ({current}).')
+        name = f'CO-Costume-Editor-{version}-Setup.exe'
+        asset = next((a for a in rel.get('assets', []) if a.get('name') == name), None) or {}
+        url, digest = str(asset.get('browser_download_url', '')), str(asset.get('digest') or '')
+        if not url.startswith(DOWNLOADS) or not digest.startswith('sha256:'):
+            return fail("GitHub didn't list the new installer as expected (with its checksum), so it wasn't downloaded. Download it yourself instead.")
+        folder = data('updates')
+        os.makedirs(folder, exist_ok=True)
+        for old in os.listdir(folder):  # earlier downloads
+            try:
+                os.remove(os.path.join(folder, old))
+            except OSError:
+                pass
+        dest, total, got, sha = os.path.join(folder, name), int(asset.get('size') or 0), 0, hashlib.sha256()
+        step = 'download'
+        UPDATE.update(state='downloading', version=version, got=0, total=total)
+        req = urllib.request.Request(url, headers={'User-Agent': 'CO-Costume-Editor'})
+        with urllib.request.urlopen(req, timeout=30) as r, open(dest + '.part', 'wb') as f:
+            while chunk := r.read(1 << 16):
+                f.write(chunk)
+                sha.update(chunk)
+                got += len(chunk)
+                UPDATE['got'] = got
+        step = 'check'
+        UPDATE['state'] = 'checking'
+        if got != total or sha.hexdigest() != digest[len('sha256:'):].lower():
+            os.remove(dest + '.part')
+            return fail("The download didn't match GitHub's checksum, so it wasn't started. Try again, or download it yourself.")
+        os.replace(dest + '.part', dest)
+        step = 'start'
+        UPDATE['state'] = 'starting'
+        os.startfile(dest)  # as a double-click would: Windows asks for permission, as for any installer
+    except OSError as e:
+        code = getattr(e, 'winerror', None)
+        print(f'Update now stopped at {step}: {e!r}', flush=True)
+        if step in ('ask', 'download'):
+            return fail("Couldn't download the update from GitHub. Check your internet connection and try again, or download it yourself.")
+        if code == 1223:  # ERROR_CANCELLED: the permission prompt was declined
+            return fail("The installer didn't start: Windows asked for permission and it wasn't given.")
+        if code == 225 or isinstance(e, FileNotFoundError):  # ERROR_VIRUS_INFECTED, or removed by the scanner
+            return fail('Windows security blocked the downloaded installer. You can download it yourself from the release page.')
+        return fail(f"Couldn't start the installer ({e.strerror or e}). You can download it yourself instead.")
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return fail("GitHub's answer about the new version couldn't be read. Try again later, or download it yourself.")
+    UPDATE['state'] = 'started'
+    print(f'Update now: started the installer for {version}; stopping the editor', flush=True)
+    time.sleep(3)  # long enough for the page to see it
+    if BUILD_PROC[0] and BUILD_PROC[0].poll() is None:
+        BUILD_PROC[0].terminate()
+    server.shutdown()
+
+
+# Links the page may have opened in the default browser (/api/open): the project's pages only
+OPEN_LINK = re.compile(r'https://(github\.com/codexheroes/co-character-creator|(www\.)?codexheroes\.com)(/[^\s"<>]*)?')
+
+
+def open_link(url):
+    """Open one of the project's pages in the default browser, not the editor's own window (which may be Edge
+    while the player's browser is another)."""
+    if sys.platform == 'win32':
+        os.startfile(url)
+    else:
+        import webbrowser
+        webbrowser.open(url)
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
                       '.js': 'text/javascript', '.json': 'application/json', '.mset': 'application/octet-stream',
@@ -363,7 +478,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return None
         if clean == '/api/update':  # ?force=1: Settings' Check now
             query = http.server.urllib.parse.parse_qs(self.path.split('?', 1)[1] if '?' in self.path else '')
-            self.send_json(latest_release(force=query.get('force') == ['1']))
+            self.send_json({**latest_release(force=query.get('force') == ['1']), 'current': editor_version(), 'installable': can_update()})
+            return None
+        if clean == '/api/update/status':  # how Update now is getting on
+            self.send_json(dict(UPDATE))
             return None
         if clean == '/api/test/costume-files':
             self.send_json(list(saved_costumes()))
@@ -474,7 +592,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(self._body)
             return
         if path not in ('/api/source', '/api/check', '/api/test/results', '/api/settings', '/api/file/open',
-                        '/api/alive', '/api/bye'):
+                        '/api/alive', '/api/bye', '/api/update/install', '/api/open'):
             self.send_error(404)
             return
         # only this page may use these: same-origin JSON requests
@@ -492,6 +610,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             TEST_RESULTS.clear()
             TEST_RESULTS.update(req)
             self.send_json({'ok': True})
+            self.wfile.write(self._body)
+            return
+        if path == '/api/update/install':  # Update now: download, check and start the newest installer (install_update)
+            if not can_update():
+                self.send_json({'error': 'Update now is for the installed editor. Download the installer instead.'}, 400)
+            else:
+                with UPDATE_LOCK:
+                    if UPDATE.get('state') not in ('downloading', 'checking', 'starting', 'started'):
+                        UPDATE.clear()
+                        UPDATE.update(state='downloading', got=0, total=0)
+                        threading.Thread(target=install_update, args=(self.server,), daemon=True).start()
+                self.send_json(dict(UPDATE))
+            self.wfile.write(self._body)
+            return
+        if path == '/api/open':  # {"url"}: one of the project's pages, in the default browser
+            url = str(req.get('url') or '')
+            if not OPEN_LINK.fullmatch(url):
+                self.send_error(403)
+                return
+            try:
+                open_link(url)
+                self.send_json({'ok': True})
+            except OSError as e:
+                self.send_json({'error': str(e)}, 500)
             self.wfile.write(self._body)
             return
         if path in ('/api/alive', '/api/bye'):  # {"id"}: an editor page is open / closing
@@ -610,12 +752,28 @@ class Server(http.server.ThreadingHTTPServer):
         super().server_bind()
 
 
+APP_BROWSERS = ('chrome.exe', 'msedge.exe', 'brave.exe', 'vivaldi.exe', 'chromium.exe')  # can open an app window (--app)
+
+
 def app_browser():
-    """Edge or Chrome, which can open a page as its own app window (--app); None when neither is found."""
+    """A browser that can open a page as its own app window (--app): the default browser if it can, else Edge or
+    Chrome; None when there's none."""
     import shutil
     if sys.platform != 'win32':
         return next(filter(None, map(shutil.which, ['google-chrome', 'chromium', 'chromium-browser', 'microsoft-edge'])), None)
     import winreg
+    # the player's default browser, when it can open an app window (so the editor's links open there too)
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                            r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice') as k:
+            prog = winreg.QueryValueEx(k, 'ProgId')[0]
+        with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, rf'{prog}\shell\open\command') as k:
+            command = winreg.QueryValue(k, None).strip()
+        exe = command[1:command.index('"', 1)] if command.startswith('"') else command.split()[0]
+        if os.path.basename(exe).lower() in APP_BROWSERS and os.path.isfile(exe):
+            return exe
+    except (OSError, ValueError, IndexError):
+        pass
     for exe in ('msedge.exe', 'chrome.exe'):
         for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
             try:
@@ -647,7 +805,7 @@ def window_size():
 
 
 def show(url, app):
-    """Open the editor: in its own app window when app is set and Edge or Chrome is there, else a browser tab."""
+    """Open the editor: in its own app window when app is set and a browser that can is there, else a browser tab."""
     exe = app and app_browser()
     if exe:
         w, h = window_size()

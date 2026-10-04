@@ -11,7 +11,7 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 - **Windows**, with **Champions Online** installed (Steam or Arc).
 - About **320 MB** of free space: the editor itself, plus the data it builds from your game.
 - An **internet connection** while the editor is open: the page loads its 3D engine and fonts from the web (see [Dependencies](#dependencies)).
-- A modern web browser with WebGL; any up-to-date one works. Microsoft Edge (part of Windows) or Google Chrome is recommended: with either, the editor opens in its own window, without tabs or an address bar. With another browser it opens in a normal tab.
+- A modern web browser with WebGL; any up-to-date one works. With Google Chrome, Microsoft Edge (part of Windows), Brave or Vivaldi the editor opens in its own window, without tabs or an address bar: in your default browser when it's one of those, else in Edge or Chrome. Links in the editor open in your default browser. With no such browser it opens in a normal tab.
 - Nothing else to install: the program carries everything else it needs.
 
 ## Starting it
@@ -21,10 +21,10 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
    - It installs into `C:\Program Files\CO Costume Editor` (Windows asks for admin rights), or, if you choose **Install for me only**, into your own `%LOCALAPPDATA%\Programs` without them. It adds the editor to the Start menu (and the desktop, if you tick that box).
    - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
    - To update, run a newer installer. It says which version you have and offers to update it, in the same folder with the same choices, and keeps that data. (It asks first before reinstalling the same version or putting an older one over a newer one.) Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
-   - The editor tells you when a new version is out: the version number in the bottom-right corner says so, the **About** button gets a gold dot, and **About** has the download link. It looks once a day; **Settings** → **Updates** → **Check now** looks straight away, and the tick box there turns the daily look off.
+   - The editor tells you when a new version is out: the version number in the bottom-right corner says so, the **About** button gets a gold dot, and **About** has **Update now**: it downloads the new installer from GitHub, checks it, and starts it, and the editor closes while it updates (the installer's last page can open the new one). You can also download the installer yourself from there. It looks once a day; **Settings** → **Updates** → **Check now** looks straight away, and the tick box there turns the daily look off.
    - Prefer no installer? The release also has a zip: unzip it anywhere (keep the whole folder together) and double-click **`start.bat`**. It uses the Python that comes in the zip; its console window stays open while the editor runs, and closing it stops the editor.
 2. Start **CO Costume Editor** from the Start menu (the installer can start it for you the first time).
-3. The editor opens in its own window (Microsoft Edge or Google Chrome with no tabs or address bar; without either, your normal browser).
+3. The editor opens in its own window, with no tabs or address bar: your default browser if it's Chrome, Edge, Brave or Vivaldi, else Edge or Chrome (without either, a normal browser tab).
    - Closing the editor window stops the editor.
    - While it's open you can also use it in any browser at `http://localhost:8765`.
    - If it can't find your game, the **Settings** box opens. Pick your Champions Online folder (for example `C:\Program Files (x86)\Steam\steamapps\common\Champions Online`) with **Browse…**, or paste the path and press Enter.

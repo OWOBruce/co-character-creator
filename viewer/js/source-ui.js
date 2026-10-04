@@ -108,7 +108,7 @@ export async function setupSettings(button, opts = {}) {
       now.disabled = false;
       if (!res) { updState.hidden = true; return; }  // the test page doesn't ask
       updState.classList.toggle('bad', !!res.error && !res.newer);
-      updState.textContent = res.newer ? `Version ${res.version} is out. About has the download link.`
+      updState.textContent = res.newer ? `Version ${res.version} is out. About has ${res.installable ? 'Update now' : 'the download link'}.`
         : res.error ? "GitHub couldn't be reached. Try again in a little while."
         : `You have the newest version (${res.current}).`;
     };
