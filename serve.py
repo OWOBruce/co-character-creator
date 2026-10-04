@@ -24,7 +24,8 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
 /api/settings -> POST {"account"} and/or {"checkUpdates"}: remember the account name for saved costumes, or
                 whether to look for new versions, in settings.json
 /api/update  -> GET: the newest release on GitHub {"version", "url"}, asked at most once a day, or {"off": true}
-                when Settings turns the check off (latest_release)
+                when Settings turns the check off (latest_release); ?force=1 (Settings' Check now) asks now,
+                and {"error": true} says GitHub couldn't be reached
 /api/source  -> GET: the game folder in use, what was found, the saved account and the state of the editor's data (build);
                 POST {"path"}: use another folder; POST {"browse": true}: open a folder picker on this
                 machine and use what's chosen.
@@ -297,30 +298,33 @@ RELEASES = 'https://api.github.com/repos/codexheroes/co-character-creator/releas
 RELEASE_LOCK = threading.Lock()
 
 
-def latest_release():
+def latest_release(force=False):
     """The newest published release, for the page's "new version" notice: {'version', 'url', 'checked'}.
     GitHub is asked at most once a day; the answer is kept in settings.json (latestRelease), which also
-    answers when GitHub can't be reached (then asked again in an hour). {'off': True} when Settings turns
-    checking off (checkUpdates false). Nothing about the player or their costumes is sent."""
+    answers when GitHub can't be reached (then asked again in an hour, and 'error' is set). {'off': True}
+    when Settings turns checking off (checkUpdates false). force (Settings' Check now) asks GitHub now, even
+    with the daily check off, unless it was asked in the last minute (GitHub allows 60 asks an hour).
+    Nothing about the player or their costumes is sent."""
     import time
     import urllib.request
-    if load_settings().get('checkUpdates') is False:
+    if not force and load_settings().get('checkUpdates') is False:
         return {'off': True}
     with RELEASE_LOCK:
         known = load_settings().get('latestRelease') or {}
-        if time.time() - known.get('checked', 0) < 86400:
+        if time.time() - known.get('checked', 0) < (60 if force else 86400):
             return known
+        failed = False
         try:
             req = urllib.request.Request(RELEASES, headers={'Accept': 'application/vnd.github+json',
                                                             'User-Agent': 'CO-Costume-Editor'})
             rel = json.loads(urllib.request.urlopen(req, timeout=5).read())
             known = {'version': rel['tag_name'].lstrip('vV'), 'url': rel['html_url'], 'checked': time.time()}
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
-            known = {**known, 'checked': time.time() - 86400 + 3600}
+            known, failed = {**known, 'checked': time.time() - 86400 + 3600}, True
         s = load_settings()
         s['latestRelease'] = known
         save_settings(s)
-        return known
+        return {**known, 'error': True} if failed else known
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -357,8 +361,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_json({**SOURCE.info(), 'found': candidates(), 'saved': settings.get('gameFolder'),
                             'account': settings.get('account', ''), 'checkUpdates': settings.get('checkUpdates') is not False})
             return None
-        if clean == '/api/update':
-            self.send_json(latest_release())
+        if clean == '/api/update':  # ?force=1: Settings' Check now
+            query = http.server.urllib.parse.parse_qs(self.path.split('?', 1)[1] if '?' in self.path else '')
+            self.send_json(latest_release(force=query.get('force') == ['1']))
             return None
         if clean == '/api/test/costume-files':
             self.send_json(list(saved_costumes()))

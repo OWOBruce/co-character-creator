@@ -99,8 +99,22 @@ export async function setupSettings(button, opts = {}) {
                                     body: JSON.stringify({ checkUpdates: upd.checked }) }).catch(() => {});
       if (upd.checked) checkForUpdate(); else clearUpdate();
     };
-    updSec.append(el('div', 'gfLabel', 'Updates'), updLabel,
-      el('div', 'gfState', 'Once a day the editor asks GitHub which version is the newest. It sends nothing else: no costumes, settings or game details.'));
+    // Check now: ask GitHub straight away (works with the daily check off too) and say what came back
+    const now = el('button', null, 'Check now'); now.type = 'button'; now.title = 'Ask GitHub now whether a newer version is out';
+    const updState = el('div', 'gfState'); updState.setAttribute('role', 'status'); updState.hidden = true;
+    now.onclick = async () => {
+      now.disabled = true; updState.hidden = false; updState.classList.remove('bad'); updState.textContent = 'Asking GitHub…';
+      const res = await checkForUpdate({ force: true });
+      now.disabled = false;
+      if (!res) { updState.hidden = true; return; }  // the test page doesn't ask
+      updState.classList.toggle('bad', !!res.error && !res.newer);
+      updState.textContent = res.newer ? `Version ${res.version} is out. About has the download link.`
+        : res.error ? "GitHub couldn't be reached. Try again in a little while."
+        : `You have the newest version (${res.current}).`;
+    };
+    const updRow = el('div', 'gfRow'); updRow.append(updLabel, now);
+    updSec.append(el('div', 'gfLabel', 'Updates'), updRow, updState,
+      el('div', 'gfState', 'Once a day the editor asks GitHub which version is the newest, and Check now asks straight away. It sends nothing else: no costumes, settings or game details.'));
     // a picture of the current character from four sides (sheet.js), when the page provides it
     const sheetSec = el('div', 'gameFolder');
     if (opts.exportSheet) {

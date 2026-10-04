@@ -28,15 +28,19 @@ function showVersion() {
 }
 
 // Ask the server for the newest release (not under the test page, which runs offline); quietly does nothing
-// when it can't tell. Called at start, and again when Settings turns checking back on.
-export async function checkForUpdate() {
-  if (new URLSearchParams(location.search).has('test')) return;
+// when it can't tell. Called at start, and again when Settings turns checking back on. force (Settings' Check
+// now) has the server ask GitHub straight away; the answer, {version, error, newer, current}, is for Settings
+// to say what it found.
+export async function checkForUpdate({ force = false } = {}) {
+  if (new URLSearchParams(location.search).has('test')) return null;
+  let rel;
   try {
-    const r = await fetch('api/update');
-    const rel = r.ok ? await r.json() : {};
-    newer = rel.version && isNewer(rel.version, VERSION) ? rel : null;
-  } catch { newer = null; }
+    const r = await fetch(force ? 'api/update?force=1' : 'api/update');
+    rel = r.ok ? await r.json() : { error: true };
+  } catch { rel = { error: true }; }
+  newer = rel.version && isNewer(rel.version, VERSION) ? rel : null;
   showVersion();
+  return { ...rel, newer: !!newer, current: VERSION };
 }
 export function clearUpdate() { newer = null; showVersion(); }
 
