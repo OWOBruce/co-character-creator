@@ -10,8 +10,8 @@ The zip and the installer hold the editor's source and, in python/, the Python t
 nothing installed: python.org's embeddable package (PYTHON, checked against the SHA-256 python.org lists) with
 Pillow and numpy added, and tkinter (the folder and file pickers), which the package leaves out, copied from the
 Python running this script. So making it needs that same Python version (3.14). The installer's shortcuts run
-python\pythonw.exe app_launcher.py (no console; it quits when its window closes), and start.bat uses python\
-when it's there. Every program in there is Python's own, signed by the Python Software Foundation; the
+python\\pythonw.exe app_launcher.py (no console; it quits when its window closes), and start.bat uses
+python\\ when it's there. Every program in there is Python's own, signed by the Python Software Foundation; the
 unsigned PyInstaller program the releases used to have drew antivirus guesses (Trojan:Win32/Wacatac!ml).
 --source-only leaves Python out (the old, small zip; needs Python installed). The working files go to
 %LOCALAPPDATA%/CO Costume Editor/release-build, outside the project.
