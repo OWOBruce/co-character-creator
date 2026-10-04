@@ -17,7 +17,7 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 ## Starting it
 
 1. Download **[CO-Costume-Editor-Setup.exe](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version; older ones are on the [releases page](https://github.com/codexheroes/co-character-creator/releases)) and run it.
-   - Windows may say **"Windows protected your PC"**, because the installer isn't signed by a paid certificate. Click **More info**, then **Run anyway**.
+   - Your browser may warn that the installer isn't commonly downloaded; choose to keep it. Windows may then say **"Windows protected your PC"**: click **More info**, then **Run anyway**. Both happen because the installer isn't code-signed ([why, and how to check it](#code-signing-and-checking-a-download)). Once it's installed, **Update now** updates the editor without going through the browser.
    - It installs into `C:\Program Files\CO Costume Editor` (Windows asks for admin rights), or, if you choose **Install for me only**, into your own `%LOCALAPPDATA%\Programs` without them. It adds the editor to the Start menu (and the desktop, if you tick that box).
    - What the editor makes (the data built from your game, its settings and logs) is kept in **`%LOCALAPPDATA%\CO Costume Editor`**.
    - To update, run a newer installer. It says which version you have and offers to update it, in the same folder with the same choices, and keeps that data. (It asks first before reinstalling the same version or putting an older one over a newer one.) Uninstall it from Windows' **Installed apps**; it asks whether to delete the data too.
@@ -130,22 +130,20 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 - **Running from the source code:** Python 3.10 or newer, plus Pillow and NumPy (`requirements.txt`; `start.bat` installs them).
 - **For developers only:** Python 3.14 and [Inno Setup 6](https://jrsoftware.org/isinfo.php) to make the installer, the `anthropic` package for writing the piece descriptions (`describe.py`), `capstone` for `tools\disasm.py`, and Node.js for one test. See [DEVELOPER.md](DEVELOPER.md).
 
-## Code signing policy
+## Code signing, and checking a download
 
-Windows releases will be signed through the [SignPath Foundation](https://signpath.org), which signs
-open-source projects for free (application pending). Until then the installer is unsigned, so Windows may
-warn about it.
+The installer isn't code-signed. A certificate costs money every year, and the free signing programmes for open-source projects want a track record this project doesn't have yet. So Windows SmartScreen, your browser and some antivirus programs may warn about a new release until enough people have downloaded it. The program itself has no exe of its own: the Python it installs is python.org's, signed by the Python Software Foundation, so the installer is the only unsigned file.
 
-- **What gets signed:** only the Windows installer, `CO-Costume-Editor-<version>-Setup.exe`, built by GitHub
-  Actions from this repository's source (`.github/workflows/release.yml`). The Python it installs is
-  python.org's own, already signed by the Python Software Foundation.
-- **Who:** [sadronmeldir](https://github.com/sadronmeldir) writes the code (author), reviews any outside
-  contribution before it's merged (reviewer), and approves each signing request by hand (approver).
-- **Privacy:** see [Privacy](#privacy). The editor sends nothing about you, your costumes or your game.
+You can check that a download is the real thing:
+
+- **Built in the open:** every release is built by GitHub Actions from this repository's source (`.github/workflows/release.yml`), not on anyone's PC.
+- **Build attestations:** each file carries one. With the [GitHub CLI](https://cli.github.com/), `gh attestation verify CO-Costume-Editor-Setup.exe --repo codexheroes/co-character-creator` shows it was built by that workflow from this repository, and from which commit.
+- **Checksums:** the release page lists each file's SHA-256. **Update now** checks the installer against it before starting it.
+- **Who:** [sadronmeldir](https://github.com/sadronmeldir) writes the code and reviews any outside contribution before it's merged.
 
 ## Privacy
 
-Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above, and, at most once a day, the number of the newest release from GitHub, so the editor can tell you about updates (nothing else is sent: no costumes, settings or game details; turn it off in **Settings** → **Updates**). Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
+Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above, and, at most once a day (or when you press **Check now**), the number of the newest release from GitHub, so the editor can tell you about updates (nothing else is sent: no costumes, settings or game details; turn it off in **Settings** → **Updates**). When you click **Update now**, the new installer is downloaded from GitHub. Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
 
 ## Feedback and source code
 
