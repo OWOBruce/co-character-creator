@@ -91,9 +91,11 @@ def build_program():
     scripts = [f for f in files() if f.endswith('.py') and not f.startswith('tests/') and f != 'app_launcher.py']
     hidden = imported_modules(scripts)
     shutil.rmtree(WORK, ignore_errors=True)
+    # never UPX-packed: antivirus distrusts packed programs
     cmd = [sys.executable, '-m', 'PyInstaller', os.path.join(HERE, 'app_launcher.py'), '--name', APP_NAME,
-           '--windowed', '--noconfirm', '--icon', os.path.join(HERE, 'app.ico'),
-           '--distpath', os.path.join(WORK, 'dist'), '--workpath', os.path.join(WORK, 'build'), '--specpath', WORK,
+           '--windowed', '--noconfirm', '--noupx', '--icon', os.path.join(HERE, 'app.ico'),
+           '--version-file', version_file(), '--distpath', os.path.join(WORK, 'dist'),
+           '--workpath', os.path.join(WORK, 'build'), '--specpath', WORK,
            '--log-level', 'WARN'] + [x for m in hidden for x in ('--hidden-import', m)]
     print(f'Freezing the program ({len(hidden)} modules the scripts import)...', flush=True)
     subprocess.run(cmd, check=True)
@@ -103,6 +105,26 @@ def build_program():
 def version():
     text = open(os.path.join(HERE, 'viewer', 'js', 'version.js'), encoding='utf-8').read()
     return re.search(r"VERSION = '([^']+)'", text).group(1)
+
+
+def version_file():
+    """The .exe's version details (Properties > Details), in PyInstaller's --version-file format -> its path in
+    WORK. Code signing (SignPath) requires them, and antivirus is warier of programs without them. The
+    publisher matches installer/setup.iss."""
+    v = version()
+    nums = tuple((list(map(int, re.findall(r'\d+', v))) + [0, 0, 0, 0])[:4])
+    strings = {'CompanyName': 'sadders1', 'FileDescription': APP_NAME, 'FileVersion': v, 'InternalName': APP_NAME,
+               'LegalCopyright': 'Free software under the GPL-3.0', 'OriginalFilename': APP_NAME + '.exe',
+               'ProductName': APP_NAME, 'ProductVersion': v}
+    text = (f'VSVersionInfo(ffi=FixedFileInfo(filevers={nums}, prodvers={nums}, mask=0x3f, flags=0x0, OS=0x40004, '
+            'fileType=0x1, subtype=0x0, date=(0, 0)), kids=[StringFileInfo([StringTable("040904B0", ['
+            + ', '.join(f'StringStruct({k!r}, {s!r})' for k, s in strings.items())
+            + '])]), VarFileInfo([VarStruct("Translation", [1033, 1200])])])')
+    os.makedirs(WORK, exist_ok=True)
+    path = os.path.join(WORK, 'version_info.txt')
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(text)
+    return path
 
 
 def find_iscc():

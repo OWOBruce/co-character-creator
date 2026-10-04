@@ -1,6 +1,11 @@
 # Pushing a version tag (git tag v0.5.1 && git push origin v0.5.1) builds CO Costume Editor.exe and the
 # installer on a Windows runner and publishes them, with the zip, as a GitHub Release. The tag must match
 # viewer/js/version.js. Run it by hand (Actions > Release > Run workflow) to just build and download them.
+#
+# Every file it makes gets a build attestation, so anyone can check a download was built here from this repo:
+#   gh attestation verify CO-Costume-Editor-Setup.exe --repo codexheroes/co-character-creator
+# The actions are pinned to commits (the tag they were is in the comment), so a moved or hijacked tag can't
+# change what runs; to update one, look up the new tag's commit (gh api repos/<owner>/<action>/commits/<tag>).
 name: Release
 
 on:
@@ -9,22 +14,42 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write           # publish the release
+  id-token: write           # the attestation's signing certificate
+  attestations: write       # store the attestation
+  artifact-metadata: write
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.10'
 
+      # PyInstaller's launcher (the start of CO Costume Editor.exe) is compiled here with the runner's Visual
+      # Studio rather than taken prebuilt from PyPI: malware ships that prebuilt one too, so antivirus that
+      # guesses by machine learning flags programs that have it (Defender's Trojan:Win32/Wacatac.B!ml).
       - name: Install the build's tools
+        env:
+          PYINSTALLER_COMPILE_BOOTLOADER: '1'
         run: |
-          python -m pip install --disable-pip-version-check -r requirements.txt pyinstaller
+          python -m pip install --disable-pip-version-check -r requirements.txt
+          python -m pip install --disable-pip-version-check --no-binary=pyinstaller pyinstaller==6.22.3
           choco install innosetup -y --no-progress
+
+      - name: Check PyInstaller's launcher was compiled here
+        shell: python
+        run: |
+          import os, struct, sys, time, PyInstaller
+          exe = os.path.join(os.path.dirname(PyInstaller.__file__), 'bootloader', 'Windows-64bit-intel', 'runw.exe')
+          data = open(exe, 'rb').read()
+          linked = struct.unpack_from('<I', data, struct.unpack_from('<I', data, 0x3c)[0] + 8)[0]  # PE header time
+          print('runw.exe linked', time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime(linked)))
+          if time.time() - linked > 86400:
+              sys.exit('That is the prebuilt launcher from PyPI, not one compiled by this run')
 
       - name: Check the tag matches viewer/js/version.js
         if: startsWith(github.ref, 'refs/tags/')
@@ -42,9 +67,16 @@ jobs:
         shell: bash
         run: cp dist/CO-Costume-Editor-*-Setup.exe dist/CO-Costume-Editor-Setup.exe
 
+      - name: Attest where the files were built
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
+        with:
+          subject-path: |
+            dist/*-Setup.exe
+            dist/*.zip
+
       - name: Publish the release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
           name: CO Costume Editor ${{ github.ref_name }}
           generate_release_notes: true
@@ -54,7 +86,7 @@ jobs:
 
       - name: Keep the files (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: co-costume-editor
           path: |
