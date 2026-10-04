@@ -129,6 +129,19 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 - **Running from the source code:** Python 3.10 or newer, plus Pillow and NumPy (`requirements.txt`; `start.bat` installs them).
 - **For developers only:** Python 3.14 and [Inno Setup 6](https://jrsoftware.org/isinfo.php) to make the installer, the `anthropic` package for writing the piece descriptions (`describe.py`), `capstone` for `tools\disasm.py`, and Node.js for one test. See [DEVELOPER.md](DEVELOPER.md).
 
+## Code signing policy
+
+Windows releases will be signed through the [SignPath Foundation](https://signpath.org), which signs
+open-source projects for free (application pending). Until then the installer is unsigned, so Windows may
+warn about it.
+
+- **What gets signed:** only the Windows installer, `CO-Costume-Editor-<version>-Setup.exe`, built by GitHub
+  Actions from this repository's source (`.github/workflows/release.yml`). The Python it installs is
+  python.org's own, already signed by the Python Software Foundation.
+- **Who:** [sadronmeldir](https://github.com/sadronmeldir) writes the code (author), reviews any outside
+  contribution before it's merged (reviewer), and approves each signing request by hand (approver).
+- **Privacy:** see [Privacy](#privacy). The editor sends nothing about you, your costumes or your game.
+
 ## Privacy
 
 Everything runs on your own computer. The editor's server only answers your own PC (`127.0.0.1`), and it reads your game files without changing them. The only things fetched from the internet are three.js and the fonts above, and, at most once a day, the number of the newest release from GitHub, so the editor can tell you about updates (nothing else is sent: no costumes, settings or game details; turn it off in **Settings** → **Updates**). Saved costumes go to your game's `Live\screenshots` folder, and the editor's settings to `settings.json` (in `%LOCALAPPDATA%\CO Costume Editor` when installed, else in the editor's folder).
