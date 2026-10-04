@@ -74,7 +74,7 @@ At the top:
   - **Play** the animation, **Loop wings**, and the jiggle (**Bouncers**) and **Cloth** physics.
   - Wind on capes (off by default). The game's outdoor wind is about 1.5; stronger wind makes cloth flutter hard, front and back pieces in opposite directions, as in the game.
   - **Shake** sways the character to see the bouncers and cloth move.
-- **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours. **Background** changes the colour behind the character: with **Comic art** ticked it recolours the tailor's comic page, unticked it's a plain colour. **Reset** puts back the tailor's blue. The left panel always keeps the tailor's blue, and the background isn't remembered between sessions.
+- **Scene**: the **Floor grid**, the **Height ruler**, and **Compare with**, another character beside yours. **Background** sets what's behind the character: a colour, and art over it in that colour. **Comic page** is the tailor's comic page, **None** is just the colour, and the drawn ones are **Halftone**, **Speed lines**, **Studio spotlight**, **Starburst**, **Sunburst**, **Blueprint**, **Starfield** and **Hex shield**. It's remembered between sessions, and **Reset** puts back the tailor's blue comic page. The left panel always keeps the tailor's blue. A character sheet with the **Same as view** background uses it too.
 - **Inspect**, for checking pieces:
   - **Skeleton** and **Wireframe** draw the bones and each piece's triangles.
   - **Normal maps** (on by default) are the painted-on bumps: wrinkles, seams, stitching and muscle definition. Untick it to see each piece's bare shape.

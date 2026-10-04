@@ -56,6 +56,7 @@
   .opts .bgRow { display:flex; align-items:center; gap:8px; margin-top:4px; }
   .opts .bgRow label { margin:0; }
   .bgRow button { font-size:13px; padding:1px 8px; margin-left:auto; }
+  .bgRow select { flex:1; width:auto; min-width:0; }
   .lightOpts.off { opacity:.45; }
   .titleRow { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; }
   .titleRow h1 { margin:0; }
@@ -208,6 +209,10 @@
               background:url(ui/zippatone.png) left bottom/100% 6px no-repeat; }
   .mainTabs button { flex:1; font-size:16px; padding:4px 1px; white-space:nowrap; }
   .fileRow { gap:4px; } .fileRow button { white-space:nowrap; font-size:14px; padding:3px 5px; }
+  /* New masculine / New feminine / Load+Save share their columns with Costume / Body / Stance & Mood below */
+  .topGrid { display:grid; grid-template-columns:repeat(3, 1fr); column-gap:4px; }
+  .topGrid > .fileRow, .topGrid > .mainTabs { grid-column:1 / -1; display:grid; grid-template-columns:subgrid; column-gap:4px; }
+  .fileOps { display:flex; gap:4px; } .fileOps button { flex:1; min-width:0; }
   .viewOpts { margin-top:12px; padding-top:10px; border-top:1px solid #9fc4ff73; }
   .viewTabs { display:flex; gap:2px; margin:8px 0 6px; }
   .viewTabs button { flex:1; font-size:14px; padding:2px 1px; white-space:nowrap; }
@@ -361,9 +366,9 @@
       <div class="titleBtns"><button id="settings" type="button" title="Settings (game folder, account, character sheet)" aria-haspopup="dialog">Settings</button>
         <button id="about" type="button" title="Who made this, thanks, and the legal notice" aria-haspopup="dialog">About</button></div></div>
     <label>Start from <select id="costume"></select></label>
-    <div class="row fileRow"><button id="blankM" type="button" title="Start a blank costume on the masculine body">New masculine</button><button id="blankF" type="button" title="Start a blank costume on the feminine body">New feminine</button>
-      <span style="flex:1"></span><button id="loadCostume" type="button" title="Open a costume saved by the game (Live/screenshots/Costume_*.jpg), a demo recording (Live/demos/*.demo: pick a player) or a costume JSON (index/GUIDE.md); you can also drop one on the page or paste JSON">Load</button><button id="saveCostume" type="button" title="Save as a game costume file">Save</button></div>
-    <div class="mainTabs"><button data-tab="costume" class="on">Costume</button><button data-tab="body">Body</button><button data-tab="stance">Stance &amp; Mood</button></div>
+    <div class="topGrid"><div class="row fileRow"><button id="blankM" type="button" title="Start a blank costume on the masculine body">New masculine</button><button id="blankF" type="button" title="Start a blank costume on the feminine body">New feminine</button>
+      <span class="fileOps"><button id="loadCostume" type="button" title="Open a costume saved by the game (Live/screenshots/Costume_*.jpg), a demo recording (Live/demos/*.demo: pick a player) or a costume JSON (index/GUIDE.md); you can also drop one on the page or paste JSON">Load</button><button id="saveCostume" type="button" title="Save as a game costume file">Save</button></span></div>
+    <div class="mainTabs"><button data-tab="costume" class="on">Costume</button><button data-tab="body">Body</button><button data-tab="stance">Stance &amp; Mood</button></div></div>
     <div id="tab-costume" class="tabPage"><div id="parts"></div></div>
     <div id="tab-body" class="tabPage" hidden><div id="bodySliders"></div></div>
     <div id="tab-stance" class="tabPage" hidden><div id="stancePanel"></div></div>
@@ -398,7 +403,7 @@
           <label><input type="checkbox" id="showGrid"> Floor grid</label>
           <label title="A measuring stick beside the character, marked at the height the Height slider gives (hair and hats don't count)"><input type="checkbox" id="showRuler"> Height ruler</label>
           <div class="compareRow"><label title="Another character beside yours, in the same stance: a default in grey at the game's default body, or one from a saved costume or demo"><input type="checkbox" id="compare"> Compare with</label><select id="compareWith" aria-label="Compare with"><option value="same">the same body type</option><option value="Male">a masculine default</option><option value="Female">a feminine default</option><option value="file" hidden>a character from a file…</option><option value="pick">a character from a file…</option></select></div>
-          <div class="bgRow" title="The 3D view's background. The left panel keeps the tailor's blue."><span>Background</span><input type="color" id="viewBg" aria-label="Background colour" title="The background's colour"><label title="The tailor's comic page, in the colour picked. Untick for a plain colour."><input type="checkbox" id="viewComic" checked> Comic art</label><button id="viewBgReset" type="button" title="Back to the tailor's blue comic page">Reset</button></div>
+          <div class="bgRow" title="The 3D view's background. The left panel keeps the tailor's blue."><span>Background</span><input type="color" id="viewBg" aria-label="Background colour" title="The background's colour"><select id="viewOverlay" aria-label="Background art" title="Art over the colour: the tailor's comic page, a drawn pattern, or None for a plain colour"></select><button id="viewBgReset" type="button" title="Back to the tailor's blue comic page">Reset</button></div>
         </div>
       </div>
       <div class="viewPage away" id="view-inspect" role="tabpanel" inert>
@@ -451,7 +456,7 @@ import { CompareFigure } from './js/compare.js';
 import { setColourDropper, DROPPER_CURSOR } from './js/colors.js';
 import { pickColour } from './js/pick.js';
 import { setGameLighting, turnLighting, getSun, setSun, lightingReady } from './js/shader-graph.js';
-import { backdrop, applyBackdrop, TAILOR_BLUE } from './js/backdrop.js';
+import { backdrop, applyBackdrop, saveBackdrop, OVERLAYS, TAILOR_BLUE } from './js/backdrop.js';
 
 const $ = id => document.getElementById(id);
 const BUILD_NAMES = { Male: 'masculine', Female: 'feminine' };  // the skeletons, as the page names them
@@ -745,15 +750,19 @@ lightUsable();
 lightingReady.then(sun => { creatorLight = sun; if (sun) showLight(); lightUsable(); });
 $('lightReset').onclick = () => { if (creatorLight) { setSun({ ...creatorLight, colour: [...creatorLight.colour] }); showLight(); } };
 $('gameLight').onchange = () => { setGameLighting($('gameLight').checked); lightUsable(); };
-// View options > Scene > Background: the 3D view's own (backdrop.js); the left panel keeps the page's
+// View options > Scene > Background: the 3D view's own (backdrop.js), remembered; the left panel keeps the page's
+for (const [value, label, tip] of OVERLAYS) $('viewOverlay').append(Object.assign(document.createElement('option'), { value, textContent: label, title: tip }));
 function showBackdrop() {
   applyBackdrop($('view'));
-  $('viewBg').value = backdrop.colour || TAILOR_BLUE; $('viewComic').checked = backdrop.comic;
+  $('viewBg').value = backdrop.colour || TAILOR_BLUE; $('viewOverlay').value = backdrop.overlay;
 }
-$('viewBg').oninput = () => { backdrop.colour = $('viewBg').value; applyBackdrop($('view')); };
-$('viewComic').onchange = () => { backdrop.comic = $('viewComic').checked; applyBackdrop($('view')); };
-$('viewBgReset').onclick = () => { backdrop.colour = null; backdrop.comic = true; showBackdrop(); };
+$('viewBg').oninput = () => { backdrop.colour = $('viewBg').value; applyBackdrop($('view')); saveBackdrop(); };
+$('viewOverlay').onchange = () => { backdrop.overlay = $('viewOverlay').value; applyBackdrop($('view')); saveBackdrop(); };
+$('viewBgReset').onclick = () => { backdrop.colour = null; backdrop.overlay = 'comic'; showBackdrop(); saveBackdrop(); };
 showBackdrop();
+// the drawn overlays fit the view: draw them again at its new size
+let backdropResize = 0;
+addEventListener('resize', () => { clearTimeout(backdropResize); backdropResize = setTimeout(() => applyBackdrop($('view')), 150); });
 // Shake: sway the whole character side to side for a moment (the bouncers see the movement)
 $('shake').onclick = () => {
   const t0 = performance.now(), g = ch.group;
