@@ -26,7 +26,8 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
 /api/update  -> GET: the newest release on GitHub {"version", "url"}, asked at most once a day, or {"off": true}
                 when Settings turns the check off (latest_release); ?force=1 (Settings' Check now) asks now,
                 and {"error": true} says GitHub couldn't be reached. Also {"current", "installable"}: this
-                version, and whether Update now can install a newer one
+                version, and whether Update now can install a newer one, and for a git clone {"gitFolder"}:
+                where to run git pull
 /api/update/install -> POST {}: Update now (install_update): download the newest installer, check it against
                 GitHub's SHA-256 for it, start it and stop the editor; GET /api/update/status says how it's going
 /api/open    -> POST {"url"}: open one of the project's pages (GitHub, codexheroes.com) in the default browser
@@ -55,7 +56,7 @@ import threading
 from functools import lru_cache
 
 from gamefs import GameFS, candidates, default_folder, find_piggs, load_settings, renders_folder, save_settings
-from paths import INSTALLED, claude_workspace, data
+from paths import GIT, INSTALLED, claude_workspace, data
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, 'viewer')
@@ -489,7 +490,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return None
         if clean == '/api/update':  # ?force=1: Settings' Check now
             query = http.server.urllib.parse.parse_qs(self.path.split('?', 1)[1] if '?' in self.path else '')
-            self.send_json({**latest_release(force=query.get('force') == ['1']), 'current': editor_version(), 'installable': can_update()})
+            self.send_json({**latest_release(force=query.get('force') == ['1']), 'current': editor_version(), 'installable': can_update(),
+                            **({'gitFolder': HERE} if GIT and not INSTALLED else {})})
             return None
         if clean == '/api/update/status':  # how Update now is getting on
             self.send_json(dict(UPDATE))

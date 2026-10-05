@@ -7,11 +7,16 @@ DATA  what the editor makes and writes: catalog/, index/, viewer/data/, viewer/u
 DATA is this folder too (running from the source, or from the zip), unless the installer's marker installed.ini
 sits here: an install can be in Program Files, which only an administrator can write to, so its DATA is
 %LOCALAPPDATA%/CO Costume Editor (also where the logs go). The environment variable CO_EDITOR_DATA overrides both.
+INSTALLED and GIT say how this copy got here, and so how it updates: the installer (Update now), a git clone
+(git pull), or neither (the release zip, or GitHub's Download ZIP: a new download).
 """
 import os
 
 CODE = os.path.dirname(os.path.abspath(__file__))
 INSTALLED = os.path.isfile(os.path.join(CODE, 'installed.ini'))
+# a git clone (the README's "run it from the source"), which updates with git pull rather than the installer;
+# exists, not isdir: in a worktree or submodule .git is a file
+GIT = os.path.exists(os.path.join(CODE, '.git'))
 USER_DIR = os.path.join(os.environ.get('LOCALAPPDATA') or os.path.expanduser('~'), 'CO Costume Editor')
 DATA = os.environ.get('CO_EDITOR_DATA') or (USER_DIR if INSTALLED else CODE)
 

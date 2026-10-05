@@ -2,7 +2,8 @@
 // It also tells the player when a newer version is out: serve.py asks GitHub at most once a day (/api/update,
 // off in Settings), and a newer one shows in the version label in the corner and at the top of the About box,
 // with Update now in the installed editor: serve.py downloads the installer, checks it and starts it
-// (/api/update/install), so the update doesn't go through the browser's download checks.
+// (/api/update/install), so the update doesn't go through the browser's download checks. A git clone (the
+// README's "run it from the source") is told to run git pull in its folder instead.
 // Links open in the default browser through serve.py (/api/open): the editor's own window may be Edge while the
 // player's browser is another. Other modules can add a section (aboutSection): what's new in the game does.
 import { VERSION } from './version.js';
@@ -10,7 +11,7 @@ function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.
 
 const INSTALLER = 'https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe';
 const RELEASE = 'https://github.com/codexheroes/co-character-creator/releases/latest';
-// newer: {version, url, current, installable} of a release newer than this one
+// newer: {version, url, current, installable, gitFolder} of a release newer than this one
 let aboutButton = null, versionLabel = null, newer = null;
 let update = { state: 'idle' };   // Update now (serve.py's UPDATE): idle, downloading, checking, starting, started, error
 let updateUI = null;              // { button, state } in the open About box
@@ -120,7 +121,8 @@ export function setupAbout(button, label) {
     box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'aboutHead');
     const head = el('div', 'phead', 'CO Costume Editor ' + VERSION); head.id = 'aboutHead';
 
-    // a newer version: Update now (the installed editor), or where to get it; updating keeps everything
+    // a newer version: Update now (the installed editor), git pull (a git clone), or where to get it; updating
+    // keeps everything
     const stops = [];
     let updateBox = null;
     if (newer) {
@@ -139,6 +141,13 @@ export function setupAbout(button, label) {
         updateBox.append(line, row, state, el('p', null, 'Update now downloads the installer from GitHub, checks it, and starts it. '
           + "The editor closes while it updates. Your settings and the editor's data stay."));
         stops.push(notes, now, self);
+      } else if (newer.gitFolder) {
+        line.append(el('span', 'aboutSub', 'New version!'), ` Version ${newer.version} is out (`, notes, ').');
+        const how = el('p');
+        how.append('To update, run ', el('code', null, 'git pull'), ' in ', el('code', null, newer.gitFolder),
+          ", then start the editor again. Your settings and the editor's data stay.");
+        updateBox.append(line, how);
+        stops.push(notes);
       } else {
         const get = external(el('a', null, `Download version ${newer.version}`), INSTALLER);
         line.append(el('span', 'aboutSub', 'New version!'), ' ', get, ' (', notes, ').');

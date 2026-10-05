@@ -4,7 +4,7 @@ A costume creator for **Champions Online** that runs in your web browser. You ca
 
 The editor reads everything (pieces, materials, colours, animations) straight from your own copy of the game. It contains no game files, and it never changes your install.
 
-**[⬇ Download the installer for Windows](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version) · [All releases](https://github.com/codexheroes/co-character-creator/releases)
+**[⬇ Download the installer for Windows](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version) · [All releases](https://github.com/codexheroes/co-character-creator/releases) · [No installer: run it from the source](#without-the-installer-from-the-source-code-with-git-and-python)
 
 ## System requirements
 
@@ -53,9 +53,24 @@ The editor's figures are recommendations from testing it, not official requireme
 
 Starting it again while the editor is already open just opens another editor window. The editor stops about 10 seconds after its last window closes.
 
-### Starting it from the source code, with Python (`start.bat`)
+### Without the installer: from the source code, with Git and Python
 
-Download the source from [GitHub](https://github.com/codexheroes/co-character-creator) (**Code → Download ZIP**, or `git clone`). `start.bat` starts the same editor with an installed Python (3.10 or newer, from [python.org](https://www.python.org/downloads/) with **"Add python.exe to PATH"** ticked). It installs Pillow and numpy the first time. It keeps a black window open that shows what the editor is doing; closing that window stops the editor. `start.bat --browser` opens a normal browser tab instead of the editor window. This is handy for testing, or for an AI assistant that needs to start the editor.
+If you'd rather not run an unsigned installer, run the editor straight from this repository's code. Nothing of ours comes through your browser, so the warnings about the installer don't come up: the only programs involved are Git's and Python's own.
+
+1. Install [Git for Windows](https://git-scm.com/download/win) and [Python](https://www.python.org/downloads/) 3.10 or newer. In Python's installer, keep the default options (they include the `py` launcher, which `start.bat` uses, and tkinter, which the folder and file pickers use) and tick **"Add python.exe to PATH"**.
+2. Pick a folder for it. We suggest **`C:\Users\<you>\CO Costume Editor`**, in your own user folder. Avoid `C:\Program Files`, which needs admin rights to write to (the editor keeps its data beside its code), and folders that OneDrive or Dropbox sync, such as Documents or the Desktop on many PCs (the data it builds from your game is about 175 MB).
+3. Open **PowerShell** from the Start menu. It starts in `C:\Users\<you>`, so this puts the editor in the suggested folder:
+
+   ```
+   git clone https://github.com/codexheroes/co-character-creator.git "CO Costume Editor"
+   ```
+
+4. Open the new **CO Costume Editor** folder and double-click **`start.bat`**. The first time, it installs the two Python packages the editor needs (Pillow and NumPy), and the editor builds its data from your game, which takes about a minute and a half, as above. A black window stays open and shows what the editor is doing; closing it stops the editor. For a desktop shortcut, right-click `start.bat` → **Show more options** → **Send to** → **Desktop (create shortcut)**.
+
+- **Updating:** the editor tells you when a new version is out, and **About** says how. In PowerShell, run `cd "CO Costume Editor"`, then `git pull`, and start the editor again. Your settings and the editor's data stay. `git pull` gets the newest code, which can be a little ahead of the latest release.
+- **Removing it:** delete the folder.
+- **No Git?** **Code → Download ZIP** on [GitHub](https://github.com/codexheroes/co-character-creator) gets the same files, but you'd download it again to update, and Windows may ask before running `start.bat`, since it came through your browser.
+- `start.bat --browser` opens a normal browser tab instead of the editor window. This is handy for testing, or for an AI assistant that needs to start the editor.
 
 ## Using it
 
@@ -153,6 +168,8 @@ The editor comes with a skill for [Claude Code](https://claude.com/claude-code),
 ## Code signing, and checking a download
 
 The installer isn't code-signed. A certificate costs money every year, and the free signing programmes for open-source projects want a track record this project doesn't have yet. So Windows SmartScreen, your browser and some antivirus programs may warn about a new release until enough people have downloaded it. The program itself has no exe of its own: the Python it installs is python.org's, signed by the Python Software Foundation, so the installer is the only unsigned file.
+
+To avoid the unsigned installer altogether, [run the editor from the source code](#without-the-installer-from-the-source-code-with-git-and-python) with Git and Python instead.
 
 You can check that a download is the real thing:
 
