@@ -9,11 +9,13 @@ Reads the install's .hogg archives (gamefs.py / gamedata.py) and GameClient.exe,
   index/                       the costume index: every piece, material, pattern and colour, for people and AI
                                (build_index.py; guide in index_guide.md)
   viewer/data/build.json       which install and game version this was built from
-  viewer/data/whats_new.json   the pieces, materials and patterns each game patch added, and known_names.json,
-                               every name seen so far (whatsnew.py)
 
-It skips the work when build.json matches the install (same archives, same sizes and dates); --force
-rebuilds anyway. serve.py runs this by itself when the build is missing or the game has been patched.
+Only what the editor's parts list has goes in (parts_list.py, parts_list.json); a later version adds what a
+game update brings.
+
+It skips the work when build.json matches the install (same archives, same sizes and dates) and the parts
+list and What's new (lists_stamp); --force rebuilds anyway. serve.py runs this by itself when the build is
+missing, the game has been patched, or an editor update changed the parts list.
 Progress lines start with '## ' (the stage) and '%% ' (how much of the build is done, 0 to 1; buildprogress.py);
 serve.py shows both in the page. The bar is split between the stages by how long each took last time
 (build.json stageSeconds), else by STAGES' typical seconds.
@@ -28,7 +30,9 @@ sys.path.insert(0, os.path.join(HERE, 'tools'))
 from paths import data  # noqa: E402
 
 BUILD_INFO = data('viewer', 'data', 'build.json')
-VERSION = 6  # bump when the build's output changes, to force a rebuild (5: lighting.json, the creator sky's lights; 6: no vehicle bike in the index)
+VERSION = 8  # bump when the build's output changes, to force a rebuild (5: lighting.json, the creator sky's lights; 6: no vehicle bike in the index; 7: the parts list; 8: a piece with no display name takes its other body's)
+# files older versions made that the editor no longer uses (and settings.json's whatsNewSeen): deleted
+OLD_FILES = [data('viewer', 'data', 'known_names.json')]
 
 
 PACKAGES = {'PIL': 'Pillow', 'numpy': 'numpy'}  # import name -> pip name; also in requirements.txt
@@ -50,11 +54,24 @@ def missing_packages():
     return [pip for mod, pip in PACKAGES.items() if importlib.util.find_spec(mod) is None]
 
 
+def lists_stamp():
+    """A short hash of the parts list and What's new (parts_list.py): an editor update that adds parts rebuilds."""
+    import hashlib
+    import parts_list
+    h = hashlib.sha256()
+    for path in (parts_list.LIST, parts_list.NEWS):
+        try:
+            h.update(open(path, 'rb').read())
+        except OSError:
+            pass
+    return h.hexdigest()[:16]
+
+
 def current(folder=None):
-    """{folder, stamp, version} of the install as it is now."""
+    """{folder, stamp, version, lists} of the install and the editor as they are now."""
     from gamefs import default_folder, open_game
     fs = open_game(default_folder(folder))
-    return {'folder': fs.folder, 'stamp': fs.stamp(), 'version': VERSION}
+    return {'folder': fs.folder, 'stamp': fs.stamp(), 'version': VERSION, 'lists': lists_stamp()}
 
 
 def built():
@@ -66,17 +83,21 @@ def built():
 
 def up_to_date(folder=None):
     b, c = built(), current(folder)
-    return bool(b) and all(b.get(k) == c[k] for k in ('folder', 'stamp', 'version'))
+    return bool(b) and all(b.get(k) == c[k] for k in ('folder', 'stamp', 'version', 'lists'))
 
 
 def run(folder=None, force=False):
     from gamefs import default_folder, save_settings, load_settings
     folder = default_folder(folder)
-    if folder:  # the build and the server read the same install
-        s = load_settings()
-        if s.get('gameFolder') != folder:
+    s = load_settings()
+    if (folder and s.get('gameFolder') != folder) or 'whatsNewSeen' in s:  # the build and the server read the same install
+        s.pop('whatsNewSeen', None)
+        if folder:
             s['gameFolder'] = folder
-            save_settings(s)
+        save_settings(s)
+    for path in OLD_FILES:
+        if os.path.isfile(path):
+            os.remove(path)
     if not force and up_to_date(folder):
         step('Up to date')
         return
@@ -88,16 +109,8 @@ def run(folder=None, force=False):
     info = current(folder)
     step(f'Reading {info["folder"]}')
     import importlib
-    import whatsnew
     from buildprogress import span, timed
-    before = built() or {}
-    last = before.get('stageSeconds') or {}
-    # what's new is what this build has and the last one didn't: note the last one's names first, if there's
-    # nothing noted yet (the first patch after an editor update that brought this)
-    try:
-        whatsnew.baseline()
-    except Exception as e:  # never stops the build
-        print(f"Could not note what's in the game for what's new: {e!r}", flush=True)
+    last = (built() or {}).get('stageSeconds') or {}
     weights = [max(1, last.get(name, typical)) for name, typical, _ in STAGES]
     edges = [sum(weights[:i]) / sum(weights) for i in range(len(weights) + 1)]
     seconds = {}
@@ -108,14 +121,6 @@ def run(folder=None, force=False):
             # imported only now: a stage's modules read what the stages before it wrote (e.g. schema.json)
             importlib.import_module(module).main()
         seconds[name] = round(time.time() - t, 1)
-    # a patch: the same install with other archives (not another folder, nor only a newer build.py)
-    patched = before.get('folder') == info['folder'] and before.get('stamp') not in (None, info['stamp'])
-    try:
-        entry = whatsnew.record(patched)
-        if entry:
-            print("What's new: " + ', '.join(f'{sum(map(len, entry[k].values()))} {k}' for k, _ in whatsnew.KINDS), flush=True)
-    except Exception as e:
-        print(f"Could not work out what's new in the game: {e!r}", flush=True)
     json.dump({**info, 'builtAt': time.strftime('%Y-%m-%d %H:%M:%S'), 'seconds': round(time.time() - t0),
                'stageSeconds': seconds}, open(BUILD_INFO, 'w', encoding='utf-8'), indent=1)
     step(f'Done in {time.time() - t0:.0f} s')

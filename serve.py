@@ -9,7 +9,8 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
 /            -> viewer/
 /assets/...  -> the game's meshes (bin/geobin/**.mset) and textures (dds/**.dds), read straight out of the
                 Champions Online install's .hogg archives (a texture is its .wtex with the Cryptic header
-                stripped). Nothing is read from anywhere else.
+                stripped). Nothing is read from anywhere else. Only the ones the editor's data names are sent
+                (viewer/data/assets.json, from the parts list: parts_list.py); anything else is a 404.
 /api/check   -> POST {"costume"}: check a costume JSON (costume_check.py) -> {"doc", "problems"}
 /api/test/... -> for tests/run.py and viewer/test.html: the game's saved costumes (Live/screenshots/Costume_*.jpg,
                 read only) and the browser tests' results
@@ -21,8 +22,8 @@ once no editor page is open. Pages report in every 15 s and say goodbye when the
                 (then wherever the last file came from); answers the chosen file's bytes (X-File-Name: its name,
                 URL-encoded) or {"cancelled": true}
 /api/alive, /api/bye -> POST {"id"}: an editor page is open / has closed (for --quit-when-closed)
-/api/settings -> POST {"account"} and/or {"checkUpdates"}: remember the account name for saved costumes, or
-                whether to look for new versions, in settings.json
+/api/settings -> POST {"account"}, {"checkUpdates"} and/or {"newPartsSeen"}: remember the account name for saved
+                costumes, whether to look for new versions, or the newest What's new entry shown, in settings.json
 /api/update  -> GET: the newest release on GitHub {"version", "url"}, asked at most once a day, or {"off": true}
                 when Settings turns the check off (latest_release); ?force=1 (Settings' Check now) asks now,
                 and {"error": true} says GitHub couldn't be reached. Also {"current", "installable"}: this
@@ -82,10 +83,11 @@ class GameSource:
                 'files': self.files, 'build': dict(BUILD)}
 
     def read(self, rel):
-        """Bytes of an asset path: 'bin/geobin/**.mset' as stored, 'dds/**.dds' = texture_library/**.wtex's DDS."""
-        if not self.fs:
-            return None
+        """Bytes of an asset path: 'bin/geobin/**.mset' as stored, 'dds/**.dds' = texture_library/**.wtex's DDS.
+        None for one the editor's data doesn't name (ASSETS)."""
         low = rel.lower()
+        if not self.fs or low not in ASSETS:
+            return None
         if low.startswith('dds/') and low.endswith('.dds'):
             return self.fs.dds('texture_library/' + rel[4:-4] + '.wtex')
         if low.startswith('bin/geobin/') and low.endswith('.mset'):
@@ -95,6 +97,16 @@ class GameSource:
 
 SOURCE = None
 SOURCE_LOCK = threading.Lock()
+ASSETS = frozenset()  # what /assets/ may send, lower case: the build's assets.json (load_assets)
+
+
+def load_assets():
+    """The meshes and textures the editor's data names (build_web.py asset_paths), read when a build is ready."""
+    global ASSETS
+    try:
+        ASSETS = frozenset(p.lower() for p in json.load(open(data('viewer', 'data', 'assets.json'), encoding='utf-8')))
+    except (OSError, ValueError):
+        ASSETS = frozenset()
 TEST_RESULTS = {}  # the last results viewer/test.html posted (tests/run.py collects them)
 RENDERS = renders_folder()  # settings.json rendersFolder, else %LOCALAPPDATA%/CO Costume Editor/renders
 RENDER_NAME = re.compile(r'^(Male|Female)/[A-Za-z0-9_.-]+\.jpg$')
@@ -161,8 +173,8 @@ def _build_loop():
         try:
             import build
             if build.up_to_date(folder):
+                load_assets()
                 BUILD.update(state='ready', step='', error=None)
-                note_known_names()
                 continue
         except Exception as e:  # unreadable install: report it
             BUILD.update(state='error', step='', error=f'{type(e).__name__}: {e}')
@@ -186,6 +198,7 @@ def _build_loop():
                 BUILD['step'] = line[3:]
                 print('  ' + line[3:], flush=True)
         if proc.wait() == 0:
+            load_assets()
             BUILD.update(state='ready', step='', error=None)
             if 'costume_check' in sys.modules:  # it caches the catalogs
                 sys.modules['costume_check'].catalog.cache_clear()
@@ -194,15 +207,6 @@ def _build_loop():
         else:
             BUILD.update(state='error', step='', error='The build failed:\n' + '\n'.join(tail))
             print('Build failed:\n' + '\n'.join(tail), flush=True)
-
-
-def note_known_names():
-    """What's new is tracked from the first start with a build (whatsnew.py): with nothing noted yet, note
-    what's in the current one. In its own process, so reading the two big catalogues doesn't grow this one."""
-    import whatsnew
-    if not os.path.isfile(whatsnew.KNOWN):
-        subprocess.Popen([sys.executable, os.path.join(HERE, 'whatsnew.py'), '--baseline'], cwd=HERE,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def use_folder(folder, save=False):
@@ -486,7 +490,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             settings = load_settings()
             self.send_json({**SOURCE.info(), 'found': candidates(), 'saved': settings.get('gameFolder'),
                             'account': settings.get('account', ''), 'checkUpdates': settings.get('checkUpdates') is not False,
-                            'whatsNewSeen': settings.get('whatsNewSeen', '')})
+                            'newPartsSeen': settings.get('newPartsSeen', '')})
             return None
         if clean == '/api/update':  # ?force=1: Settings' Check now
             query = http.server.urllib.parse.parse_qs(self.path.split('?', 1)[1] if '?' in self.path else '')
@@ -536,9 +540,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_bytes(data, 'application/octet-stream')
             return None
         path = self.translate_path(self.path)
-        if clean == '/data/whats_new.json' and not os.path.isfile(path):  # no game update logged yet (whatsnew.py)
-            self.send_json({'entries': []})
-            return None
         if path.endswith('.json') and os.path.isfile(path) and 'gzip' in self.headers.get('Accept-Encoding', ''):
             body = gzipped(path, os.path.getmtime(path))
             self.send_response(200)
@@ -663,16 +664,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_json({'ok': True})
             self.wfile.write(self._body)
             return
-        if path == '/api/settings':  # {"account"}, {"checkUpdates"}, {"whatsNewSeen"}: kept in settings.json, so every browser and window gets them
+        if path == '/api/settings':  # {"account"}, {"checkUpdates"}, {"newPartsSeen"}: kept in settings.json, so every browser and window gets them
             s, out = load_settings(), {'ok': True}
             if 'account' in req:
                 out['account'] = str(req.get('account') or '').strip().lstrip('@')[:64]
             if 'checkUpdates' in req:
                 out['checkUpdates'] = bool(req['checkUpdates'])
-            if 'whatsNewSeen' in req:  # the newest what's-new entry shown (whatsnew.py's id, 20261012-153000)
-                seen = str(req.get('whatsNewSeen') or '')
-                if re.fullmatch(r'\d{8}-\d{6}', seen):
-                    out['whatsNewSeen'] = seen
+            if 'newPartsSeen' in req:  # the newest What's new entry shown (new_parts.json's id, 2026-11-02 15:30:00)
+                seen = str(req.get('newPartsSeen') or '')
+                if re.fullmatch(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', seen):
+                    out['newPartsSeen'] = seen
             changed = {k: v for k, v in out.items() if k != 'ok' and s.get(k, True if k == 'checkUpdates' else '') != v}
             if changed:
                 s.update(changed)

@@ -27,9 +27,12 @@ const SKELETONS = ['Male', 'Female'];
 
 // What the game stores for a part: its material, the textures set on it, and the material's default for
 // any texture the material requires (Requires*) but the part leaves empty. Optional ones stay empty and
-// fall back to the material's defaults when drawn.
+// fall back to the material's defaults when drawn. A material the catalogue lacks (one not on the parts list
+// yet: it's drawn as the piece's default) is written back as it was, with the part's own textures.
 function resolver(cat) {
   return part => {
+    if (part.material && !cat.materials[part.material])
+      return { material: part.material, pattern: part.pattern || '', detail: part.detail || '', diffuse: part.diffuse || '', specular: part.specular || '' };
     const m = partMaterial(cat, part), d = m?.defaults || {}, req = m?.requires || [];
     const tex = k => part[k] || (req.includes(k) ? d[k] || '' : '');
     return { material: m?.name || part.material, pattern: tex('pattern'), detail: tex('detail'),

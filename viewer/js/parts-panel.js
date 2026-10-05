@@ -4,7 +4,7 @@
 // pattern/detail/diffuse textures, colours and child attachments; an attachment opens the same way inside it.
 // The filter bar under the region tabs keeps only the slots with a piece whose name has all its words, and
 // narrows their lists to those pieces. What's new's Show them (whats-new.js) narrows them the same way, to the
-// pieces with something a game update added, and tags what's new.
+// pieces with something an update added, and tags what's new.
 import {
   isDev, regionCategory, visibleCategories, slotsFor, piecesFor, childSlots, pickPiece, pickCategory,
   materialsFor, texturesFor, partOn, isLeftOutBone, offered, slotAllowed,
@@ -97,12 +97,12 @@ export class PartsPanel {
     for (const u of us) { const k = sourceLabel(u); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(prettyUnlock(u)); }
     return 'Unlocked by:\n' + [...groups].map(([k, v]) => `${k}: ${v.slice(0, 4).join(', ')}${v.length > 4 ? ` (+${v.length - 4} more)` : ''}`).join('\n');
   }
-  // While Show them is on: "New" on what a game update added, "+new" on a piece that has a new material,
+  // While Show them is on: "New" on what an update added, "+new" on a piece that has a new material,
   // pattern or attachment. An item's `fresh` is 'new', 'holds' or null.
   freshTag(fresh) {
     if (!fresh || !this.news) return null;
     const t = el('span', 'freshTag' + (fresh === 'holds' ? ' holds' : ''), fresh === 'holds' ? '+new' : 'New');
-    t.title = fresh === 'holds' ? 'Has a new material, pattern or attachment from the game update' : 'New in the game update';
+    t.title = fresh === 'holds' ? 'Has a new material, pattern or attachment' : 'New in this update';
     return t;
   }
 
@@ -357,7 +357,7 @@ export class PartsPanel {
       // Show them's tag: only what's new (whats-new.js); a click shows everything again
       const fresh = el('button', 'newOnly'); fresh.type = 'button';
       fresh.append('New', el('span', null, '×'));
-      fresh.title = 'Showing only the parts with something new from the game update. Click to show everything';
+      fresh.title = 'Showing only the parts with something new. Click to show everything';
       input.oninput = () => this.setFilter(input.value);
       input.onkeydown = e => { if (e.key === 'Escape' && input.value) { e.preventDefault(); this.setFilter(''); } };
       clear.onclick = () => { this.setFilter(''); input.focus(); };
@@ -375,7 +375,7 @@ export class PartsPanel {
   }
   setFilter(text) { this.filter = text; this.render(); }
 
-  // Show them (whats-new.js): only the slots and pieces with something new from a game update, starting on a tab
+  // Show them (whats-new.js): only the slots and pieces with something new from an update, starting on a tab
   // that has some. news: {skeleton: {sets: {pieces, materials, textures}, holders}}; null shows everything again.
   showNew(news) {
     this.news = news;

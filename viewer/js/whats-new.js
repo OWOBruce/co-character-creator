@@ -1,8 +1,8 @@
-// What's new in the game: the pieces, materials and patterns a game patch added. Each build compares the new
-// catalogues with every name seen before and logs what's new in data/whats_new.json (whatsnew.py). After a patch
-// the editor shows that once, in a box over the page; Show them has the parts panel keep only the slots and pieces
-// with something new (PartsPanel.showNew), and About opens the latest one again. The log keeps every new name, NPC
-// and unused pieces too: what's listed here is what the editor offers.
+// What's new in the editor: the pieces, materials and patterns an update added to its parts list. new_parts.json
+// lists them by update (parts_list.py); the build writes data/whats_new.json with the names they have in this
+// install (build_web.py whats_new). After an editor update the editor shows the new ones once, in a box over the
+// page; Show them has the parts panel keep only the slots and pieces with something new (PartsPanel.showNew), and
+// About opens the latest one again. What's listed here is what the editor offers.
 import { offered, isLeftOutBone, slotAllowed, visibleCategories, materialsFor, texturesFor, childSlots, isDev } from './rules.js';
 import { aboutSection } from './about.js';
 
@@ -11,7 +11,7 @@ const TEXTURE_KINDS = ['Pattern', 'Detail', 'Diffuse', 'Specular'];
 const BODY = { Male: 'Masculine', Female: 'Feminine' };
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
-// The log, oldest first: [{id, date, pieces: {Male: [name]}, materials, textures}]
+// The entries, oldest first: [{id, date, title, pieces: {Male: [name]}, materials, textures}]
 export async function loadLog() {
   try {
     const r = await fetch('data/whats_new.json');
@@ -110,10 +110,11 @@ function showBox(news, entries, panel, onShow) {
   document.querySelector('.whatsNewBackdrop')?.remove();
   const back = el('div', 'modalBackdrop whatsNewBackdrop'), box = el('div', 'palette whatsNewDialog');
   box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'whatsNewHead');
-  const head = el('div', 'phead', 'New in Champions Online'); head.id = 'whatsNewHead';
-  const newest = entries.at(-1);
-  const when = el('p', 'wnWhen', entries.length > 1 ? `Found after the game's last ${entries.length} updates, the newest on ${longDate(newest.date)}.`
-    : `Found after the game was updated on ${longDate(newest.date)}.`);
+  const head = el('div', 'phead', 'New in the editor'); head.id = 'whatsNewHead';
+  const newest = entries.at(-1), titles = listNames(entries.map(e => e.title).filter(Boolean));
+  const added = entries.length > 1 ? `added in the last ${entries.length} updates, the newest on ${longDate(newest.date)}`
+    : `added on ${longDate(newest.date)}`;
+  const when = el('p', 'wnWhen', titles ? `${titles} · ${added}.` : added[0].toUpperCase() + added.slice(1) + '.');
   // rows: [kind, key] -> {x, label, sub, bodies}
   const rows = new Map();
   const add = (kind, key, it, sub, sk) => {
@@ -129,7 +130,7 @@ function showBox(news, entries, panel, onShow) {
   const count = kind => [...rows.values()].filter(r => r.kind === kind).length;
   const counts = [['pieces', 'piece'], ['materials', 'material'], ['textures', 'pattern']].filter(([k]) => count(k)).map(([k, w]) => plural(count(k), w));
   const total = el('p', 'wnCounts', counts.length ? (counts.length > 1 ? counts.slice(0, -1).join(', ') + ' and ' + counts.at(-1) : counts[0]) + '.'
-    : 'Nothing the editor offers is new in this update.');
+    : 'Nothing new for these bodies.');
   const list = el('div', 'wnList');
   for (const [kind, title] of [['pieces', 'Pieces'], ['materials', 'Materials'], ['textures', 'Patterns']]) {
     const these = [...rows.values()].filter(r => r.kind === kind).sort((a, b) => a.sub.localeCompare(b.sub) || a.label.localeCompare(b.label));
@@ -144,14 +145,12 @@ function showBox(news, entries, panel, onShow) {
       list.append(row);
     }
   }
-  const early = el('p', 'wnNote', "Heads up: a game update sometimes adds pieces before they're released in-game, so some of these may not be "
-    + 'available yet, and may not be in their final state.');
   const row = el('div', 'row'), show = el('button', 'on', 'Show them'), close = el('button', null, 'Close');
   show.type = close.type = 'button';
   show.title = 'Show only the parts with something new in the Costume tab, marked New';
   show.disabled = !counts.length;
   row.append(show, close);
-  box.append(head, when, total, ...(counts.length ? [list, early] : []), row);
+  box.append(head, when, total, ...(counts.length ? [list] : []), row);
   back.append(box);
   document.body.append(back);
   const done = () => back.remove();
@@ -171,8 +170,10 @@ function showThem(panel, news) {
   panel.showNew(Object.fromEntries(Object.entries(news).map(([sk, n]) => [sk, { sets: n.sets, holders: n.holders }])));
 }
 
-// At start, once the first costume is in: the box, if a game update brought something new since it was last
-// shown (settings.json's whatsNewSeen, so every window and browser shows it once); and the latest one in About.
+// At start, once the first costume is in: the box, if an update brought parts since it was last shown
+// (settings.json's newPartsSeen, so every window and browser shows it once); and the latest one in About. With
+// nothing seen yet (a new install, or an editor from before this), only the newest, if it's from the last 60 days.
+const RECENT_DAYS = 60;
 export async function setupWhatsNew(panel, ch) {
   if (new URLSearchParams(location.search).has('test')) return;  // the test page drives the editor itself
   const entries = await loadLog();
@@ -181,22 +182,25 @@ export async function setupWhatsNew(panel, ch) {
   aboutSection(close => {
     const p = el('p', 'aboutWhatsNew'), open = el('button', null, "What's new");
     open.type = 'button';
-    open.title = 'The pieces, materials and patterns the last game update added';
+    open.title = 'The pieces, materials and patterns the last update added';
     open.onclick = async () => {
       close();
       const news = await offeredIn([latest], ch);
       showBox(news, [latest], panel, () => showThem(panel, news));
     };
-    p.append(el('span', 'aboutSub', 'Game update'), ` The game was updated on ${longDate(latest.date)}. `, open);
+    p.append(el('span', 'aboutSub', 'New parts'), ` ${latest.title ? latest.title + ', added' : 'Added'} on ${longDate(latest.date)}. `, open);
     return { el: p, stops: [open] };
   });
   let seen = '';
-  try { seen = (await (await fetch('api/source')).json()).whatsNewSeen || ''; } catch { return; }
-  const unseen = entries.filter(e => e.id > seen);
+  try { seen = (await (await fetch('api/source')).json()).newPartsSeen || ''; } catch { return; }
+  const recent = e => (Date.now() - new Date(e.date + 'T12:00:00')) / 864e5 <= RECENT_DAYS;
+  const unseen = seen ? entries.filter(e => e.id > seen) : [latest].filter(recent);
+  if (seen < latest.id) {
+    fetch('api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newPartsSeen: latest.id }) })
+      .catch(() => {});
+  }
   if (!unseen.length) return;
-  fetch('api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsNewSeen: unseen.at(-1).id }) })
-    .catch(() => {});
   const news = await offeredIn(unseen, ch);
-  if (!Object.values(news).some(n => n.holders.size)) return;  // only NPC or unused pieces: nothing to show
+  if (!Object.values(news).some(n => n.holders.size)) return;  // nothing the parts panel lists: nothing to show
   showBox(news, unseen, panel, () => showThem(panel, news));
 }

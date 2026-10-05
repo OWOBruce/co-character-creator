@@ -5,7 +5,7 @@
 // (/api/update/install), so the update doesn't go through the browser's download checks. A git clone (the
 // README's "run it from the source") is told to run git pull in its folder instead.
 // Links open in the default browser through serve.py (/api/open): the editor's own window may be Edge while the
-// player's browser is another. Other modules can add a section (aboutSection): what's new in the game does.
+// player's browser is another. Other modules can add a section (aboutSection): what's new does.
 import { VERSION } from './version.js';
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
@@ -175,6 +175,7 @@ export function setupAbout(button, label) {
     legal.append(
       el('p', null, 'Champions Online, its characters, costume pieces, artwork and other game content are the property of their respective owners.'),
       el('p', null, 'The CO Costume Editor is an unofficial fan project. It is not affiliated with, endorsed by or supported by Cryptic Studios, Arc Games or any owner of Champions Online.'),
+      el('p', null, 'The parts it offers come from its own list, which later versions of the editor add to after game updates. A part in the editor may not be on sale now, or may look different in the game, so check there before you spend anything on it.'),
       el('p', null, 'It reads the game files from your own installation and does not include or redistribute them. Use it at your own risk.'));
 
     const row = el('div', 'row'), close = el('button', null, 'Close'); close.type = 'button';

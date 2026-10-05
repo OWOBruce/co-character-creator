@@ -1,0 +1,4 @@
+{
+  "_about": "What's new in the editor: the parts each update added to the parts list, oldest first. An entry is {id (when it was added, YYYY-MM-DD HH:MM:SS), title, pieces, materials, textures, stances}, with parts_list.key(kind, name) of each part. The build writes the names to viewer/data/whats_new.json, and the editor shows the entries a player hasn't seen once.",
+  "entries": []
+}

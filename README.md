@@ -48,8 +48,10 @@ The editor's figures are recommendations from testing it, not official requireme
    - While it's open you can also use it in any browser at `http://localhost:8765`.
    - If it can't find your game, the **Settings** box opens. Pick your Champions Online folder (for example `C:\Program Files (x86)\Steam\steamapps\common\Champions Online`) with **Browse…**, or paste the path and press Enter.
 4. **The first start takes about a minute and a half.** The editor reads your game and builds its data, showing progress on the page. After that it starts in seconds.
-   - When the game is patched, the editor notices and rebuilds by itself the next time it starts. Restart it after a patch to get the new parts.
-   - **What's new:** after a patch that added pieces, materials or patterns, the editor lists them once when it opens, for masculine and feminine characters. **Show them** narrows the Costume tab to the slots with something new, marked **New** (a piece with a new material, pattern or attachment is marked **+new**); the gold **New ×** tag in the filter box shows everything again. **About** opens the latest list again. The editor only tracks what's new from the first time it starts with this feature, so it never lists what was already in the game. A game update sometimes adds pieces before they're released in-game, so some of the listed parts may not be available yet, and may not be in their final state.
+   - When the game is patched, the editor notices and rebuilds by itself the next time it starts.
+   - The editor offers the pieces, materials, patterns and stances on its own parts list. New parts from a game update are added to it in a later version of the editor.
+   - **What's new:** when an update of the editor adds parts to its list, it lists them once when it opens, for masculine and feminine characters. **Show them** narrows the Costume tab to the slots with something new, marked **New** (a piece with a new material, pattern or attachment is marked **+new**); the gold **New ×** tag in the filter box shows everything again. **About** opens the latest list again.
+   - A costume you load can have parts the editor doesn't offer yet, such as a piece from a recent game update. They stay in the costume: they aren't drawn, the status line under the 3D view counts them, and **Save** writes them back as they were.
 
 Starting it again while the editor is already open just opens another editor window. The editor stops about 10 seconds after its last window closes.
 
@@ -81,7 +83,7 @@ The left panel has the game's three creator screens as tabs.
   - **Filter parts:** type in the box under the region tabs, say "goggles" or "speed gog", and only the slots with a matching piece stay, their lists narrowed to the matches. Tabs with nothing matching dim, and a note names the region's other categories that have more. Esc or × clears it.
   - **Take a colour from the character:** in a colour box, click the pipette (top right), then click any spot on the character. You get the colour that piece has there, not the pixel's shade under the lights, whichever of its colours that is, and its glow too when the colour you're setting can glow. Hovering previews it; Esc stops. It works on a character shown with **Compare with**, too. Skin is left out.
   - **Mirror left/right** keeps gloves, boots and similar pieces matched.
-  - **Try before you unlock.** Every piece in your game files is listed, including store items and pieces from lockboxes, events and perks that you can't buy right now, so you can see one on your character before spending anything on it.
+  - **Try before you unlock.** Store items and pieces from lockboxes, events and perks are listed too, including some you can't buy right now, so you can see one on your character before spending anything on it. Check in the game that it's on offer, and how it looks there, before you buy.
   - **Hide locked** hides pieces you have to unlock. Pieces with a padlock are unlockable; a coin means a store item.
   - **Unlocks** (under the part list; gold, with a count, when something needs unlocking) lists every piece, material and pattern on the costume that needs an unlock, and how to get it: the C-Store, a lockbox, an event reward, a perk and so on, with the unlock item's name. Click one to jump to that part. It's read from the game files, so treat it as a strong hint: the editor can't see what your account owns.
 - **Body.** Height, body mass, muscle, and the face and body sliders, plus the game's body and head presets. Double-click a slider's name to reset it.
@@ -132,7 +134,7 @@ The game keeps saved costumes as picture files in its **`Live\screenshots`** fol
 
 ## Designing costumes with an AI assistant
 
-The build also writes an **`index`** folder that describes, in plain text, every piece, material, pattern and colour a player can use. **`index\GUIDE.md`** explains the costume format.
+The build also writes an **`index`** folder that describes, in plain text, every piece, material, pattern and colour the editor shows. **`index\GUIDE.md`** explains the costume format.
 
 You can give these files to an AI assistant and ask for a costume ("a noir detective with a long coat and a fedora"). It answers with costume text in a set format. Paste that text into the editor (Ctrl+V on the page) or save it as a `.json` file and **Load** it.
 
@@ -197,3 +199,5 @@ Special thanks to the **[Adventurers](https://codexheroes.com/co/adventurers/)**
 The CO Costume Editor is free software under the [GNU General Public License v3.0](LICENSE).
 
 Champions Online, its characters, costume pieces, artwork and other game content are the property of their respective owners. The CO Costume Editor is an unofficial fan project. It is not affiliated with, endorsed by or supported by Cryptic Studios, Arc Games or any owner of Champions Online. It reads the game files from your own installation and does not include or redistribute them. Use it at your own risk.
+
+The parts the editor offers come from its own list, which later versions of the editor add to after game updates. A part in the editor may not be on sale now, or may look different in the game, so check there before you spend anything on it.

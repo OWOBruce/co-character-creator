@@ -134,7 +134,7 @@
   .aboutDialog .aboutUpdateState { color:var(--muted); } .aboutDialog .aboutUpdateState.bad { color:#ff9a7a; }
   .aboutDialog .row { justify-content:flex-end; margin-top:6px; }
   .aboutWhatsNew button { font-size:14px; padding:1px 8px; margin-left:2px; }
-  /* what's new in the game (whats-new.js) */
+  /* what's new: the parts an update added (whats-new.js) */
   .whatsNewDialog { position:static; width:min(440px, 100%); max-height:calc(100vh - 32px); box-sizing:border-box;
                     display:flex; flex-direction:column; padding:8px 10px; }
   .whatsNewDialog p { margin:0 2px 6px; font:400 14px/1.4 var(--body); color:var(--text); }
@@ -474,7 +474,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Character } from './js/character.js';
-import { loadShared, loadCatalog } from './js/catalog.js';
+import { loadShared, loadCatalog, unshownParts } from './js/catalog.js';
 import { newPart, isLeftOutBone } from './js/rules.js';
 import { PartsPanel } from './js/parts-panel.js';
 import { BodyPanel } from './js/body-panel.js';
@@ -613,8 +613,12 @@ async function updateCompare() {
 }
 function showStatus(prefix) {
   const shown = [...ch.parts.values()].filter(p => p.mesh).length;
-  const missing = ch.doc.parts.filter(p => !isLeftOutBone(ch.cat, p.bone)).length - shown;  // weapons and the bike aren't drawn
-  status.textContent = `${prefix} · ${shown} parts${missing ? ` (${missing} not installed)` : ''} · ${ch.doc.skeleton}`;
+  const parts = ch.doc.parts.filter(p => !isLeftOutBone(ch.cat, p.bone));  // weapons and the bike aren't drawn
+  const { pieces, looks } = unshownParts(ch.cat, parts);  // not on the editor's parts list: kept, not drawn
+  const missing = parts.length - shown - pieces;
+  const notes = [missing && `${missing} not installed`, pieces && `${pieces} not in the editor, kept when you save`,
+                 looks && `${looks} drawn with ${looks > 1 ? 'their' : 'its'} default material or pattern`].filter(Boolean);
+  status.textContent = `${prefix} · ${shown} parts${notes.length ? ` (${notes.join('; ')})` : ''} · ${ch.doc.skeleton}`;
 }
 // The character as drawn: sampled skinned vertices with the body sliders applied (height, leg length...).
 // Box3.setFromObject would use skinned meshes' bounding boxes, computed once at load before the
@@ -811,7 +815,7 @@ window.editor = { THREE, scene, camera, controls, ch, compare, ruler, open, shar
 const first = ['Archetype_Freeform_Free_F_01', 'Archetype_Freeform_Free_M_01'].map(n => shared.costumes.findIndex(c => c.name === n))
   .find(i => i >= 0) ?? shared.costumes.findIndex(c => /Freeform/i.test(c.name));
 sel.value = shown = String(Math.max(first, 0));
-open(shared.costumes[sel.value]).then(() => setupWhatsNew(panel, ch));  // after a game update: what it added
+open(shared.costumes[sel.value]).then(() => setupWhatsNew(panel, ch));  // after an editor update: the parts it added
 </script>
 </body>
 </html>

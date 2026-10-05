@@ -68,6 +68,8 @@ Type: filesandordirs; Name: "{app}\python"
 Type: filesandordirs; Name: "{app}\tools"
 Type: filesandordirs; Name: "{app}\viewer\js"
 Type: filesandordirs; Name: "{app}\__pycache__"
+; a file older versions had
+Type: files; Name: "{app}\whatsnew.py"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

@@ -16,8 +16,8 @@ unsigned PyInstaller program the releases used to have drew antivirus guesses (T
 --source-only leaves Python out (the old, small zip; needs Python installed). The working files go to
 %LOCALAPPDATA%/CO Costume Editor/release-build, outside the project.
 
-Also in: the piece descriptions (captions/captions.json) and, for AI assistants, the build-costume skill and
-.claude/launch.json. Left out: your own costumes (my_costumes/), .claude/settings.local.json, captions/batches.json.
+Also in: the parts list (parts_list.json), the piece descriptions (captions/captions.json) and, for AI assistants,
+the build-costume skill and .claude/launch.json. Left out: your own costumes (my_costumes/), .claude/settings.local.json, captions/batches.json.
 Nothing made from the game is included: catalog/ (with schema.json), viewer/data/, viewer/ui/ and index/ are
 built on each person's machine from their own install on first start. settings.json (this machine's game
 folder and account) stays out too.
@@ -34,7 +34,9 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILES = ['README.md', 'LICENSE', 'DEVELOPER.md', 'start.bat', 'requirements.txt', 'index_guide.md', 'app_launcher.py', 'app.ico', 'buildprogress.py',
          'serve.py', 'paths.py', 'build.py', 'build_catalog.py', 'build_web.py', 'build_ui.py', 'build_index.py',
-         'whatsnew.py', 'rig_data.py', 'costume_check.py', 'gamefs.py', 'gamedata.py', 'hogg.py', 'make_release.py',
+         'rig_data.py', 'costume_check.py', 'gamefs.py', 'gamedata.py', 'hogg.py', 'make_release.py',
+         # the parts list: what the editor offers (hashes of names, no game data)
+         'parts_list.py', 'parts_list.json', 'new_parts.json',
          'viewer/index.html', 'viewer/test.html', 'viewer/render.html', 'captions.py', 'describe.py', 'captions/TAGS.md',
          # what each piece looks like (the captioning pass; build_index.py folds it into the costume index)
          'captions/captions.json',

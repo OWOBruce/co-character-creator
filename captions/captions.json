@@ -1,40 +1,4 @@
 {
- "Female/F_Armsaccessoriesl_Foxbatcon_2025_01": {
-  "description": "A single fin-like blade running along the outer left forearm, tapering to a point at the wrist, with several curved frilly spikes along its edge and a tall curled tip near the elbow. Fantasy, aquatic creature styling.",
-  "colourAreas": "Colour 1 on the main body of the fin; colour 3 on the frilled spikes and edge tips, blending into colour 1 toward the middle.",
-  "tags": [
-   "fantasy",
-   "aquatic",
-   "organic",
-   "fins",
-   "spiky",
-   "flowing",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Armsaccessoriesl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Armsaccessoriesl_Foxbatcon_2025_01"
- },
- "Female/F_Armsaccessoriesr_Foxbatcon_2025_01": {
-  "description": "A single organic fin-like blade running along the outside of the right forearm, with a smooth tapered base and several curved, frilled spurs branching off toward the elbow. It suggests aquatic creature styling.",
-  "colourAreas": "Colour 1 on the main body of the fin; colour 3 on the spur tips and upper edges, blending into colour 1.",
-  "tags": [
-   "aquatic",
-   "organic",
-   "fantasy",
-   "monstrous",
-   "fins",
-   "spiky",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Armsaccessoriesr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Armsaccessoriesr_Foxbatcon_2025_01"
- },
  "Female/F_Back_Alien_01": {
   "description": "A narrow spinal ridge of layered, curved blade-like fins running down the centre of the upper back, each fin ending in a sharp spike. A jagged central strip pokes out past the shoulders. Alien, organic-armor look.",
   "colourAreas": "Colour 0 on the central ridge strip and fin edges; colour 1 on the curved fin panels; colour 2 on the inner fin shadows and undersides; colour 3 on the spike tips.",
@@ -5566,42 +5530,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Back_Weapon_Lead_Pipe_01.mset",
   "model": "Geo_Back_Weapon_Lead_Pipe_01"
  },
- "Female/F_Back_Weapon_Lockbox_65_01": {
-  "description": "A long staff carried diagonally across the back, extending above the shoulder and down past the hip. It has a slim shaft with segmented metal collars, ring fittings and a rounded knob at the top, in a mechanical style.",
-  "colourAreas": "Colour 0 on the metal collars, rings and end caps; colour 1 on the shaft; colour 3 on the round gem-like knobs and studs; colour 2 on the small recessed joints.",
-  "tags": [
-   "sci-fi",
-   "fantasy",
-   "metal",
-   "segmented",
-   "rounded",
-   "gems",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Back_Weapon_Lockbox_65_01.mset",
-  "model": "Geo_Back_Weapon_Lockbox_65_01"
- },
- "Female/F_Back_Weapon_Lockbox_65_02": {
-  "description": "A very long polearm-like weapon carried diagonally across the back, with a thick spiked, segmented mechanical shaft ending in a flared studded head near the hip and a slim pole tip rising above the shoulder.",
-  "colourAreas": "Colour 2 on the thick body of the shaft; colour 0 on the spikes, rings and metal fittings; colour 1 on the slim upper pole; colour 3 on the small tip accent.",
-  "tags": [
-   "sci-fi",
-   "fantasy",
-   "metal",
-   "spikes",
-   "segmented",
-   "angular",
-   "studs",
-   "straps",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/M/M_Back_Weapon_Lockbox_65_02.mset",
-  "model": "Geo_Back_Weapon_Lockbox_65_02"
- },
  "Female/F_Back_Weapon_Mad_Scientist_03": {
   "description": "A compact sci-fi submachine-gun slung diagonally across the back, with a long ribbed barrel, top-mounted plunger, pistol grip and a curved, clawed shoulder stock. Angular mechanical housings suggest a mad-scientist gadget.",
   "colourAreas": "Colour 0 on the main receiver and barrel housing; colour 1 on the stock, grip and side panels; colour 3 on small accents near the trigger; colour 2 on small fittings.",
@@ -5897,23 +5825,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Back_Weapon_Shotgun_04.mset",
   "model": "Geo_Back_Weapon_Shotgun_04"
- },
- "Female/F_Back_Weapon_Shotgun_Bloodmoon_2025_01": {
-  "description": "A double-barrelled shotgun slung diagonally across the back, barrels pointing down to the hip and curved stock up by the shoulder. The stock has ornate swirling carved panels and a trigger guard sits mid-body.",
-  "colourAreas": "Colour 0 on the stock and the barrel rib; colour 1 on the barrels and forend; colour 3 on the ornate swirl inlays and details; colour 2 on the barrel muzzles and trigger guard.",
-  "tags": [
-   "western",
-   "ornate",
-   "metal",
-   "wood",
-   "straps",
-   "partial",
-   "angular"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/F/F_Back_Weapon_Shotgun_Bloodmoon_2025_01.mset",
-  "model": "Geo_Back_Weapon_Shotgun_Bloodmoon_2025_01"
  },
  "Female/F_Back_Weapon_Shovel_01": {
   "description": "A full-size digging shovel carried diagonally across the back, with a D-shaped grip handle at the shoulder, a long straight shaft and a broad flat blade hanging near the hip. Practical, rugged work-tool look.",
@@ -6711,23 +6622,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Belt_Child_Lockbox_66_01.mset",
   "model": "Geo_Belt_Child_Lockbox_66_01"
- },
- "Female/F_Belt_Child_Lockbox_67_01": {
-  "description": "A small ornate belt ornament shaped like a butterfly, with cut-out openwork wings, scrolled curls underneath and a fleur-de-lis shaped backing plate. It sits centred at the front of the waist.",
-  "colourAreas": "Colour 0 on the openwork wings and scrolls; colour 1 on the central backing plate and lower fleur-de-lis; colour 2 on the darker rim and recesses behind the wings.",
-  "tags": [
-   "fantasy",
-   "ornate",
-   "metal",
-   "rounded",
-   "emblem",
-   "gothic",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Belt_Child_Lockbox_67_01.mset",
-  "model": "Geo_Belt_Child_Lockbox_67_01"
  },
  "Female/F_Belt_Child_Modern_Sapphire_01": {
   "description": "A small circular belt buckle plate: a thick segmented ring around a domed round centre, with two small studs and inset panels, worn at the front of the waist. Mechanical, sci-fi look.",
@@ -9649,44 +9543,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Belt_Tight_Light_01.mset",
   "model": "Geo_Belt_Tight_Light_01"
  },
- "Female/F_Belt_Tight_Lockbox_67_01": {
-  "description": "An ornate filigree belt of thorny, leaf-like scrollwork wrapping the waist, with a large butterfly-shaped cut-out plate at the front centre and curling swirl ornaments at the sides. Gothic and fantasy in feel.",
-  "colourAreas": "Colour 0 on the butterfly plate at the front; colour 1 on the curling swirls and the central leaf ornament; colour 2 on the thorny filigree band and leaf spikes.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "ornate",
-   "metal",
-   "spiky",
-   "belt",
-   "angular",
-   "asymmetric",
-   "partial"
-  ],
-  "differs": "The butterfly plate sits at the front centre with the leaf flourish below it, and the tall leaf spray is on the right side of the belt.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Belt_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Belt_Tight_Lockbox_67_01"
- },
- "Female/F_Belt_Tight_Lockbox_67_02": {
-  "description": "A wide, rigid armoured belt band sitting low on the hips, with pointed bat-like peaks at the front and back, two angled fin panels at the front and a thin contrasting edge line. Superhero styling.",
-  "colourAreas": "Colour 0 on the main band and peaks; colour 2 on the inner fin panels; colour 1 on the thin edge trim along the lower front.",
-  "tags": [
-   "superhero",
-   "sleek",
-   "angular",
-   "armor-plates",
-   "metal",
-   "trim",
-   "partial"
-  ],
-  "differs": "The female belt has a more notched front, with a raised centre section between the two fin panels, while the male front dips lower between its fins.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/F/F_Belt_Tight_Lockbox_67_02.mset",
-  "model": "Geo_Belt_Tight_Lockbox_67_02"
- },
  "Female/F_Belt_Tight_Loinclothmedicinebag_01": {
   "description": "A thin hip belt with a single rectangular flapped pouch hanging at the wearer's right hip. The pouch has stitched edging and a printed tribal motif on the flap and body. Suggests a tribal, hide-craft look.",
   "colourAreas": "Colour 0 on the belt band and pouch body; colour 1 on the belt edge stripe; colour 3 and colour 1 on the stitched pouch edging; colour 2 on the printed motifs.",
@@ -11459,21 +11315,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/B/M_Bike_Rocket_02.mset",
   "model": "Geo_M_Bike_Rocket_02"
- },
- "Female/F_Broom_01": {
-  "description": "A witch-style broom held at hip height: a long thin straight handle ending in a fanned bundle of bristles, bound at the neck by a narrow band. It sits horizontally beside the body, suggesting a fantasy or folk look.",
-  "colourAreas": "Colour 1 on the handle; colour 3 on the binding band at the bristle neck; colour 0 on the lighter bristle tips; colour 2 on the darker upper bristles.",
-  "tags": [
-   "fantasy",
-   "mystic",
-   "wood",
-   "fringe",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/V/B/M_Vehicle_Broom_01.mset",
-  "model": "Geo_Vehicle_Broom_01"
  },
  "Female/F_Brow_Face_Aggressive_01": {
   "description": "A pair of thin, angular eyebrows that slant sharply downward toward the nose, giving a fierce scowling expression. They sit flat on the brow ridge above the eyes, with a slight upward flick at the outer ends.",
@@ -18792,25 +18633,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Chest_F_Variablerobot_01.mset",
   "model": "Geo_Chest_F_Variablerobot_01"
  },
- "Female/F_Chest_Foxbatcon_2025_01": {
-  "description": "A long-sleeved, skin-tight top ending at the waist, with a glossy V-shaped panel across the chest and shoulders, a sculpted ribbed abdomen panel, and small spots scattered down the outer arms.",
-  "colourAreas": "Colour 0 on the main top and sleeves; colour 2 on the chest V-panel and abdomen panel; colour 3 on the spots along the arms.",
-  "tags": [
-   "sci-fi",
-   "superhero",
-   "form-fitting",
-   "sleek",
-   "latex",
-   "long-sleeved",
-   "waist-length",
-   "full-coverage"
-  ],
-  "differs": "The female version has a wide chest band and a fully sculpted ribbed abdomen panel, while the male version has a thin shoulder stripe and a notched abdomen panel.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chest_Foxbatcon_2025_01.mset",
-  "model": "Geo_Chest_Foxbatcon_2025_01"
- },
  "Female/F_Chest_Holohexarmor_01": {
   "description": "A long-sleeved sci-fi top with a glossy segmented chest plate and a ridged central spine panel over a banded undershirt. Armoured strips run along the arms, and it ends at the waist.",
   "colourAreas": "Colour 1 on the chest and back plates and arm strips; colour 0 on the banded undershirt and sleeves; colour 2 on the recessed back vents and side inserts; colour 3 on the small chest indicator.",
@@ -25546,27 +25368,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Chest_Tight_01.mset",
   "model": "Geo_Chest_Tight_01"
  },
- "Female/F_Chest_Tight_Lockbox_67_01": {
-  "description": "A long-sleeved, waist-length fitted jacket with a high stand collar, a ruffle-edged shoulder yoke with buttons, puffed sleeves gathered into banded cuffs with frilled edges, and seam lines down the front. A small winged emblem sits on the back.",
-  "colourAreas": "Colour 0 on the jacket body, sleeves and cuff frills; colour 1 on the shoulder yoke and the back emblem; colour 2 on the ruffle edging, seam piping, waist band and cuff bands; colour 3 not visible.",
-  "tags": [
-   "formal",
-   "fantasy",
-   "form-fitting",
-   "layered",
-   "high-collar",
-   "buttons",
-   "trim",
-   "emblem",
-   "long-sleeved",
-   "waist-length",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chest_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Chest_Tight_Lockbox_67_01"
- },
  "Female/F_Chest_Tight_Madjester_01": {
   "description": "A long-sleeved, skin-tight patchwork top made of irregular angular patches joined by contrasting cross-stitched seams, in a jester style. It covers the torso and arms and ends at the waist with a plain hem.",
   "colourAreas": "Colour 1 on the main body patches; colour 0 on the light patches; colour 3 on the accent patches; colour 2 on the stitching.",
@@ -26995,27 +26796,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Chest_Vest_Victorian_01.mset",
   "model": "Geo_Chest_Vest_Victorian_01"
- },
- "Female/F_Chestaccessories_Foxbatcon_2025_01": {
-  "description": "A partial chest and shoulder piece of layered, petal-like curved plates: rounded shoulder caps join a bandeau-style band around the bust and upper back, meeting at a pointed centre. Organic, wing-like sci-fi look.",
-  "colourAreas": "Colour 1 on the main petal plates; colour 3 on the ridged stripes and edge lines running along each plate.",
-  "tags": [
-   "organic",
-   "sci-fi",
-   "alien",
-   "fantasy",
-   "layered",
-   "rounded",
-   "ornate",
-   "armor-plates",
-   "sleek",
-   "partial"
-  ],
-  "differs": "The female version has a smaller, more open bust band with slimmer shoulder caps that leave more of the chest bare.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chestaccessories_Foxbatcon_2025_01.mset",
-  "model": "Geo_Chestaccessories_Foxbatcon_2025_01"
  },
  "Female/F_Chestattach_L_Arm_Alien_01": {
   "description": "A sculpted alien armband that wraps the upper left arm: an open, angular band with a raised contrasting plate on the outer side, layered edge plating and a short pointed spike jutting toward the back.",
@@ -33240,23 +33020,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Chestattach_L_Inmate_01.mset",
   "model": "Geo_Chestattach_L_Inmate_01"
- },
- "Female/F_Chestattach_L_Lockbox_67_01": {
-  "description": "A tapering, faceted sleeve-like sheath hanging along the left side of the torso, gathered into a ruffled, flared frill at its lower end with a small tassel dangling below. Reads as a gothic or formal accent.",
-  "colourAreas": "Colour 2 on the main body of the sheath and the frill; colour 0 on the tassel tip.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "cloth",
-   "angular",
-   "layered",
-   "fringe",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chestattach_L_Lockbox_67_01.mset",
-  "model": "Geo_Chestattach_L_Lockbox_67_01"
  },
  "Female/F_Chestattach_L_Psionic_Dragon_01": {
   "description": "A small angular curved shoulder-arm plate that wraps partway around the upper left arm, with faceted edges and a pointed lower tip and a small flared upturned fin at the top; suggests a sci-fi psionic armor accent.",
@@ -43751,23 +43514,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Chestattach_R_Inmate_01.mset",
   "model": "Geo_Chestattach_R_Inmate_01"
  },
- "Female/F_Chestattach_R_Lockbox_67_01": {
-  "description": "A tapered, closed sleeve-like arm piece hanging along the right side of the torso, starting angular at the shoulder and ending in a ruffled, gathered flare with a small pendant tassel dangling below.",
-  "colourAreas": "Colour 2 on the whole sleeve body and ruffled flare; colour 0 on the small hanging tassel.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "cloth",
-   "flowing",
-   "layered",
-   "tattered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chestattach_R_Lockbox_67_01.mset",
-  "model": "Geo_Chestattach_R_Lockbox_67_01"
- },
  "Female/F_Chestattach_R_Psionic_Dragon_01": {
   "description": "A small angular shard-like guard that wraps partway around the right upper arm, with faceted, folded plates and a pointed upper fin. It sits on the outer arm like a stylised dragon wing or scale.",
   "colourAreas": "Colour 0 on the main faceted plate in a glossy metallic finish; colour 1 on the thin inner edge trim along the rim.",
@@ -52318,47 +52064,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Chestlayer_Lockbox_65_01.mset",
   "model": "Geo_Chestlayer_Lockbox_65_01"
  },
- "Female/F_Chestlayer_Lockbox_67_02": {
-  "description": "A strapless corset-style bustier with glossy padded cups edged in ruffled trim, a smooth fitted midsection with a scalloped lower edge, and a peplum of pointed tabs flaring over the hips. Open at the back, worn over the torso.",
-  "colourAreas": "Colour 2 on the cups and the peplum tabs; colour 0 on the midsection band and ruffle trim; colour 1 on the inner lining and the edging of the tabs.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "leather",
-   "form-fitting",
-   "layered",
-   "trim",
-   "ribbons",
-   "partial",
-   "revealing",
-   "sleeveless",
-   "waist-length"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chestlayer_Lockbox_67_02.mset",
-  "model": "Geo_Chestlayer_Lockbox_67_02"
- },
- "Female/F_Chestlayer_Lockbox_67_03": {
-  "description": "A cropped, short-sleeved capelet-style top covering the shoulders, chest and upper back, with a patterned swirl design, ruffled frilled edging, small dangling metal tassels and a contrasting open collar. Ends above the waist.",
-  "colourAreas": "Colour 1 on the main body of the capelet; colour 0 on the swirl patterns and collar-area panels; colour 2 on the ruffled edging and inner collar; colour 3 not clearly visible.",
-  "tags": [
-   "fantasy",
-   "mystic",
-   "cloth",
-   "layered",
-   "ornate",
-   "fringe",
-   "trim",
-   "short-sleeved",
-   "cropped",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Chestlayer_Lockbox_67_03.mset",
-  "model": "Geo_Chestlayer_Lockbox_67_03"
- },
  "Female/F_Chestlayer_Mecha_01": {
   "description": "A bulky mechanical chest-and-back shell: a boxy armored casing over the torso with a ridged central crest and chevron marks at the neck, side pods with round openings, twin round vents on the back and a rounded module below.",
   "colourAreas": "The default material is glossy and mostly ignores the scheme. Colour 0 on the main casing; colour 2 on the crest and the lower back module; colour 3 on the chevron marks.",
@@ -59924,81 +59629,6 @@
   "date": "2026-10-03",
   "mesh": "bin/geobin/cl/A/F/F_Collar_Tight_Lemurian_Bubble_01.mset",
   "model": "Geo_Collar_Tight_Lemurian_Bubble_01"
- },
- "Female/F_Collar_Tight_Lockbox_67_01": {
-  "description": "A feathered shoulder mantle of layered, spiky plumes draping over both shoulders and around the neck, with a smooth padded collar at the front throat. Feathers grade in tiers toward ragged tips; sits at the upper chest and back.",
-  "colourAreas": "Colour 0 on the upper feathers around the neck and back; colour 1 on the middle feather tier over the shoulders; colour 2 on the feather tips and the front collar band.",
-  "tags": [
-   "feathered",
-   "feathers",
-   "layered",
-   "spiky",
-   "fantasy",
-   "gothic",
-   "ornate",
-   "collar",
-   "partial"
-  ],
-  "differs": "The female mantle has a lower, narrower front collar that sits closer to the throat and a fuller drape at the back.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Collar_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_01"
- },
- "Female/F_Collar_Tight_Lockbox_67_02": {
-  "description": "A tall, snug neck collar wrapped with a soft draped scarf that crosses at the throat and ties in a loose knot at the front, with long tapering tails hanging down the chest. Casual, slightly formal look.",
-  "colourAreas": "Colour 1 on the tight inner collar; colour 0 on the scarf outer face and tails; colour 2 on the scarf underside visible at the back.",
-  "tags": [
-   "cloth",
-   "scarf",
-   "collar",
-   "high-collar",
-   "flowing",
-   "layered",
-   "casual",
-   "formal",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Collar_Tight_Lockbox_67_02.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_02"
- },
- "Female/F_Collar_Tight_Lockbox_67_03": {
-  "description": "A thick, ring-shaped fur collar that sits around the base of the neck and rests on the shoulders, with shaggy layered tufts hanging down and small contrasting spikes studded through the fur. Suggests a rugged, savage look.",
-  "colourAreas": "Colour 0 on the fur ruff; colour 2 on the spikes.",
-  "tags": [
-   "fur",
-   "fantasy",
-   "monstrous",
-   "punk",
-   "layered",
-   "spikes",
-   "collar",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Collar_Tight_Lockbox_67_03.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_03"
- },
- "Female/F_Collar_Tight_Lockbox_67_04": {
-  "description": "A thick, fur-like shoulder collar of layered, pointed tufts that wraps around the neck and drapes over the shoulders and upper back, open at the front with a contrasting lining inside. Suggests a rugged, wintry look.",
-  "colourAreas": "Colour 0 on the fur tufts; colour 2 on the inner lining; colour 1 on a small hidden trim at the lower back edge.",
-  "tags": [
-   "fur",
-   "layered",
-   "fantasy",
-   "medieval",
-   "rounded",
-   "open-front",
-   "collar",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Collar_Tight_Lockbox_67_04.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_04"
  },
  "Female/F_Collar_Tight_Luchador_01": {
   "description": "A short, stand-up collar band that wraps around the neck with a ridged, folded outer surface and pointed tips at the front and back. It sits at the base of the neck as a tight, sleek accessory.",
@@ -75307,22 +74937,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Footl_F_Variablerobot_01.mset",
   "model": "Geo_Footl_F_Variablerobot_01"
  },
- "Female/F_Footl_Foxbatcon_2025_01": {
-  "description": "A plain ankle-high boot for the left foot with a smooth rounded toe, a thin flat sole and a small low heel. It has no visible fastenings and stops just above the ankle.",
-  "colourAreas": "Colour 0 on the whole boot; no other colour slots are visible on this piece.",
-  "tags": [
-   "plain",
-   "rounded",
-   "sleek",
-   "casual",
-   "partial"
-  ],
-  "differs": "The female version has a thin sole with a small low heel, making it a proper ankle boot, while the male version is a soft sock-like shoe with no sole.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Footl_Foxbatcon_2025_01"
- },
  "Female/F_Footl_Gamer_01": {
   "description": "A chunky ankle-high sneaker boot with a padded flared collar, a wide strap across the ankle, small angular gem-like side plates, short contrasting laces, and a thick layered sole. Sporty, gamer-inspired look.",
   "colourAreas": "Colour 0 on the main boot body and toe; colour 1 on the collar, ankle strap, heel and sole trim; colour 3 on the side plates; colour 2 on the laces and sole.",
@@ -77084,25 +76698,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Footl_Child_Greave_Lockbox_66_02.mset",
   "model": "Geo_Footl_Child_Greave_Lockbox_66_02"
- },
- "Female/F_Footl_Greave_Lockbox_67_01": {
-  "description": "A shaggy fur cuff wrapped around the lower left calf and ankle, built from layered, jagged tufts that hang in points; the upper tufts are longer and the lower layer forms a contrasting fringe. Suits beastly or tribal looks.",
-  "colourAreas": "Colour 0 on the upper fur tufts; colour 1 on the lower layer of fur tufts.",
-  "tags": [
-   "fur",
-   "animal",
-   "monstrous",
-   "tribal",
-   "layered",
-   "tattered",
-   "fringe",
-   "loose",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footl_Greave_Lockbox_67_01.mset",
-  "model": "Geo_Footl_Greave_Lockbox_67_01"
  },
  "Female/F_Footl_Greave_Martial_Power_01": {
   "description": "A shin greave built from vertical rounded slats forming a hollow tube around the lower leg, held by two wide bands with a diagonal strap crossing between them. Martial, east-asian armour style.",
@@ -78894,40 +78489,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Footl_Lockbox_66_01.mset",
   "model": "Geo_Footl_Lockbox_66_01"
- },
- "Female/F_Footl_Lockbox_67_01": {
-  "description": "A furry beast-foot covering for the left foot: a short shaggy fur cuff at the ankle flowing into a rounded paw with a split, hoof-like tip. Suggests a monstrous, animal-legged look.",
-  "colourAreas": "Colour 1 on the shaggy fur; colour 2 on the split hoof tips.",
-  "tags": [
-   "animal",
-   "monstrous",
-   "fur",
-   "organic",
-   "claws",
-   "layered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footl_Lockbox_67_01.mset",
-  "model": "Geo_Footl_Lockbox_67_01"
- },
- "Female/F_Footl_Lockbox_67_02": {
-  "description": "A low ankle boot with a folded-over cuff at the top, criss-cross lacing over the instep, thin decorative piping lines across the sides, a flat sole, and a small pointed fin-like flap at the back of the ankle.",
-  "colourAreas": "Colour 0 on the main boot body; colour 2 on the inner cuff and the flap; colour 1 on the piping, lacing and sole edge.",
-  "tags": [
-   "fantasy",
-   "leather",
-   "laces",
-   "trim",
-   "wings",
-   "layered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footl_Lockbox_67_02.mset",
-  "model": "Geo_Footl_Lockbox_67_02"
  },
  "Female/F_Footl_Long_Bounty_01": {
   "description": "A mid-calf sci-fi western boot with a plated shin guard, a cuffed band below the top, a contrasting front seam strip, a reinforced toe cap with a small light, and a thick sole with a heel block.",
@@ -85747,23 +85308,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Footr_F_Variablerobot_01.mset",
   "model": "Geo_Footr_F_Variablerobot_01"
  },
- "Female/F_Footr_Foxbatcon_2025_01": {
-  "description": "A short ankle boot with a smooth, rounded toe, a thin flat sole with a small heel step, and a plain upper that ends just above the ankle. A simple, casual style with little detail.",
-  "colourAreas": "Colour 0 on the whole boot upper and sole; no other colour slots are visible.",
-  "tags": [
-   "casual",
-   "plain",
-   "rounded",
-   "sleek",
-   "leather",
-   "partial"
-  ],
-  "differs": "The female version is a structured ankle boot with a distinct thin sole and small heel, while the male version is a soft, sole-less slipper-like foot covering.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Footr_Foxbatcon_2025_01"
- },
  "Female/F_Footr_Gamer_01": {
   "description": "A chunky ankle-high sneaker boot with a padded flared cuff, a wide hook-and-loop strap across the ankle, small lace eyelets, angular gem-like side studs and a thick layered sole. Sporty, futuristic gamer look.",
   "colourAreas": "Colour 0 on the main shoe body; colour 1 on the cuff, ankle strap, heel and toe trim; colour 2 on the sole and laces; colour 3 on the gem-like side studs.",
@@ -87544,24 +87088,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Footr_Child_Greave_Lockbox_66_02.mset",
   "model": "Geo_Footr_Child_Greave_Lockbox_66_02"
- },
- "Female/F_Footr_Greave_Lockbox_67_01": {
-  "description": "A shaggy fur cuff wrapping the right lower leg from just below the knee to the ankle, built from layered jagged tufts with a ragged, pointed lower edge. Suggests a beastly, barbarian look.",
-  "colourAreas": "Colour 0 on the upper and middle fur tufts; colour 1 on the lower layer of fur tufts.",
-  "tags": [
-   "fur",
-   "animal",
-   "tribal",
-   "layered",
-   "tattered",
-   "fantasy",
-   "monstrous",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footr_Greave_Lockbox_67_01.mset",
-  "model": "Geo_Footr_Greave_Lockbox_67_01"
  },
  "Female/F_Footr_Greave_Martial_Power_01": {
   "description": "A shin guard wrapping the lower leg, built from vertical alternating slats that form a split tube open at the front. Two bands circle the top and bottom, with a diagonal strap between them. Martial-arts styling.",
@@ -89355,41 +88881,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Footr_Lockbox_66_01.mset",
   "model": "Geo_Footr_Lockbox_66_01"
- },
- "Female/F_Footr_Lockbox_67_01": {
-  "description": "A shaggy, beast-like right foot covering: a furry hoof-shaped boot with ragged layered tufts around the ankle and a split cloven hoof tip at the front. Ends at the ankle, suggesting a monstrous or animal look.",
-  "colourAreas": "Colour 1 on the shaggy fur; colour 2 on the split hoof tips.",
-  "tags": [
-   "monstrous",
-   "animal",
-   "fur",
-   "fantasy",
-   "layered",
-   "tattered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footr_Lockbox_67_01.mset",
-  "model": "Geo_Footr_Lockbox_67_01"
- },
- "Female/F_Footr_Lockbox_67_02": {
-  "description": "A low ankle boot with a chunky sole, laced front with decorative web-like stitched trim, a folded-over contrasting cuff at the ankle, and a small pair of butterfly-like wing fins at the heel.",
-  "colourAreas": "Colour 0 on the main boot body; colour 2 on the folded cuff; colour 1 on the sole, stitched trim, laces and wing fins.",
-  "tags": [
-   "fantasy",
-   "cute",
-   "leather",
-   "laces",
-   "trim",
-   "wings",
-   "fins",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Footr_Lockbox_67_02.mset",
-  "model": "Geo_Footr_Lockbox_67_02"
  },
  "Female/F_Footr_Long_Bounty_01": {
   "description": "Mid-calf sci-fi boot with a segmented, paneled shaft, a wide contrasting band below the top, a contrasting centre strip down the front, a chunky capped toe with a small inset light, and a thick sole with a heel block.",
@@ -101968,73 +101459,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Hair_Lockbox_66_01.mset",
   "model": "Geo_Hair_Lockbox_66_01"
  },
- "Female/F_Hair_Lockbox_67_01": {
-  "description": "Mid-back hairstyle with a short blunt fringe over the eyes, hair swept back into a thin braided band around the head, and four long twisted locks with bulbous knots and pointed tips hanging over the shoulders.",
-  "colourAreas": "Colour 0 on the main hair mass, fringe and head braid; colour 1 on the four hanging knotted locks.",
-  "tags": [
-   "hair",
-   "fantasy",
-   "tribal",
-   "layered",
-   "ribbons",
-   "partial"
-  ],
-  "differs": "The female version has hanging locks that fall in front of and behind the shoulders, with two in front and two behind. The male version has them mostly at the front and back of the chest.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hair_Lockbox_67_01.mset",
-  "model": "Geo_Hair_Lockbox_67_01"
- },
- "Female/F_Hair_Lockbox_67_02": {
-  "description": "Chin-length, tousled hair with a deep centre-ish part, wavy layered strands, long fringe falling over the eyes, and a curling contrasting front section that sweeps to one side with flicked-out ends at the nape.",
-  "colourAreas": "Colour 0 on the main body of the hair; colour 1 on the swept front section, curled fringe locks and the strands at one side.",
-  "tags": [
-   "hair",
-   "layered",
-   "flowing",
-   "casual",
-   "street",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hair_Lockbox_67_02.mset",
-  "model": "Geo_Hair_Lockbox_67_02"
- },
- "Female/F_Hair_Lockbox_67_03": {
-  "description": "Mid-back length hair with a blunt fringe over the eyes and a smooth swept-back crown held by a thin braided band; two long segmented braids hang forward over each shoulder, tied into tapered bulbs.",
-  "colourAreas": "Colour 0 on the main hair mass and the braided band; colour 1 on the hanging braids and their tapered tips.",
-  "tags": [
-   "hair",
-   "fantasy",
-   "tribal",
-   "layered",
-   "ribbons",
-   "partial"
-  ],
-  "differs": "The female version has two braids hanging in front over the chest, while the male version has four braids split between front and back.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hair_Lockbox_67_01.mset",
-  "model": "Geo_Hair_Lockbox_67_01"
- },
- "Female/F_Hair_Lockbox_67_04": {
-  "description": "Chin-length, tousled, layered hair with a deep side-swept fringe falling over the eyes, wavy shaggy ends and a few curled, flicked locks at the front and sides; a tapered, choppy back.",
-  "colourAreas": "Colour 0 on the main body of the hair; colour 1 on the front fringe and side section of curling locks.",
-  "tags": [
-   "hair",
-   "layered",
-   "flowing",
-   "casual",
-   "street",
-   "punk",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hair_Lockbox_67_02.mset",
-  "model": "Geo_Hair_Lockbox_67_02"
- },
  "Female/F_Hair_Mad_Scientist_01": {
   "description": "A short, wild hairstyle of sharp angular spikes radiating outward from the crown and sides, with a swept-back front flap and a clean hairline. It hugs the head above the jaw and suggests a messy, eccentric look.",
   "colourAreas": "Colour 0 on the main body of the hair and spikes; colour 1 on the shaded undersides and tips of the outer spikes. The glossy default material shows a metallic sheen.",
@@ -103659,25 +103083,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Handl_Extra_Gamer_01.mset",
   "model": "Geo_Handl_Extra_Gamer_01"
  },
- "Female/F_Handl_Extra_Lockbox_67_01": {
-  "description": "A left-hand piece with a padded wrist cuff fastened by a small buckle, and a cluster of sharp, jagged blade-like claws spiking from the knuckles and fingers, joined by thin open link frames.",
-  "colourAreas": "Colour 2 on the cuff and the claw spikes; colour 1 on the cuff edge piping and the thin link frames around the claws.",
-  "tags": [
-   "gothic",
-   "punk",
-   "spiky",
-   "spikes",
-   "claws",
-   "metal",
-   "buckles",
-   "straps",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handl_Extra_Lockbox_67_01.mset",
-  "model": "Geo_Handl_Extra_Lockbox_67_01"
- },
  "Female/F_Handl_Extra_Long_Mechaclaw_01": {
   "description": "A left-hand mechanical claw: a small angular cuff panel at the fist with two long, curved blade-like talons hanging down past the hand, each ending in a sharp point with spiky notches at the top.",
   "colourAreas": "Colour 1 on the hand cuff panel; colour 0 on the two long talon blades.",
@@ -103852,22 +103257,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Handl_F_Variablerobot_01.mset",
   "model": "Geo_Handl_F_Variablerobot_01"
- },
- "Female/F_Handl_Foxbatcon_2025_01": {
-  "description": "A smooth, rounded glove covering the left hand in a clenched fist, with a plain cuff edge at the wrist and softly modelled, short fingers curled into the palm. Simple, casual-looking design.",
-  "colourAreas": "Colour 0 on the whole glove including the fingers; no other slots visible.",
-  "tags": [
-   "plain",
-   "rounded",
-   "cloth",
-   "casual",
-   "sleek",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Handl_Foxbatcon_2025_01"
  },
  "Female/F_Handl_Gatling_01": {
   "description": "A large forearm-mounted rotary gatling cannon: a cluster of long barrels projects past the hand, with a chunky housing, round drum canisters and a cap at the elbow end. Sci-fi heavy weapon look.",
@@ -104061,26 +103450,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Handl_Largehook_01.mset",
   "model": "Geo_Handl_Largehook_01"
- },
- "Female/F_Handl_Lockbox_67_01": {
-  "description": "A clenched-fist glove with a banded strapped cuff, a smooth padded back decorated with swirling tribal line patterns, and jagged blade-like spikes jutting from the knuckles and fingertips. Street-fighter or fantasy claw look.",
-  "colourAreas": "Colour 0 on the main glove body; colour 1 on the swirling line patterns and the edging of the cuff; colour 2 on the cuff band and the knuckle spikes.",
-  "tags": [
-   "tribal",
-   "fantasy",
-   "punk",
-   "leather",
-   "spikes",
-   "claws",
-   "straps",
-   "buckles",
-   "trim",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handl_Lockbox_67_01.mset",
-  "model": "Geo_Handl_Lockbox_67_01"
  },
  "Female/F_Handl_Long_Gamer_01": {
   "description": "A long, boxy gauntlet shaped like a retro game controller strapped to the forearm, with an octagonal cuff, a raised D-pad and button panel, a coiled cable wrapped around the wrist, and a gloved fist with a wrist pad.",
@@ -107555,24 +106924,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Handr_Extra_Gamer_01.mset",
   "model": "Geo_Handr_Extra_Gamer_01"
  },
- "Female/F_Handr_Extra_Lockbox_67_01": {
-  "description": "A wrist cuff with a buckled band paired with a cluster of sharp, blade-like claw spikes and thin linked frame loops across the knuckles and fingers of the fist. Aggressive, gauntlet-style street or sci-fi weapon look.",
-  "colourAreas": "Colour 2 on the wrist band and the claw blades; colour 1 on the band edging and the thin linking frames.",
-  "tags": [
-   "claws",
-   "spiky",
-   "spikes",
-   "buckles",
-   "straps",
-   "angular",
-   "punk",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handr_Extra_Lockbox_67_01.mset",
-  "model": "Geo_Handr_Extra_Lockbox_67_01"
- },
  "Female/F_Handr_Extra_Long_Mechaclaw_01": {
   "description": "A pair of long, flat curved blade claws that hang down from the right fist, alongside a separate angular guard plate at the hand. Sleek, sharp mechanical weapon-gauntlet look.",
   "colourAreas": "Colour 0 on the two long claw blades; colour 1 on the angular hand guard plate.",
@@ -107733,24 +107084,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Handr_F_Variablerobot_01.mset",
   "model": "Geo_Handr_F_Variablerobot_01"
- },
- "Female/F_Handr_Foxbatcon_2025_01": {
-  "description": "A clenched right-hand covering shaped like a chunky fist, with a smooth rounded back and blocky, stubby fingertips curled into the palm. It ends at the wrist with a plain straight cuff edge.",
-  "colourAreas": "Colour 0 on the whole hand covering, including the fingers; no other slots visible.",
-  "tags": [
-   "monstrous",
-   "animal",
-   "aquatic",
-   "rounded",
-   "bulky",
-   "plain",
-   "partial"
-  ],
-  "differs": "The female fingers are short, blocky rounded segments, while the male version has longer, more pointed clawed fingertips.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Handr_Foxbatcon_2025_01"
  },
  "Female/F_Handr_Gatling_01": {
   "description": "A large arm-mounted gatling cannon replacing the right hand: a cluster of long barrels with segmented rings, a boxy housing with drum magazines and vented side canisters, plus a small tank and exposed wiring behind.",
@@ -107948,25 +107281,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Handr_Largehook_01.mset",
   "model": "Geo_Handr_Largehook_01"
- },
- "Female/F_Handr_Lockbox_67_01": {
-  "description": "A clenched-fist glove with a soft, slightly baggy hand and a buckled cuff band at the wrist. Tribal-style line patterns decorate the back of the hand, and sharp contrasting claw spikes jut from the knuckles and fingertips.",
-  "colourAreas": "Colour 0 on the glove body; colour 2 on the cuff band and the knuckle claws; colour 1 on the pattern lines, piping and cuff edge trim.",
-  "tags": [
-   "fantasy",
-   "monstrous",
-   "tribal",
-   "claws",
-   "spikes",
-   "leather",
-   "buckles",
-   "trim",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Handr_Lockbox_67_01.mset",
-  "model": "Geo_Handr_Lockbox_67_01"
  },
  "Female/F_Handr_Long_Gamer_01": {
   "description": "A chunky retro game-controller gauntlet: a wide cylindrical forearm cuff with an octagonal rim, a raised button panel with a cross and dots on the outer side, and coiled cable wraps at the wrist ending in a small wrist pad.",
@@ -115124,26 +114438,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Head_FishAngler_01.mset",
   "model": "Geo_Head_Fishangler_01"
  },
- "Female/F_Head_Foxbatcon_2025_01": {
-  "description": "A full replacement head shaped like an axolotl: a smooth rounded head with a wide grinning mouth, glossy eyes and faint speckles, crowned by three feathery external gills that fan out on each side.",
-  "colourAreas": "Colour 0 on the head skin; colour 1 on the gill fronds; colour 3 on the gill tips and edges and on the eyes; colour 2 on the small neck slot under the chin.",
-  "tags": [
-   "animal",
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "organic",
-   "skin",
-   "feathered",
-   "cute",
-   "rounded",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Head_Foxbatcon_2025_01.mset",
-  "model": "Geo_Head_Foxbatcon_2025_01"
- },
  "Female/F_Head_Full_Falcon_02": {
   "description": "A full-coverage falcon-themed helmet with a sharp downward beak, angular armored plates, swept-back crest feathers and small contrasting eye gems. A segmented plated collar extends down over the neck.",
   "colourAreas": "Colour 0 on the main helmet shell and neck plates; colour 1 on the beak and the crest feathers; colour 2 on the inner crest, eye surrounds and edge trim; colour 3 on the eye gems and side accents.",
@@ -118085,24 +117379,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Head_Toxicsteel_01.mset",
   "model": "Geo_Head_Toxicsteel_01"
- },
- "Female/F_Headaccessories_Foxbatcon_2025_01": {
-  "description": "Two symmetrical clusters of three long, frond-like gills that fan out and upward from either side of the head, each with a feathery, serrated edge. Suggests an axolotl or aquatic creature costume.",
-  "colourAreas": "Colour 1 on the main body of each gill frond; colour 3 on the frilled edges and tips; colour 0 and colour 2 not clearly visible.",
-  "tags": [
-   "aquatic",
-   "animal",
-   "organic",
-   "monstrous",
-   "fantasy",
-   "feathered",
-   "fins",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Headaccessories_Foxbatcon_2025_01.mset",
-  "model": "Geo_Headaccessories_Foxbatcon_2025_01"
  },
  "Female/F_Headsmallaccessories_Dragonbody_Lockbox_65": {
   "description": "A pair of long, thin tapering whiskers that sprout from either side of the upper lip and sweep down and outward past the chin in curved points, like a dragon's barbels or a drooping moustache.",
@@ -129029,24 +128305,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Face_Hornssmall_01.mset",
   "model": "Geo_Helmetattach_Face_Hornssmall_01"
  },
- "Female/F_Helmetattach_Child_Foxbatcon_2025_01": {
-  "description": "Head attachment of six frond-like gill feathers, three fanning out from each side of the head, with serrated edges. They float around the skull with no cap or covering, giving an aquatic, monstrous look.",
-  "colourAreas": "Colour 1 on the main body of each frond; colour 3 on the frond edges and tips near the base. Colour 0 and colour 2 are not clearly visible.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "alien",
-   "organic",
-   "feathered",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Child_Foxbatcon_2025_01.mset",
-  "model": "Geo_Helmetattach_Child_Foxbatcon_2025_01"
- },
  "Female/F_Helmetattach_Child_Full_Dino_01": {
   "description": "A pair of short, angular pyramid-shaped horns rising from the top of the head, tilted slightly outward and forward. They are faceted and tapered to sharp points, giving a monstrous or demonic look.",
   "colourAreas": "Colour 0 on both horns across all faces; the default material shows no other colour slots.",
@@ -131249,24 +130507,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Lockbox_66_02.mset",
   "model": "Geo_Helmetattach_Lockbox_66_02"
  },
- "Female/F_Helmetattach_Lockbox_67_01": {
-  "description": "A pair of ridged ram-like horns rising from the top of the head, sweeping up and back in a curve before flaring outward at the tips. Ribbed surface with thin outlined edges suggests a beastly or demonic look.",
-  "colourAreas": "Colour 0 on the ridged horn surfaces; colour 2 on the horn edges and grooves between ridges.",
-  "tags": [
-   "monstrous",
-   "fantasy",
-   "animal",
-   "horns",
-   "bone",
-   "organic",
-   "rounded",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Lockbox_67_01.mset",
-  "model": "Geo_Helmetattach_Lockbox_67_01"
- },
  "Female/F_Helmetattach_Mechanon_Horn": {
   "description": "A pair of flat, angular horn-like plates rising in a wide arch on either side of the head, each curving up to a sharp point and flaring out at the base with a small rectangular slot by the temples.",
   "colourAreas": "Colour 1 on the main faces of the horn plates; colour 2 on the thick edge and rear layer of the plates; colour 0 on the small slotted tabs at the temples.",
@@ -133109,26 +132349,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Winged_01.mset",
   "model": "Geo_Helmetattach_Winged_01"
- },
- "Female/F_Helmetattach_Winterevent_2025_01": {
-  "description": "A tall cone-shaped cloth hood or veil that rises to a sharp point high above the head, then drapes down the back in a diamond-shaped fall with a scalloped lace edge.",
-  "colourAreas": "Colour 0 on the upper cone; colour 1 on the lower drape, fading in from the cone; colour 2 on the scalloped lace edging.",
-  "tags": [
-   "fantasy",
-   "gothic",
-   "monstrous",
-   "cloth",
-   "flowing",
-   "trim",
-   "hood",
-   "fringe",
-   "partial"
-  ],
-  "differs": "The female drape hangs slightly narrower and shorter down the back, and the cone rises more upright.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Helmetattach_Winterevent_2025_01.mset",
-  "model": "Geo_Helmetattach_Winterevent_2025_01"
  },
  "Female/F_Helmetattach_Wooden_01": {
   "description": "A crest of long, pointed leaf-like blades radiating from a thin band around the crown and back of the head, flaring outward in a spiky, feathered headdress with a tribal, wild look.",
@@ -137485,24 +136705,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Hips_Tight_01.mset",
   "model": "Geo_Hips_Tight_01"
- },
- "Female/F_Hips_Tight_Lockbox_67_01": {
-  "description": "Loose straight-cut trousers with a flared leg that reaches the ankle, a banded waist with a hanging drawcord tie at the front, and swirling decorative panels running down the outer sides of each leg.",
-  "colourAreas": "Colour 0 on the main trouser fabric; colour 1 on the swirling side panels and the drawcord; colour 2 on the waistband and inner edging.",
-  "tags": [
-   "casual",
-   "east-asian",
-   "cloth",
-   "loose",
-   "flowing",
-   "trim",
-   "ankle-length",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hips_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Hips_Tight_Lockbox_67_01"
  },
  "Female/F_Hips_Tight_Longskirt_01": {
   "description": "A bare skin-look base layer for the legs and hips: bare legs from the hips to the ankles with a low-cut brief at the top. Meant to sit under a long skirt, it adds no skirt of its own.",
@@ -150576,44 +149778,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Hipslayer_Lockbox_66_02.mset",
   "model": "Geo_Hipslayer_Lockbox_66_02"
  },
- "Female/F_Hipslayer_Lockbox_67_01": {
-  "description": "A long, flowing skirt with a gathered waistband, a tiered ruffle across the hips, and a front split that reveals the legs. Uneven, handkerchief-style hems with ruffled edging fall to about the ankles.",
-  "colourAreas": "Colour 0 on the main skirt panels and hip ruffle; colour 1 on the waistband and the ruffled hem edging.",
-  "tags": [
-   "fantasy",
-   "cloth",
-   "flowing",
-   "layered",
-   "asymmetric",
-   "trim",
-   "open-front",
-   "ankle-length"
-  ],
-  "differs": "The female skirt has a deep front split that opens between the legs like a wide trouser, while the male version has a more closed front.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Hipslayer_Lockbox_67_01.mset",
-  "model": "Geo_Hipslayer_Lockbox_67_01"
- },
- "Female/F_Hipslayer_Lockbox_67_02": {
-  "description": "A short armoured hip skirt of layered scalloped plates with edge trim, ending in a fringe of long pointed feather-like blades. It sits at the hips and leaves the front centre open with a small pointed panel.",
-  "colourAreas": "Colour 0 on the layered hip plates and waistband; colour 1 on the edge trim along the plates; colour 2 on the hanging pointed blades.",
-  "tags": [
-   "fantasy",
-   "armor-plates",
-   "layered",
-   "segmented",
-   "trim",
-   "feathered",
-   "angular",
-   "hip-length",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/F/F_Hipslayer_Lockbox_67_02.mset",
-  "model": "Geo_Hipslayer_Lockbox_67_02"
- },
  "Female/F_Hipslayer_Long_Swing_01": {
   "description": "A long, full flared skirt with a short overlaid tier at the hip. Chevron stripes sit on the upper tier, geometric patterned bands trim both hems, and a ruffled contrasting flounce finishes the hem at calf length.",
   "colourAreas": "Colour 0 on the skirt body and waistband; colour 1 on the chevron stripes; colour 2 on the patterned trim bands; colour 3 on the ruffled bottom flounce.",
@@ -153046,23 +152210,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Hips_Dragonbody_Lockbox_65_02.mset",
   "model": "Geo_Hips_Dragonbody_Lockbox_65_02"
  },
- "Female/F_Legs_Foxbatcon_2025_01": {
-  "description": "Skin-tight full-length leggings running from the hips to the ankles, with a contrasting panel on each inner thigh and crotch and scattered small round spots down the outer legs and back. Sleek, amphibian-like look.",
-  "colourAreas": "Colour 0 on the main leg surface; colour 2 on the inner thigh and crotch panels; colour 3 on the small spots.",
-  "tags": [
-   "organic",
-   "aquatic",
-   "form-fitting",
-   "sleek",
-   "skin",
-   "full-coverage",
-   "plain"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Legs_Foxbatcon_2025_01.mset",
-  "model": "Geo_Legs_Foxbatcon_2025_01"
- },
  "Female/F_Legsaccessories_Dragonbody_Lockbox_65_01": {
   "description": "A single tapering fin-like calf accessory of layered, swept flame or scale ridges that flares outward at the top and narrows to a point down the outside of the lower leg, suggesting a beast or dragon body.",
   "colourAreas": "Colour 0 on the main body of the ridges and the smooth inner panel; colour 1 on the outer ridge tips, forming a gradient toward the top.",
@@ -153098,24 +152245,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Hipsattach_L_Dragonbody_Lockbox_65_02.mset",
   "model": "Geo_Hipsattach_L_Dragonbody_Lockbox_65_02"
- },
- "Female/F_Legsaccessoriesl_Foxbatcon_2025_01": {
-  "description": "A pair of curved, feather-like fins attached along the outer side of the left leg, one on the thigh and one on the calf, each with a swept tip and ragged frilled edge. Suggests an aquatic, monstrous creature look.",
-  "colourAreas": "Colour 1 on the inner surface of each fin; colour 3 on the frilled outer edges and rims of each fin.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "fins",
-   "organic",
-   "asymmetric",
-   "spiky",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Legsaccessoriesl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Legsaccessoriesl_Foxbatcon_2025_01"
  },
  "Female/F_Legsaccessoriesr_Dragonbody_Lockbox_65_01": {
   "description": "A flame-like fin or frill attached to the outer right calf, made of swept, wavy ridges that flare into pointed tips at the top and taper to a long point near the ankle. Suggests a dragon or beast look.",
@@ -153153,24 +152282,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/F/F_Hipsattach_R_Dragonbody_Lockbox_65_02.mset",
   "model": "Geo_Hipsattach_R_Dragonbody_Lockbox_65_02"
- },
- "Female/F_Legsaccessoriesr_Foxbatcon_2025_01": {
-  "description": "A pair of frilled, feather-like fins attached to the outer side of the right leg, one at the thigh and one at the calf. Each is a swept, pointed blade with ragged, layered edges, giving an organic aquatic look.",
-  "colourAreas": "Colour 3 on the outer edges and rims of each fin; colour 1 on the inner body of each fin.",
-  "tags": [
-   "aquatic",
-   "organic",
-   "monstrous",
-   "fantasy",
-   "fins",
-   "layered",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Legsaccessoriesr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Legsaccessoriesr_Foxbatcon_2025_01"
  },
  "Female/F_Lockbox_65_Dragon_Hips_Tight_01": {
   "description": "Form-fitting scaled dragon legs with a textured reptilian skin, overlapping segmented plates across the hips and groin, padded ridged panels down the back of the thighs, and armoured knee and shin segments; reaches the ankles.",
@@ -165594,25 +164705,6 @@
   "mesh": "bin/geobin/cl/A/T/M_Tail_Extra_Tight_Seacreature_04.mset",
   "model": "Geo_Tail_Extra_Tight_Seacreature_04"
  },
- "Female/F_Tail_Foxbatcon_2025_02": {
-  "description": "A long, thick amphibian-style tail with a rounded blunt base at the hips, tapering to a curved tip. A frilly, feathery fin fringe runs along its upper edge and it has a speckled surface.",
-  "colourAreas": "Colour 0 on the main tail body with speckles; colour 2 on the rounded base cap; colour 1 on the inner fin ridge; colour 3 on the frilly fin edges.",
-  "tags": [
-   "animal",
-   "aquatic",
-   "monstrous",
-   "organic",
-   "fins",
-   "fringe",
-   "rounded",
-   "tail",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Tail_Foxbatcon_2025_02.mset",
-  "model": "Geo_Tail_Foxbatcon_2025_02"
- },
  "Female/F_Tail_Kaiju_01": {
   "description": "A thick, tapering monster tail that attaches at the lower back with a rounded base plate. Rows of curved horn-like spines and small spikes run along its length, and it ends in a curling tip.",
   "colourAreas": "Colour 3 on the base plate and the small spikes along the top; colour 1 on the underside of the tail; colour 2 on the large curved horns; colour 0 on the plates between the horns.",
@@ -168496,44 +167588,6 @@
   "mesh": "bin/geobin/cl/A/F/F_Capebelt_L_Dragonbody_Lockbox_65_01.mset",
   "model": "Geo_Capebelt_L_Dragonbody_Lockbox_65_01"
  },
- "Female/F_Waistaccessoriesl_Foxbatcon_2025_01": {
-  "description": "A single swept-back fin cluster worn on the left hip: three layered, ribbed fin blades that fan backwards and taper to points, with a rounded, smoothly curved outer surface and a scalloped lower edge.",
-  "colourAreas": "Colour 1 on the inner and lower fin surfaces; colour 3 on the outer fin edges and upper ridges, blending into colour 1 across the fin membranes.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "organic",
-   "fins",
-   "layered",
-   "rounded",
-   "flowing",
-   "partial"
-  ],
-  "differs": "The female fins are smoother and more rounded, with ribbed, fanned blades and a scalloped lower edge, while the male version is more angular and folded.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Waistaccessoriesl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Waistaccessoriesl_Foxbatcon_2025_01"
- },
- "Female/F_Waistaccessoriesr_Foxbatcon_2025_01": {
-  "description": "A single swept-back fin ornament on the right hip: three stacked, ribbed fin layers curve to a point, with a frilled ragged lower edge. Suggests an amphibian or monster look.",
-  "colourAreas": "Colour 3 on the outer rims and ribbed fin edges; colour 1 on the inner fin surfaces and frilled underside.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "organic",
-   "fins",
-   "layered",
-   "rounded",
-   "partial",
-   "fantasy"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/F/F_Waistaccessoriesr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Waistaccessoriesr_Foxbatcon_2025_01"
- },
  "Female/F_Waistr_Dragonbody_Lockbox_65": {
   "description": "A small cluster of curved, clawlike spikes worn at the right hip: long tapering blades fan out from a knotted base, with shorter talon-like points curling below. Suggests a monstrous dragon-scale accent.",
   "colourAreas": "Colour 0 on the middle of the long spikes; colour 1 on the spike tips; colour 2 on the base knot; colour 3 on the lower curling talons.",
@@ -169077,24 +168131,6 @@
   "date": "2026-10-03",
   "mesh": "bin/geobin/cl/A/F/F_Back_Lockbox_66_02.mset",
   "model": "Geo_Back_Lockbox_66_02"
- },
- "Female/F_Wings_Lockbox_67_01": {
-  "description": "A pair of translucent, fairy-like wings: two large upper lobes and two smaller lower lobes spread out from the upper back, with thin veined, glossy membranes and pointed tips. Fantasy or insect style.",
-  "colourAreas": "The default material ignores the colour scheme; the wing membranes show a marbled, translucent finish and no colour slots are clearly visible.",
-  "tags": [
-   "fantasy",
-   "insect",
-   "flowing",
-   "sleek",
-   "wings",
-   "partial",
-   "glass"
-  ],
-  "differs": "The female wings are broad, translucent, four-lobed fairy wings spreading outward, whereas the male version is a pair of long, narrow, drooping moth-like wings.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/F/F_Wings_Lockbox_67_01.mset",
-  "model": "Geo_Wings_Lockbox_67_01"
  },
  "Female/F_Wings_Moth_01": {
   "description": "A pair of large butterfly-style wings with broad upper and lower lobes, fine vein lines, ringed eye-spots and contrasting-tipped edges, attached at the upper back by a small angular clasp. Suggests a fantasy insect look.",
@@ -171252,42 +170288,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Helmet_Face_MooseSkull_01.mset",
   "model": "Geo_Helmet_Face_Mooseskull_01"
- },
- "Male/M_Armsaccessoriesl_Foxbatcon_2025_01": {
-  "description": "A single fin-like blade running along the outer left forearm, tapering to a point at the wrist, with several curved frilly spikes along its edge and a tall curled tip near the elbow. Fantasy, aquatic creature styling.",
-  "colourAreas": "Colour 1 on the main body of the fin; colour 3 on the frilled spikes and edge tips, blending into colour 1 toward the middle.",
-  "tags": [
-   "fantasy",
-   "aquatic",
-   "organic",
-   "fins",
-   "spiky",
-   "flowing",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Armsaccessoriesl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Armsaccessoriesl_Foxbatcon_2025_01"
- },
- "Male/M_Armsaccessoriesr_Foxbatcon_2025_01": {
-  "description": "A single organic fin-like blade running along the outside of the right forearm, with a smooth tapered base and several curved, frilled spurs branching off toward the elbow. It suggests aquatic creature styling.",
-  "colourAreas": "Colour 1 on the main body of the fin; colour 3 on the spur tips and upper edges, blending into colour 1.",
-  "tags": [
-   "aquatic",
-   "organic",
-   "fantasy",
-   "monstrous",
-   "fins",
-   "spiky",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Armsaccessoriesr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Armsaccessoriesr_Foxbatcon_2025_01"
  },
  "Male/M_Back_Alien_01": {
   "description": "A narrow spinal ridge of layered, curved blade-like fins running down the centre of the upper back, each fin ending in a sharp spike. A jagged central strip pokes out past the shoulders. Alien, organic-armor look.",
@@ -178006,23 +177006,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Belt_Child_Lockbox_66_01.mset",
   "model": "Geo_Belt_Child_Lockbox_66_01"
  },
- "Male/M_Belt_Child_Lockbox_67_01": {
-  "description": "A small ornate belt ornament shaped like a butterfly, with cut-out openwork wings, scrolled curls underneath and a fleur-de-lis shaped backing plate. It sits centred at the front of the waist.",
-  "colourAreas": "Colour 0 on the openwork wings and scrolls; colour 1 on the central backing plate and lower fleur-de-lis; colour 2 on the darker rim and recesses behind the wings.",
-  "tags": [
-   "fantasy",
-   "ornate",
-   "metal",
-   "rounded",
-   "emblem",
-   "gothic",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Belt_Child_Lockbox_67_01.mset",
-  "model": "Geo_Belt_Child_Lockbox_67_01"
- },
  "Male/M_Belt_Child_Modern_Sapphire_01": {
   "description": "A small circular belt buckle plate: a thick segmented ring around a domed round centre, with two small studs and inset panels, worn at the front of the waist. Mechanical, sci-fi look.",
   "colourAreas": "Colour 0 on the lower and left segments of the outer ring; colour 1 on the upper ring band; colour 3 on the domed centre; colour 2 on the inset panels and studs.",
@@ -180880,44 +179863,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Belt_Tight_Light_01.mset",
   "model": "Geo_Belt_Tight_Light_01"
- },
- "Male/M_Belt_Tight_Lockbox_67_01": {
-  "description": "An ornate filigree belt of thorny, leaf-like scrollwork wrapping the waist, with a butterfly-shaped cut-out plate at the front and curling swirl ornaments at the sides. A tall leaf spray rises at the back. Gothic and fantasy in feel.",
-  "colourAreas": "Colour 0 on the butterfly plate at the front; colour 1 on the curling swirls and the central leaf ornament; colour 2 on the thorny filigree band and leaf spikes.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "ornate",
-   "metal",
-   "spiky",
-   "belt",
-   "angular",
-   "asymmetric",
-   "partial"
-  ],
-  "differs": "The butterfly plate is slightly smaller and set left of centre, with a larger leaf spray beside it at the front and another at the back.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Belt_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Belt_Tight_Lockbox_67_01"
- },
- "Male/M_Belt_Tight_Lockbox_67_02": {
-  "description": "A wide, rigid armoured belt band sitting low on the hips, with pointed bat-like peaks at the front and back and two angled fin panels at the front. A thin contrasting edge line runs along the lower front.",
-  "colourAreas": "Colour 0 on the main band and peaks; colour 2 on the inner fin panels; colour 1 on the thin edge trim along the lower front.",
-  "tags": [
-   "superhero",
-   "sleek",
-   "angular",
-   "armor-plates",
-   "metal",
-   "trim",
-   "partial"
-  ],
-  "differs": "The male belt has a smoother front that dips in a single V between the two fin panels, without the raised centre section the female version has.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/M/M_Belt_Tight_Lockbox_67_02.mset",
-  "model": "Geo_Belt_Tight_Lockbox_67_02"
  },
  "Male/M_Belt_Tight_Loinclothmedicinebag_01": {
   "description": "A thin hip belt with a single rectangular flapped pouch hanging at the wearer's right hip. The pouch has stitched edging and a printed tribal motif on the flap and body. Suggests a tribal, hide-craft look.",
@@ -185315,24 +184260,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Capebelt_L_Corrupted_01.mset",
   "model": "Geo_Capebelt_L_Corrupted_01"
  },
- "Male/M_Capebelt_L_Foxbatcon_2025_01": {
-  "description": "A single hip-mounted fin cluster: three stacked, swept-back fin blades with ribbed surfaces that flare outward and taper to points, sitting on the side of the hip like an aquatic creature's frill.",
-  "colourAreas": "Colour 3 on the outer ribbed fin surfaces; colour 1 on the base and inner edges of the fins, blending between the two.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "organic",
-   "fins",
-   "layered",
-   "rounded",
-   "skin",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Capebelt_L_Foxbatcon_2025_01.mset",
-  "model": "Geo_Capebelt_L_Foxbatcon_2025_01"
- },
  "Male/M_Capebelt_L_Gladiator_01": {
   "description": "A belt accessory of three large octagonal metal rings joined by small chain links, each ring holding a hanging rounded plaque with pyramid studs. It dangles at the hip in a gladiator style.",
   "colourAreas": "Colour 0 on the rings and chain links; colour 1 on the plaque faces; colour 2 on the plaque borders, pyramid studs and connectors.",
@@ -186430,24 +185357,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Capebelt_R_Corrupted_01.mset",
   "model": "Geo_Capebelt_R_Corrupted_01"
- },
- "Male/M_Capebelt_R_Foxbatcon_2025_01": {
-  "description": "A single hip fin ornament worn on the right hip: a stack of three layered, swept-back fin blades with ridged edges that curve outward and taper to a point behind the hip. Suggests a creature or amphibian look.",
-  "colourAreas": "Colour 3 on the outer fin surfaces and ridged edges; colour 1 on the inner surfaces and the lower fin undersides.",
-  "tags": [
-   "monstrous",
-   "aquatic",
-   "fins",
-   "layered",
-   "organic",
-   "fantasy",
-   "partial",
-   "rounded"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Capebelt_R_Foxbatcon_2025_01.mset",
-  "model": "Geo_Capebelt_R_Foxbatcon_2025_01"
  },
  "Male/M_Capebelt_R_Gladiator_01": {
   "description": "A belt accessory of three octagonal metal rings joined by small chain links, each ring holding a hanging rounded plate with a bordered edge and diamond studs. Hangs at the hip in a fantasy gladiator style.",
@@ -190137,25 +189046,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Chest_Extra_Ski_01.mset",
   "model": "Geo_Chest_Extra_Ski_01"
- },
- "Male/M_Chest_Foxbatcon_2025_01": {
-  "description": "A long-sleeved, skin-tight top ending at the waist, with a thin contrasting stripe across the shoulders, a pointed chest notch leading into a sculpted abdomen panel, and small spots down the outer forearms.",
-  "colourAreas": "Colour 0 on the main top and sleeves; colour 2 on the shoulder stripe and abdomen panel; colour 3 on the spots along the arms.",
-  "tags": [
-   "sci-fi",
-   "superhero",
-   "form-fitting",
-   "sleek",
-   "latex",
-   "long-sleeved",
-   "waist-length",
-   "full-coverage"
-  ],
-  "differs": "The male version has a thin shoulder stripe and a jagged, bat-like notch above the abdomen panel, rather than the wide chest band of the female version.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chest_Foxbatcon_2025_01.mset",
-  "model": "Geo_Chest_Foxbatcon_2025_01"
  },
  "Male/M_Chest_Holohexarmor_01": {
   "description": "A long-sleeved sci-fi top with a glossy segmented chest plate and a ridged central spine panel over a banded undershirt. Armoured strips run along the arms, and it ends at the waist.",
@@ -195343,27 +194233,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Chest_Tight_01.mset",
   "model": "Geo_Chest_Tight_01"
  },
- "Male/M_Chest_Tight_Lockbox_67_01": {
-  "description": "A long-sleeved, waist-length fitted jacket with a high stand collar, a ruffle-edged shoulder yoke with buttons, puffed sleeves gathered into banded cuffs with frilled edges, and seam lines down the front. A small winged emblem sits on the back.",
-  "colourAreas": "Colour 0 on the jacket body, sleeves and cuff frills; colour 1 on the shoulder yoke and the back emblem; colour 2 on the ruffle edging, seam piping, waist band and cuff bands; colour 3 not visible.",
-  "tags": [
-   "formal",
-   "fantasy",
-   "form-fitting",
-   "layered",
-   "high-collar",
-   "buttons",
-   "trim",
-   "emblem",
-   "long-sleeved",
-   "waist-length",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chest_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Chest_Tight_Lockbox_67_01"
- },
  "Male/M_Chest_Tight_Madjester_01": {
   "description": "A long-sleeved, skin-tight patchwork top made of irregular angular patches joined by contrasting cross-stitched seams, in a jester style. It covers the torso and arms and ends at the waist with a plain hem.",
   "colourAreas": "Colour 1 on the main body patches; colour 0 on the light patches; colour 3 on the accent patches; colour 2 on the stitching.",
@@ -198323,27 +197192,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Chest_Variable_Robot_01.mset",
   "model": "Geo_Chest_Variable_Robot_01"
- },
- "Male/M_Chestaccessories_Foxbatcon_2025_01": {
-  "description": "A partial chest and shoulder piece of layered, petal-like curved plates: large rounded shoulder caps join a band across the chest and upper back, meeting at a pointed centre. Organic, wing-like sci-fi look.",
-  "colourAreas": "Colour 1 on the main petal plates; colour 3 on the ridged stripes and edge lines running along each plate.",
-  "tags": [
-   "organic",
-   "sci-fi",
-   "alien",
-   "fantasy",
-   "layered",
-   "rounded",
-   "ornate",
-   "armor-plates",
-   "sleek",
-   "partial"
-  ],
-  "differs": "The male version has bulkier shoulder caps and a wider, fuller chest band that covers more of the chest.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chestaccessories_Foxbatcon_2025_01.mset",
-  "model": "Geo_Chestaccessories_Foxbatcon_2025_01"
  },
  "Male/M_Chestattach_L_Arm_Alien_01": {
   "description": "A sculpted alien armband that wraps the upper left arm: an open, angular band with a raised contrasting plate on the outer side, layered edge plating and a short pointed spike jutting toward the back.",
@@ -204377,23 +203225,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Chestattach_L_Light_01.mset",
   "model": "Geo_Chestattach_L_Light_01"
- },
- "Male/M_Chestattach_L_Lockbox_67_01": {
-  "description": "A tapering, faceted sleeve-like sheath hanging along the left side of the torso, gathered into a ruffled, flared frill at its lower end with a small tassel dangling below. Reads as a gothic or formal accent.",
-  "colourAreas": "Colour 2 on the main body of the sheath and the frill; colour 0 on the tassel tip.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "cloth",
-   "angular",
-   "layered",
-   "fringe",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chestattach_L_Lockbox_67_01.mset",
-  "model": "Geo_Chestattach_L_Lockbox_67_01"
  },
  "Male/M_Chestattach_L_Psionic_Dragon_01": {
   "description": "A small angular curved shoulder-arm plate that wraps partway around the upper left arm, with faceted edges, a pointed lower tip and a small flared upturned fin at the top; suggests a sci-fi psionic armor accent.",
@@ -214632,23 +213463,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Chestattach_R_Light_01.mset",
   "model": "Geo_Chestattach_R_Light_01"
  },
- "Male/M_Chestattach_R_Lockbox_67_01": {
-  "description": "A tapered, closed sleeve-like arm piece hanging along the right side of the torso, starting angular at the shoulder and ending in a ruffled, gathered flare with a small pendant tassel dangling below.",
-  "colourAreas": "Colour 2 on the whole sleeve body and ruffled flare; colour 0 on the small hanging tassel.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "cloth",
-   "flowing",
-   "layered",
-   "tattered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chestattach_R_Lockbox_67_01.mset",
-  "model": "Geo_Chestattach_R_Lockbox_67_01"
- },
  "Male/M_Chestattach_R_Psionic_Dragon_01": {
   "description": "A small angular shard-like guard that wraps partway around the right upper arm, with faceted, folded plates and a pointed upper fin. It sits on the outer arm like a stylised dragon wing or scale.",
   "colourAreas": "Colour 0 on the whole faceted plate in a glossy metallic finish; no other slot is clearly visible.",
@@ -223156,47 +221970,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Chestlayer_Lockbox_65_01.mset",
   "model": "Geo_Chestlayer_Lockbox_65_01"
  },
- "Male/M_Chestlayer_Lockbox_67_02": {
-  "description": "A strapless corset-style bustier with glossy padded cups edged in ruffled trim, a smooth fitted midsection with a scalloped lower edge, and a peplum of pointed tabs flaring over the hips. Open at the back, worn over the torso.",
-  "colourAreas": "Colour 2 on the cups and the peplum tabs; colour 0 on the midsection band and ruffle trim; colour 1 on the inner lining and the edging of the tabs.",
-  "tags": [
-   "gothic",
-   "fantasy",
-   "leather",
-   "form-fitting",
-   "layered",
-   "trim",
-   "ribbons",
-   "partial",
-   "revealing",
-   "sleeveless",
-   "waist-length"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chestlayer_Lockbox_67_02.mset",
-  "model": "Geo_Chestlayer_Lockbox_67_02"
- },
- "Male/M_Chestlayer_Lockbox_67_03": {
-  "description": "A cropped, short-sleeved capelet-style top covering the shoulders, chest and upper back, with a patterned swirl design, ruffled frilled edging, small dangling metal tassels and a contrasting open collar. Ends above the waist.",
-  "colourAreas": "Colour 1 on the main body of the capelet; colour 0 on the swirl patterns and collar-area panels; colour 2 on the ruffled edging and inner collar; colour 3 not clearly visible.",
-  "tags": [
-   "fantasy",
-   "mystic",
-   "cloth",
-   "layered",
-   "ornate",
-   "fringe",
-   "trim",
-   "short-sleeved",
-   "cropped",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Chestlayer_Lockbox_67_03.mset",
-  "model": "Geo_Chestlayer_Lockbox_67_03"
- },
  "Male/M_Chestlayer_Mecha_01": {
   "description": "A bulky mechanical chest-and-back shell: a boxy armored casing over the torso with a ridged central crest and chevron marks at the neck, side pods with round openings, missile-like pods on the front, twin round vents on the back and a rounded module below.",
   "colourAreas": "Colour 0 on the main casing and side pods; colour 1 on the back panel, front pod ends and lower front plate; colour 2 on the crest trim and the lower back module; colour 3 on the chevrons, vent centres and pod dots.",
@@ -230433,81 +229206,6 @@
   "date": "2026-10-03",
   "mesh": "bin/geobin/cl/A/M/M_Collar_Tight_Lemurian_Bubble_01.mset",
   "model": "Geo_Collar_Tight_Lemurian_Bubble_01"
- },
- "Male/M_Collar_Tight_Lockbox_67_01": {
-  "description": "A feathered shoulder mantle of layered, spiky plumes draping over both shoulders and around the neck, with a smooth open collar at the front. Feathers grade in tiers toward ragged tips; sits at the upper chest and back.",
-  "colourAreas": "Colour 0 on the upper feathers around the neck and back; colour 1 on the middle feather tier over the shoulders; colour 2 on the feather tips and the inner front collar.",
-  "tags": [
-   "feathered",
-   "feathers",
-   "layered",
-   "spiky",
-   "fantasy",
-   "gothic",
-   "ornate",
-   "collar",
-   "partial"
-  ],
-  "differs": "The male mantle has a wider open front with a visible inner collar, and the feathers sit more heavily on the shoulders and upper back.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Collar_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_01"
- },
- "Male/M_Collar_Tight_Lockbox_67_02": {
-  "description": "A tall, snug neck collar wrapped with a soft draped scarf that crosses at the throat and ties in a loose knot at the front, with long tapering tails hanging down the chest. Casual, slightly formal look.",
-  "colourAreas": "Colour 1 on the tight inner collar; colour 0 on the scarf outer face and tails; colour 2 on the scarf underside visible at the back.",
-  "tags": [
-   "cloth",
-   "scarf",
-   "collar",
-   "high-collar",
-   "flowing",
-   "layered",
-   "casual",
-   "formal",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Collar_Tight_Lockbox_67_02.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_02"
- },
- "Male/M_Collar_Tight_Lockbox_67_03": {
-  "description": "A thick, ring-shaped fur collar that sits around the base of the neck and rests on the shoulders, with shaggy layered tufts hanging down and small contrasting spikes studded through the fur. Suggests a rugged, savage look.",
-  "colourAreas": "Colour 0 on the fur ruff; colour 2 on the spikes.",
-  "tags": [
-   "fur",
-   "fantasy",
-   "monstrous",
-   "punk",
-   "layered",
-   "spikes",
-   "collar",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Collar_Tight_Lockbox_67_03.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_03"
- },
- "Male/M_Collar_Tight_Lockbox_67_04": {
-  "description": "A thick, fur-like shoulder collar of layered, pointed tufts that wraps around the neck and drapes over the shoulders and upper back, open at the front with a contrasting lining inside. Suggests a rugged, wintry look.",
-  "colourAreas": "Colour 0 on the fur tufts; colour 2 on the inner lining; colour 1 on a small hidden trim at the lower back edge.",
-  "tags": [
-   "fur",
-   "layered",
-   "fantasy",
-   "medieval",
-   "rounded",
-   "open-front",
-   "collar",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Collar_Tight_Lockbox_67_04.mset",
-  "model": "Geo_Collar_Tight_Lockbox_67_04"
  },
  "Male/M_Collar_Tight_Luchador_01": {
   "description": "A short, stand-up collar band that wraps around the neck with a ridged, folded outer surface and pointed tips at the back. It sits at the base of the neck as a tight, sleek accessory.",
@@ -246260,22 +244958,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Footl_Extra_Victory_01.mset",
   "model": "Geo_Footl_Extra_Victory_01"
  },
- "Male/M_Footl_Foxbatcon_2025_01": {
-  "description": "A soft, smooth ankle-high covering for the left foot, like a sock-shoe with a rounded toe and no visible sole, heel or fastenings. It hugs the foot and ends just above the ankle.",
-  "colourAreas": "Colour 0 on the whole foot covering; no other colour slots are visible on this piece.",
-  "tags": [
-   "plain",
-   "rounded",
-   "sleek",
-   "form-fitting",
-   "partial"
-  ],
-  "differs": "The male version is a soft sock-like covering with no separate sole or heel, whereas the female version is a boot with a thin sole and low heel.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Footl_Foxbatcon_2025_01"
- },
  "Male/M_Footl_Gamer_01": {
   "description": "A chunky ankle-high sneaker boot with a padded flared collar, a wide strap across the ankle, small angular gem-like side plates, short contrasting laces, and a thick layered sole. Sporty, gamer-inspired look.",
   "colourAreas": "Colour 0 on the main boot body and toe; colour 1 on the collar, ankle strap, heel and sole trim; colour 3 on the side plates; colour 2 on the laces and sole.",
@@ -248042,25 +246724,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Footl_Child_Greave_Lockbox_66_02.mset",
   "model": "Geo_Footl_Child_Greave_Lockbox_66_02"
- },
- "Male/M_Footl_Greave_Lockbox_67_01": {
-  "description": "A shaggy fur cuff wrapped around the lower left calf and ankle, built from layered, jagged tufts that hang in points; the upper tufts are longer and the lower layer forms a contrasting fringe. Suits beastly or tribal looks.",
-  "colourAreas": "Colour 0 on the upper fur tufts; colour 1 on the lower layer of fur tufts.",
-  "tags": [
-   "fur",
-   "animal",
-   "monstrous",
-   "tribal",
-   "layered",
-   "tattered",
-   "fringe",
-   "loose",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footl_Greave_Lockbox_67_01.mset",
-  "model": "Geo_Footl_Greave_Lockbox_67_01"
  },
  "Male/M_Footl_Greave_Martial_Power_01": {
   "description": "A shin greave built from vertical rounded slats forming a hollow tube around the lower leg, held by two wide bands with a diagonal strap crossing between them. Martial, east-asian armour style.",
@@ -249867,40 +248530,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Footl_Lockbox_66_01.mset",
   "model": "Geo_Footl_Lockbox_66_01"
- },
- "Male/M_Footl_Lockbox_67_01": {
-  "description": "A furry beast-foot covering for the left foot: a short shaggy fur cuff at the ankle flowing into a rounded paw with a split, hoof-like tip. Suggests a monstrous, animal-legged look.",
-  "colourAreas": "Colour 1 on the shaggy fur; colour 2 on the split hoof tips.",
-  "tags": [
-   "animal",
-   "monstrous",
-   "fur",
-   "organic",
-   "claws",
-   "layered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footl_Lockbox_67_01.mset",
-  "model": "Geo_Footl_Lockbox_67_01"
- },
- "Male/M_Footl_Lockbox_67_02": {
-  "description": "A low ankle boot with a folded-over cuff at the top, criss-cross lacing over the instep, thin decorative piping lines across the sides, a flat sole, and a small pointed fin-like flap at the back of the ankle.",
-  "colourAreas": "Colour 0 on the main boot body; colour 2 on the inner cuff and the flap; colour 1 on the piping, lacing and sole edge.",
-  "tags": [
-   "fantasy",
-   "leather",
-   "laces",
-   "trim",
-   "wings",
-   "layered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footl_Lockbox_67_02.mset",
-  "model": "Geo_Footl_Lockbox_67_02"
  },
  "Male/M_Footl_Long_Arvad_01": {
   "description": "A single calf-high soft boot with a smooth, slightly slouched shaft, a thin contrasting sole, and a stacked layered cuff at the top. An ornate scrolling swirl panel decorates the front of the shaft, suggesting an eastern-fantasy or mystic style.",
@@ -256176,23 +254805,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Footr_Extra_Victory_01.mset",
   "model": "Geo_Footr_Extra_Victory_01"
  },
- "Male/M_Footr_Foxbatcon_2025_01": {
-  "description": "A soft, smooth foot covering that hugs the foot and ankle, with a rounded blunt toe and no distinct sole or heel. The top edge ends just above the ankle with small pointed tabs at the back.",
-  "colourAreas": "Colour 0 on the whole foot covering; no other colour slots are visible.",
-  "tags": [
-   "plain",
-   "rounded",
-   "sleek",
-   "form-fitting",
-   "organic",
-   "partial"
-  ],
-  "differs": "The male version is a soft, sole-less slipper-like foot covering with small pointed tabs at the back, while the female version is a structured ankle boot with a thin sole and small heel.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Footr_Foxbatcon_2025_01"
- },
  "Male/M_Footr_Gamer_01": {
   "description": "A chunky ankle-high sneaker boot with a padded flared cuff, a wide hook-and-loop strap across the ankle, small lace eyelets, angular gem-like side studs and a thick layered sole. Sporty, futuristic gamer look.",
   "colourAreas": "Colour 0 on the main shoe body; colour 1 on the cuff, ankle strap, heel and toe trim; colour 2 on the sole and laces; colour 3 on the gem-like side studs.",
@@ -257976,24 +256588,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Footr_Child_Greave_Lockbox_66_02.mset",
   "model": "Geo_Footr_Child_Greave_Lockbox_66_02"
- },
- "Male/M_Footr_Greave_Lockbox_67_01": {
-  "description": "A shaggy fur cuff wrapping the right lower leg from just below the knee to the ankle, built from layered jagged tufts with a ragged, pointed lower edge. Suggests a beastly, barbarian look.",
-  "colourAreas": "Colour 0 on the upper and middle fur tufts; colour 1 on the lower layer of fur tufts.",
-  "tags": [
-   "fur",
-   "animal",
-   "tribal",
-   "layered",
-   "tattered",
-   "fantasy",
-   "monstrous",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footr_Greave_Lockbox_67_01.mset",
-  "model": "Geo_Footr_Greave_Lockbox_67_01"
  },
  "Male/M_Footr_Greave_Martial_Power_01": {
   "description": "A shin guard wrapping the lower leg, built from vertical alternating slats that form a split tube open at the front. Two bands circle the top and bottom, with a diagonal strap between them. Martial-arts styling.",
@@ -259802,41 +258396,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Footr_Lockbox_66_01.mset",
   "model": "Geo_Footr_Lockbox_66_01"
- },
- "Male/M_Footr_Lockbox_67_01": {
-  "description": "A shaggy, beast-like right foot covering: a furry hoof-shaped boot with ragged layered tufts around the ankle and a split cloven hoof tip at the front. Ends at the ankle, suggesting a monstrous or animal look.",
-  "colourAreas": "Colour 1 on the shaggy fur; colour 2 on the split hoof tips.",
-  "tags": [
-   "monstrous",
-   "animal",
-   "fur",
-   "fantasy",
-   "layered",
-   "tattered",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footr_Lockbox_67_01.mset",
-  "model": "Geo_Footr_Lockbox_67_01"
- },
- "Male/M_Footr_Lockbox_67_02": {
-  "description": "A low ankle boot with a chunky sole, laced front with decorative web-like stitched trim, a folded-over contrasting cuff at the ankle, and a small pair of butterfly-like wing fins at the heel.",
-  "colourAreas": "Colour 0 on the main boot body; colour 2 on the folded cuff; colour 1 on the sole, stitched trim, laces and wing fins.",
-  "tags": [
-   "fantasy",
-   "cute",
-   "leather",
-   "laces",
-   "trim",
-   "wings",
-   "fins",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Footr_Lockbox_67_02.mset",
-  "model": "Geo_Footr_Lockbox_67_02"
  },
  "Male/M_Footr_Long_Arvad_01": {
   "description": "A right calf-high boot with a soft, smooth shaft and thin sole, topped by stacked layered bands at the cuff and an ornate curled scroll plate with swirl motifs down the front of the shin.",
@@ -271206,73 +269765,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Hair_Lockbox_66_01.mset",
   "model": "Geo_Hair_Lockbox_66_01"
  },
- "Male/M_Hair_Lockbox_67_01": {
-  "description": "Mid-back hairstyle with a short blunt fringe over the eyes, hair swept back into a thin braided band around the head, and four long twisted locks with bulbous knots and pointed tips hanging down.",
-  "colourAreas": "Colour 0 on the main hair mass, fringe and head braid; colour 1 on the four hanging knotted locks.",
-  "tags": [
-   "hair",
-   "fantasy",
-   "tribal",
-   "layered",
-   "ribbons",
-   "partial"
-  ],
-  "differs": "The male version has the four knotted locks hanging in a row down the chest and back, rather than being split into front and back pairs.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hair_Lockbox_67_01.mset",
-  "model": "Geo_Hair_Lockbox_67_01"
- },
- "Male/M_Hair_Lockbox_67_02": {
-  "description": "Chin-length, tousled hair with a deep centre-ish part, wavy layered strands, long fringe falling over the eyes, and a curling contrasting front section that sweeps to one side with flicked-out ends at the nape.",
-  "colourAreas": "Colour 0 on the main body of the hair; colour 1 on the swept front section, curled fringe locks and the strands at one side.",
-  "tags": [
-   "hair",
-   "layered",
-   "flowing",
-   "casual",
-   "street",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hair_Lockbox_67_02.mset",
-  "model": "Geo_Hair_Lockbox_67_02"
- },
- "Male/M_Hair_Lockbox_67_03": {
-  "description": "Mid-back length hair with a blunt fringe over the eyes and a smooth swept-back crown held by a thin braided band; four long segmented braids hang in tied, tapered bulbs, two in front and two behind.",
-  "colourAreas": "Colour 0 on the main hair mass and the braided band; colour 1 on the hanging braids and their tapered tips.",
-  "tags": [
-   "hair",
-   "fantasy",
-   "tribal",
-   "layered",
-   "ribbons",
-   "partial"
-  ],
-  "differs": "The male version has four braids, two hanging in front over the chest and two down the back, while the female version has only two.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hair_Lockbox_67_01.mset",
-  "model": "Geo_Hair_Lockbox_67_01"
- },
- "Male/M_Hair_Lockbox_67_04": {
-  "description": "Chin-length, tousled, layered hair with a deep side-swept fringe falling over the eyes, wavy shaggy ends and a few curled, flicked locks at the front and sides; a tapered, choppy back.",
-  "colourAreas": "Colour 0 on the main body of the hair; colour 1 on the front fringe and side section of curling locks.",
-  "tags": [
-   "hair",
-   "layered",
-   "flowing",
-   "casual",
-   "street",
-   "punk",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hair_Lockbox_67_02.mset",
-  "model": "Geo_Hair_Lockbox_67_02"
- },
  "Male/M_Hair_Mad_Scientist_01": {
   "description": "A short, wild hairstyle of sharp angular spikes radiating outward from the crown and sides, with a swept-back front flap and a clean hairline. It hugs the head above the jaw and suggests a messy, eccentric look.",
   "colourAreas": "Colour 0 on the main body of the hair and spikes; colour 1 on the shaded undersides and tips of the outer spikes. The glossy default material shows a metallic sheen.",
@@ -272966,25 +271458,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Handl_Extra_Gamer_01.mset",
   "model": "Geo_Handl_Extra_Gamer_01"
  },
- "Male/M_Handl_Extra_Lockbox_67_01": {
-  "description": "A left-hand piece with a padded wrist cuff fastened by a small buckle, and a cluster of sharp, jagged blade-like claws spiking from the knuckles and fingers, joined by thin open link frames.",
-  "colourAreas": "Colour 2 on the cuff and the claw spikes; colour 1 on the cuff edge piping and the thin link frames around the claws.",
-  "tags": [
-   "gothic",
-   "punk",
-   "spiky",
-   "spikes",
-   "claws",
-   "metal",
-   "buckles",
-   "straps",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handl_Extra_Lockbox_67_01.mset",
-  "model": "Geo_Handl_Extra_Lockbox_67_01"
- },
  "Male/M_Handl_Extra_Long_Mechaclaw_01": {
   "description": "A left-hand mechanical claw: a small angular cuff panel at the fist with two long, curved blade-like talons hanging down past the hand, each ending in a sharp point with spiky notches at the top.",
   "colourAreas": "Colour 1 on the hand cuff panel; colour 0 on the two long talon blades.",
@@ -273157,22 +271630,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Handl_Fem_Winterevent_2025_01.mset",
   "model": "Geo_Handl_Fem_Winterevent_2025_01"
- },
- "Male/M_Handl_Foxbatcon_2025_01": {
-  "description": "A smooth, rounded glove covering the left hand in a clenched fist, with a plain cuff edge at the wrist and softly modelled, short fingers curled into the palm. Simple, casual-looking design.",
-  "colourAreas": "Colour 0 on the whole glove including the fingers; no other slots visible.",
-  "tags": [
-   "plain",
-   "rounded",
-   "cloth",
-   "casual",
-   "sleek",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Handl_Foxbatcon_2025_01"
  },
  "Male/M_Handl_Gatling_01": {
   "description": "A large forearm-mounted rotary gatling cannon: a cluster of long barrels projects past the hand, with a chunky housing, round drum canisters and a cap at the elbow end. Sci-fi heavy weapon look.",
@@ -273366,26 +271823,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_HandL_LargeHook_01.mset",
   "model": "Geo_Handl_Largehook_01"
- },
- "Male/M_Handl_Lockbox_67_01": {
-  "description": "A clenched-fist glove with a banded strapped cuff, a smooth padded back decorated with swirling tribal line patterns, and jagged blade-like spikes jutting from the knuckles and fingertips. Street-fighter or fantasy claw look.",
-  "colourAreas": "Colour 0 on the main glove body; colour 1 on the swirling line patterns and the edging of the cuff; colour 2 on the cuff band and the knuckle spikes.",
-  "tags": [
-   "tribal",
-   "fantasy",
-   "punk",
-   "leather",
-   "spikes",
-   "claws",
-   "straps",
-   "buckles",
-   "trim",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handl_Lockbox_67_01.mset",
-  "model": "Geo_Handl_Lockbox_67_01"
  },
  "Male/M_Handl_Long_Gamer_01": {
   "description": "A long, boxy gauntlet shaped like a retro game controller strapped to the forearm, with an octagonal cuff, a raised D-pad and button panel, a coiled cable wrapped around the wrist, and a gloved fist with a wrist pad.",
@@ -276809,24 +275246,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Handr_Extra_Gamer_01.mset",
   "model": "Geo_Handr_Extra_Gamer_01"
  },
- "Male/M_Handr_Extra_Lockbox_67_01": {
-  "description": "A wrist cuff with a buckled band paired with a cluster of sharp, blade-like claw spikes and thin linked frame loops across the knuckles and fingers of the fist. Aggressive, gauntlet-style street or sci-fi weapon look.",
-  "colourAreas": "Colour 2 on the wrist band and the claw blades; colour 1 on the band edging and the thin linking frames.",
-  "tags": [
-   "claws",
-   "spiky",
-   "spikes",
-   "buckles",
-   "straps",
-   "angular",
-   "punk",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handr_Extra_Lockbox_67_01.mset",
-  "model": "Geo_Handr_Extra_Lockbox_67_01"
- },
  "Male/M_Handr_Extra_Long_Mechaclaw_01": {
   "description": "A pair of long, flat curved blade claws that hang down from the right fist, alongside a separate angular guard plate at the hand. Sleek, sharp mechanical weapon-gauntlet look.",
   "colourAreas": "Colour 0 on the two long claw blades; colour 1 on the angular hand guard plate.",
@@ -277001,25 +275420,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Handr_Fem_Winterevent_2025_01.mset",
   "model": "Geo_Handr_Fem_Winterevent_2025_01"
- },
- "Male/M_Handr_Foxbatcon_2025_01": {
-  "description": "A clenched right-hand covering shaped like a chunky fist, with a smooth rounded back and knuckles and pointed, slightly clawed fingertips curled into the palm. It ends at the wrist with a plain straight cuff edge.",
-  "colourAreas": "Colour 0 on the whole hand covering, including the fingers; no other slots visible.",
-  "tags": [
-   "monstrous",
-   "animal",
-   "aquatic",
-   "claws",
-   "rounded",
-   "bulky",
-   "plain",
-   "partial"
-  ],
-  "differs": "The male fingers are longer and more pointed, reading as small claws, while the female version has short blocky fingertips.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Handr_Foxbatcon_2025_01"
  },
  "Male/M_Handr_Gatling_01": {
   "description": "A large arm-mounted gatling cannon replacing the right hand: a cluster of long barrels with segmented rings, a boxy housing with drum magazines and vented side canisters, plus a small tank and exposed wiring behind.",
@@ -277217,25 +275617,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_HandR_LargeHook_01.mset",
   "model": "Geo_Handr_Largehook_01"
- },
- "Male/M_Handr_Lockbox_67_01": {
-  "description": "A clenched-fist glove with a soft, slightly baggy hand and a buckled cuff band at the wrist. Tribal-style line patterns decorate the back of the hand, and sharp contrasting claw spikes jut from the knuckles and fingertips.",
-  "colourAreas": "Colour 0 on the glove body; colour 2 on the cuff band and the knuckle claws; colour 1 on the pattern lines, piping and cuff edge trim.",
-  "tags": [
-   "fantasy",
-   "monstrous",
-   "tribal",
-   "claws",
-   "spikes",
-   "leather",
-   "buckles",
-   "trim",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Handr_Lockbox_67_01.mset",
-  "model": "Geo_Handr_Lockbox_67_01"
  },
  "Male/M_Handr_Long_Gamer_01": {
   "description": "A chunky retro game-controller gauntlet: a wide cylindrical forearm cuff with an octagonal rim, a raised button panel with a cross and dots on the outer side, and coiled cable wraps at the wrist ending in a small wrist pad.",
@@ -283864,26 +282245,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Head_Fox_02.mset",
   "model": "Geo_Head_Fox_02"
  },
- "Male/M_Head_Foxbatcon_2025_01": {
-  "description": "A full replacement head shaped like an axolotl: a smooth rounded head with a wide grinning mouth, glossy eyes and faint speckles, crowned by three feathery external gills that fan out on each side.",
-  "colourAreas": "Colour 0 on the head skin; colour 1 on the gill fronds; colour 3 on the gill tips and edges and on the eyes; colour 2 on the small neck slot under the chin.",
-  "tags": [
-   "animal",
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "organic",
-   "skin",
-   "feathered",
-   "cute",
-   "rounded",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Head_Foxbatcon_2025_01.mset",
-  "model": "Geo_Head_Foxbatcon_2025_01"
- },
  "Male/M_Head_Full_Falcon_01": {
   "description": "A full-head falcon helmet in segmented plate: a hooked beak over the face, angry angled eye slits, swept crest spikes and side fins on top, and a layered gorget collar flaring over the neck and shoulders.",
   "colourAreas": "Colour 0 on the helmet plates and neck collar; colour 1 on the beak and the crest and side feather blades; colour 2 on the inner helmet shell and edge lining; colour 3 on the eye markings and small side spikes.",
@@ -287377,24 +285738,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Head_Toxicsteel_01.mset",
   "model": "Geo_Head_Toxicsteel_01"
- },
- "Male/M_Headaccessories_Foxbatcon_2025_01": {
-  "description": "Two symmetrical clusters of three long, frond-like gills that fan out and upward from either side of the head, each with a feathery, serrated edge. Suggests an axolotl or aquatic creature costume.",
-  "colourAreas": "Colour 1 on the main body of each gill frond; colour 3 on the frilled edges and tips; colour 0 and colour 2 not clearly visible.",
-  "tags": [
-   "aquatic",
-   "animal",
-   "organic",
-   "monstrous",
-   "fantasy",
-   "feathered",
-   "fins",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Headaccessories_Foxbatcon_2025_01.mset",
-  "model": "Geo_Headaccessories_Foxbatcon_2025_01"
  },
  "Male/M_Headsmallaccessories_Dragonbody_Lockbox_65": {
   "description": "A pair of long, thin tapering whiskers that sprout from either side of the upper lip and sweep down and outward past the chin in curved points, like a dragon's barbels or a drooping moustache.",
@@ -297278,24 +295621,6 @@
   "mesh": "bin/geobin/cl/A/M/M_HelmetAttach_Face_Mirror_01.mset",
   "model": "Geo_Helmetattach_Face_Mirror_01"
  },
- "Male/M_Helmetattach_Child_Foxbatcon_2025_01": {
-  "description": "Head attachment of six frond-like gill feathers, three fanning out from each side of the head, with serrated edges. They float around the skull with no cap or covering, giving an aquatic, monstrous look.",
-  "colourAreas": "Colour 1 on the main body of each frond; colour 3 on the frond edges and tips near the base. Colour 0 and colour 2 are not clearly visible.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "alien",
-   "organic",
-   "feathered",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Helmetattach_Child_Foxbatcon_2025_01.mset",
-  "model": "Geo_Helmetattach_Child_Foxbatcon_2025_01"
- },
  "Male/M_Helmetattach_Child_Full_Dino_01": {
   "description": "A pair of short, angular pyramid-shaped horns rising from the top of the head, tilted slightly outward and forward. They are faceted and tapered to sharp points, giving a monstrous or demonic look.",
   "colourAreas": "Colour 0 on both horns across all faces; the default material shows no other colour slots.",
@@ -299323,24 +297648,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Helmetattach_Lockbox_66_02.mset",
   "model": "Geo_Helmetattach_Lockbox_66_02"
  },
- "Male/M_Helmetattach_Lockbox_67_01": {
-  "description": "A pair of ridged ram-like horns rising from the top of the head, sweeping up and back in a curve before flaring outward at the tips. Ribbed surface with thin outlined edges suggests a beastly or demonic look.",
-  "colourAreas": "Colour 0 on the ridged horn surfaces; colour 2 on the horn edges and grooves between ridges.",
-  "tags": [
-   "monstrous",
-   "fantasy",
-   "animal",
-   "horns",
-   "bone",
-   "organic",
-   "rounded",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Helmetattach_Lockbox_67_01.mset",
-  "model": "Geo_Helmetattach_Lockbox_67_01"
- },
  "Male/M_Helmetattach_Mechanon_Horn": {
   "description": "A pair of flat, angular horn-like plates rising in a wide arch on either side of the head, each curving up to a sharp point and flaring out at the base with a small rectangular slot by the temples.",
   "colourAreas": "Colour 1 on the main faces of the horn plates; colour 2 on the thick edge and rear layer of the plates; colour 0 on the small slotted tabs at the temples.",
@@ -300941,26 +299248,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Helmetattach_Winged_01.mset",
   "model": "Geo_Helmetattach_Winged_01"
- },
- "Male/M_Helmetattach_Winterevent_2025_01": {
-  "description": "A tall cone-shaped cloth hood or veil that rises to a sharp point high above the head, then drapes down the back in a diamond-shaped fall with a scalloped lace edge.",
-  "colourAreas": "Colour 0 on the upper cone; colour 1 on the lower drape, fading in from the cone; colour 2 on the scalloped lace edging.",
-  "tags": [
-   "fantasy",
-   "gothic",
-   "monstrous",
-   "cloth",
-   "flowing",
-   "trim",
-   "hood",
-   "fringe",
-   "partial"
-  ],
-  "differs": "The male drape is wider and falls a bit lower across the back, with the cone leaning back slightly.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Helmetattach_Winterevent_2025_01.mset",
-  "model": "Geo_Helmetattach_Winterevent_2025_01"
  },
  "Male/M_Helmetattach_Wooden_01": {
   "description": "A crest of long, pointed leaf-like blades radiating from a thin band around the crown and back of the head, flaring outward in a spiky, feathered headdress with a tribal, wild look.",
@@ -305407,24 +303694,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Hips_Tight_01.mset",
   "model": "Geo_Hips_Tight_01"
  },
- "Male/M_Hips_Tight_Lockbox_67_01": {
-  "description": "Loose straight-cut trousers with a flared leg that reaches the ankle, a banded waist with a hanging drawcord tie at the front, and swirling decorative panels running down the outer sides of each leg.",
-  "colourAreas": "Colour 0 on the main trouser fabric; colour 1 on the swirling side panels and the drawcord; colour 2 on the waistband and inner edging.",
-  "tags": [
-   "casual",
-   "east-asian",
-   "cloth",
-   "loose",
-   "flowing",
-   "trim",
-   "ankle-length",
-   "full-coverage"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hips_Tight_Lockbox_67_01.mset",
-  "model": "Geo_Hips_Tight_Lockbox_67_01"
- },
  "Male/M_Hips_Tight_Madjester_01": {
   "description": "Skin-tight full-length leggings from waist to ankle, made of irregular harlequin patchwork panels joined by visible contrasting stitching. A jester-like, playful look that hugs the hips and legs.",
   "colourAreas": "Colour 0 on the main patchwork panels; colour 1 on the patches; colour 3 on the patches; colour 2 on the stitching.",
@@ -308843,23 +307112,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Hipsattach_L_Falcon_01.mset",
   "model": "Geo_Hipsattach_L_Falcon_01"
- },
- "Male/M_Hipsattach_L_Foxbatcon_2025_01": {
-  "description": "Two slender, curved fin-like blades stacked down the outer left leg, one at the thigh and one at the calf, each with frilled, feathery jagged edges sweeping upward. Suggests an aquatic, amphibian creature look.",
-  "colourAreas": "Colour 3 on the outer edges and frilled rims of the fins; colour 1 on the inner centre of each fin. Colours 0 and 2 are not visible.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fins",
-   "organic",
-   "spiky",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hipsattach_L_Foxbatcon_2025_01.mset",
-  "model": "Geo_Hipsattach_L_Foxbatcon_2025_01"
  },
  "Male/M_Hipsattach_L_Frigid_01": {
   "description": "A curved hip and thigh guard for the left side: a rigid shell with a bordered edge, a banded top rim and a pleated, ribbed centre panel, hanging from the hip to the upper thigh. It looks like sci-fi armour.",
@@ -312776,24 +311028,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Hipsattach_R_Falcon_01.mset",
   "model": "Geo_Hipsattach_R_Falcon_01"
- },
- "Male/M_Hipsattach_R_Foxbatcon_2025_01": {
-  "description": "Two swept-back, frilled fin blades on the outer right leg, one on the thigh and a longer one on the calf. Each has a ragged, feather-like edge and tapers to a point, giving an axolotl or monster look.",
-  "colourAreas": "Colour 1 on the inner body of each fin; colour 3 on the frilled edges and ridges of the fins.",
-  "tags": [
-   "monstrous",
-   "aquatic",
-   "animal",
-   "fins",
-   "organic",
-   "spiky",
-   "asymmetric",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hipsattach_R_Foxbatcon_2025_01.mset",
-  "model": "Geo_Hipsattach_R_Foxbatcon_2025_01"
  },
  "Male/M_Hipsattach_R_Frigid_01": {
   "description": "A curved armour-like hip plate on the right thigh, with a bordered outer face holding a textured ribbed panel and an angled upper band. Its inside is a smooth open shell, giving a partial, sci-fi guard.",
@@ -316818,43 +315052,6 @@
   "mesh": "bin/geobin/cl/A/M/M_Hipslayer_Lockbox_66_02.mset",
   "model": "Geo_Hipslayer_Lockbox_66_02"
  },
- "Male/M_Hipslayer_Lockbox_67_01": {
-  "description": "A long, flowing skirt with a gathered waistband, a tiered ruffle across the hips, and uneven handkerchief-style hems edged with ruffles. It falls to about the ankles and is mostly closed at the front and back.",
-  "colourAreas": "Colour 0 on the main skirt panels and hip ruffle; colour 1 on the waistband and the ruffled hem edging.",
-  "tags": [
-   "fantasy",
-   "cloth",
-   "flowing",
-   "layered",
-   "asymmetric",
-   "trim",
-   "ankle-length"
-  ],
-  "differs": "The male skirt hangs as a fuller, mostly closed skirt with a drop-front hem, rather than the deep front split showing the legs.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Hipslayer_Lockbox_67_01.mset",
-  "model": "Geo_Hipslayer_Lockbox_67_01"
- },
- "Male/M_Hipslayer_Lockbox_67_02": {
-  "description": "A short armoured hip skirt of layered scalloped plates with edge trim, ending in a fringe of long pointed feather-like blades. It sits at the hips and leaves the front centre open with a small pointed panel.",
-  "colourAreas": "Colour 0 on the layered hip plates and waistband; colour 1 on the edge trim along the plates; colour 2 on the hanging pointed blades.",
-  "tags": [
-   "fantasy",
-   "armor-plates",
-   "layered",
-   "segmented",
-   "trim",
-   "feathered",
-   "angular",
-   "hip-length",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/M/M_Hipslayer_Lockbox_67_02.mset",
-  "model": "Geo_Hipslayer_Lockbox_67_02"
- },
  "Male/M_Hipslayer_Long_Swing_01": {
   "description": "A long, full flared skirt with a short overlaid tier at the hip. Chevron stripes sit on the upper tier, geometric patterned bands trim both hems, and a ruffled contrasting flounce finishes the hem at calf length.",
   "colourAreas": "Colour 0 on the skirt body and waistband; colour 1 on the chevron stripes; colour 2 on the patterned trim bands; colour 3 on the ruffled bottom flounce.",
@@ -318942,23 +317139,6 @@
   "date": "2026-09-30",
   "mesh": "bin/geobin/cl/A/M/M_Hips_Dragonbody_Lockbox_65_02.mset",
   "model": "Geo_Hips_Dragonbody_Lockbox_65_02"
- },
- "Male/M_Legs_Foxbatcon_2025_01": {
-  "description": "Skin-tight full-length leggings running from the hips to the ankles, with a contrasting panel on each inner thigh and crotch and scattered small round spots down the outer legs and back. Sleek, amphibian-like look.",
-  "colourAreas": "Colour 0 on the main leg surface; colour 2 on the inner thigh and crotch panels; colour 3 on the small spots.",
-  "tags": [
-   "organic",
-   "aquatic",
-   "form-fitting",
-   "sleek",
-   "skin",
-   "full-coverage",
-   "plain"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Legs_Foxbatcon_2025_01.mset",
-  "model": "Geo_Legs_Foxbatcon_2025_01"
  },
  "Male/M_Legsaccessoriesl_Dragonbody_Lockbox_65_01": {
   "description": "A single flame-like or fin-like organic fringe attached to the outside of the left lower leg: a tapering, swept-back blade with rippled, jagged edges that trails toward the ankle. Suggests a monstrous dragon look.",
@@ -332101,25 +330281,6 @@
   "mesh": "bin/geobin/cl/A/T/M_Tail_Extra_Tight_Seacreature_04.mset",
   "model": "Geo_Tail_Extra_Tight_Seacreature_04"
  },
- "Male/M_Tail_Foxbatcon_2025_02": {
-  "description": "A long, thick amphibian-style tail with a rounded blunt base at the hips, tapering to a curved tip. A frilly, feathery fin fringe runs along its upper edge and it has a speckled surface.",
-  "colourAreas": "Colour 0 on the main tail body with speckles; colour 2 on the rounded base cap; colour 1 on the inner fin ridge; colour 3 on the frilly fin edges.",
-  "tags": [
-   "animal",
-   "aquatic",
-   "monstrous",
-   "organic",
-   "fins",
-   "fringe",
-   "rounded",
-   "tail",
-   "partial"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Tail_Foxbatcon_2025_02.mset",
-  "model": "Geo_Tail_Foxbatcon_2025_02"
- },
  "Male/M_Tail_Kaiju_01": {
   "description": "A thick, tapering monster tail that attaches at the lower back with a rounded base plate. Rows of curved horn-like spines and small spikes run along its length, and it sweeps out to a pointed tip.",
   "colourAreas": "Colour 3 on the base plate and the small spikes along the top; colour 1 on the underside of the tail; colour 2 on the large curved horns; colour 0 on the plates between the horns.",
@@ -334780,43 +332941,6 @@
   "mesh": "bin/geobin/cl/V/G/Vehicle_Glider_Mayhem_01.mset",
   "model": "Geo_Vehicle_Player_Mayhem_01"
  },
- "Male/M_Waistaccessoriesl_Foxbatcon_2025_01": {
-  "description": "A cluster of stacked, folded fin panels on the left hip, sweeping back into pointed tips. It has an angular, pleated look, with layered blades that overlap and flare outward from the hip.",
-  "colourAreas": "Colour 3 on the outer fin surfaces and edges; colour 1 on the inner and lower fin surfaces, blending into colour 3 across the panels.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "fantasy",
-   "organic",
-   "fins",
-   "layered",
-   "angular",
-   "partial"
-  ],
-  "differs": "The male fins are more angular, with folded, pleated panels and sharper tips, rather than the smooth, rounded, ribbed fan of the female version.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Waistaccessoriesl_Foxbatcon_2025_01.mset",
-  "model": "Geo_Waistaccessoriesl_Foxbatcon_2025_01"
- },
- "Male/M_Waistaccessoriesr_Foxbatcon_2025_01": {
-  "description": "A single swept-back fin ornament on the right hip: three stacked, ribbed fin layers curve to a point, with a frilled ragged lower edge. Suggests an amphibian or monster look.",
-  "colourAreas": "Colour 3 on the outer rims and ribbed fin edges; colour 1 on the inner fin surfaces and frilled underside.",
-  "tags": [
-   "aquatic",
-   "monstrous",
-   "organic",
-   "fins",
-   "layered",
-   "rounded",
-   "partial",
-   "fantasy"
-  ],
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-09-30",
-  "mesh": "bin/geobin/cl/A/M/M_Waistaccessoriesr_Foxbatcon_2025_01.mset",
-  "model": "Geo_Waistaccessoriesr_Foxbatcon_2025_01"
- },
  "Male/M_Waistl_Dragonbody_Lockbox_65": {
   "description": "A small hip accessory of overlapping curved, claw-like spikes or fins on the left hip, fanning outward in two clusters: long tapered blades above and a darker segmented cluster of hooked talons below. Monstrous, dragon-like styling.",
   "colourAreas": "Colour 0 and colour 1 on the upper blades, fading from one to the other toward the tips; colour 2 and colour 3 on the lower segmented talons, fading toward the tips.",
@@ -335477,24 +333601,6 @@
   "date": "2026-10-03",
   "mesh": "bin/geobin/cl/A/M/M_Back_Lockbox_66_02.mset",
   "model": "Geo_Back_Lockbox_66_02"
- },
- "Male/M_Wings_Lockbox_67_01": {
-  "description": "A pair of long, narrow moth-like wings hanging from the upper back, with swept pointed tips and several finger-like lobes. Each has a bordered edge and rounded eye-spot patterning on the upper face.",
-  "colourAreas": "Colour 1 on the wing borders and the upper patterned faces; colour 2 on the eye-spots and the underside of the wings; colour 0 on the inner patches.",
-  "tags": [
-   "insect",
-   "fantasy",
-   "organic",
-   "wings",
-   "angular",
-   "asymmetric",
-   "partial"
-  ],
-  "differs": "The male wings are long, narrow, drooping moth-like wings with eye-spot patterns, whereas the female version is a set of broad, translucent four-lobed fairy wings.",
-  "from": "claude-sonnet-5-5 batch",
-  "date": "2026-10-03",
-  "mesh": "bin/geobin/cl/A/M/M_Wings_Lockbox_67_01.mset",
-  "model": "Geo_Wings_Lockbox_67_01"
  },
  "Male/M_Wings_Moth_01": {
   "description": "A pair of large butterfly-style wings with broad upper and lower lobes, fine vein lines, ringed eye-spots and contrasting-tipped edges, attached at the upper back by a small angular clasp. Suggests a fantasy insect look.",

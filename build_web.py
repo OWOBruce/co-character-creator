@@ -1,10 +1,13 @@
 """Build the editor's data: one catalog per player skeleton plus palettes, starting costumes and animation.
 
 Usage: python build_web.py
-Writes viewer/data/catalog/{Male,Female}.json, palettes.json, costumes.json, stances.json and poses/.
+Writes viewer/data/catalog/{Male,Female}.json, palettes.json, costumes.json, stances.json and poses/,
+viewer/data/assets.json, the meshes and textures those name (serve.py sends only those), and
+viewer/data/whats_new.json, the parts each update added (new_parts.json), by name.
 Everything is read from the game install's .hogg archives (gamefs.py / gamedata.py). Meshes (.mset) and
 textures (.dds) are not converted: serve.py serves them from the archives at /assets/, and the viewer
-decodes them.
+decodes them. Only what the editor's parts list has is kept (parts_list.py): a piece, material, texture
+or stance a game update adds is offered once a later version adds it to parts_list.json.
 """
 import json
 import math
@@ -17,11 +20,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'tools'))
 import rig_data as ec  # noqa: E402  (tracks, skeleton, body helpers)
 import gamedata  # noqa: E402
+import parts_list  # noqa: E402  (what the editor offers)
 
 from paths import data  # noqa: E402
 
 OUT = data('viewer', 'data')
 SKELETONS = ('Male', 'Female')
+GAME_REFLECTION = 'dds/system/cubemaps/TerrainTest_cube.dds'  # the reflection cube shader-graph.js loads
 
 
 def load(name):
@@ -87,6 +92,20 @@ def child_defs(name):
     return [{'bone': c['ChildBone'], 'default': c['DefaultChildGeometry'],
              'options': [x['hGeo'] for x in c['ChildGeometry'] if x['hGeo']], 'required': bool(c['RequiresChildGeometry'])}
             for c in opts.get('ChildGeometryDef') or []]
+
+
+def display_names(geos):
+    """Each piece's display name: its own, else its other body's (F_X <-> M_X: an "UNUSED:" on one body then counts
+    for both), else None (the game data has none, only the piece's own name)."""
+    real = {g['name']: g['displayName'] for g in geos if g['displayName'] and g['displayName'] != g['name']}
+    twin = lambda n: 'M_' + n[2:] if n.startswith('F_') else 'F_' + n[2:] if n.startswith('M_') else None
+    return {g['name']: real.get(g['name']) or real.get(twin(g['name'])) for g in geos}
+
+
+def offered_child_defs(name):
+    """child_defs() with only the pieces on the parts list."""
+    return [{**c, 'default': c['default'] if parts_list.shown('pieces', c['default']) else '',
+             'options': [x for x in c['options'] if parts_list.shown('pieces', x)]} for c in child_defs(name)]
 
 
 # child pieces offered by player pieces are kept even when they are flagged NPC-only themselves
@@ -169,17 +188,25 @@ def build_skeleton(sname, tables, unlock_index):
     sub_skeletons = {}
     used_cloth, used_col = set(), set()
     out_geos, used_mats = {}, set()
+    names = display_names(geos)
     for g in each(geos):
-        # NPC-only pieces are left out unless a starting costume wears them
-        if sname not in g['skeletons'] or g['bone'] not in my_bones or (g['availability'] == 'npc' and g['name'] not in USED | CHILD_REFS):
+        # NPC-only pieces are left out unless a starting costume wears them, and so is anything the parts list
+        # doesn't have (parts_list.py), and a piece with no display name on either body (unfinished: players would
+        # see a file name), weapons and attachments aside
+        if sname not in g['skeletons'] or g['bone'] not in my_bones or (g['availability'] == 'npc' and g['name'] not in USED | CHILD_REFS) \
+                or not parts_list.shown('pieces', g['name']) \
+                or (not names[g['name']] and not g['isChild'] and 'Weapons' not in g['categories'] and g['name'] not in USED):
             continue
         mesh = g['mesh'] if g['meshInstalled'] else None
-        rec = {'displayName': g['displayName'], 'bone': g['bone'], 'categories': g['categories'],
+        materials = [m for m in g['materials'] if parts_list.shown('materials', m)]
+        rec = {'displayName': names[g['name']] or g['displayName'], 'bone': g['bone'], 'categories': g['categories'],
                'availability': g['availability'], 'unlockedBy': [unlock_index[u] for u in g['unlockedBy'] if u in unlock_index]
                if g['availability'] != 'initial' else [],
-               'mesh': mesh, 'materials': g['materials'], 'defaultMaterial': g['defaultMaterial'],
-               'mirrorGeometry': g['mirrorGeometry'], 'hasAlpha': g['hasAlpha'], 'isCloth': g['isCloth'],
-               'isChild': g['isChild'], 'childGeos': child_defs(g['name']), 'styles': g['styles'], 'order': g['order']}
+               'mesh': mesh, 'materials': materials,
+               'defaultMaterial': g['defaultMaterial'] if parts_list.shown('materials', g['defaultMaterial']) else '',
+               'mirrorGeometry': g['mirrorGeometry'] if parts_list.shown('pieces', g['mirrorGeometry']) else '',
+               'hasAlpha': g['hasAlpha'], 'isCloth': g['isCloth'],
+               'isChild': g['isChild'], 'childGeos': offered_child_defs(g['name']), 'styles': g['styles'], 'order': g['order']}
         if mesh:
             # which model of the .mset to use, and the names behind its vertex bone indices
             rec['model'] = g['model'].split('.')[-1] if g['model'] else None
@@ -212,19 +239,21 @@ def build_skeleton(sname, tables, unlock_index):
                 if sub_skeletons[sub]:
                     rec['subSkeleton'], rec['subBone'] = sub, opts.get('SubBone') or 'Base'
         out_geos[g['name']] = rec
-        used_mats.update(g['materials'])
+        used_mats.update(materials)
     out_mats, used_tex = {}, set()
     for mn in sorted(used_mats):
         m = mats.get(mn)
         if not m or (m['availability'] == 'npc' and mn not in USED):
             continue
+        textures = [t for t in m['textures'] if parts_list.shown('textures', t)]
+        defaults = {k: v if parts_list.shown('textures', v) else '' for k, v in m['defaults'].items()}
         raw = ec.RAW_MAT.get(mn) or {}
         opts = raw.get('ColorOptions') or {}
         muscle = ec.muscle_image(None, m)
         out_mats[mn] = {'displayName': m['displayName'], 'shader': m['shader'], 'availability': m['availability'],
                         'unlockedBy': [unlock_index[u] for u in m['unlockedBy'] if u in unlock_index]
                         if m['availability'] != 'initial' else [],
-                        'textures': m['textures'], 'defaults': m['defaults'], 'requires': m['requires'],
+                        'textures': textures, 'defaults': defaults, 'requires': m['requires'],
                         # per-colour options live in ColorOptions (the top-level copies are unused zeros)
                         'hasSkin': m['hasSkin'], 'allowGlow': opts.get('AllowGlow', [0, 0, 0, 0]),
                         'allowReflection': opts.get('AllowReflection', [0, 0, 0, 0]),
@@ -235,8 +264,8 @@ def build_skeleton(sname, tables, unlock_index):
                         'reflection': opts['defaultReflection'] if opts.get('CustomReflection') else None,
                         'specularity': opts['defaultSpecularity'] if opts.get('CustomSpecularity') else None,
                         'muscle': dds_url(muscle), 'order': m['order']}
-        used_tex.update(m['textures'])
-        used_tex.update(v for v in m['defaults'].values() if v)
+        used_tex.update(textures)
+        used_tex.update(v for v in defaults.values() if v)
     out_tex = {}
     for tn in sorted(used_tex):
         t = texs.get(tn)
@@ -253,7 +282,7 @@ def build_skeleton(sname, tables, unlock_index):
                                   'replaces': e['replaces']}
                                  for e in t['extra']], 'order': t['order']}
     stances = [{'name': s['Name'], 'displayName': msg(s['displayNameMsg']) or s['Name'],
-                'player': bool(s['RestrictedTo'] & 12), 'order': s['Order']} for s in sdef['Stance']]
+                'player': bool(s['RestrictedTo'] & 12), 'order': s['Order']} for s in sdef['Stance'] if parts_list.shown('stances', s['Name'])]
     return {'name': sname, 'displayName': sdef['displayName'], 'gender': sdef['gender'],
             'skeleton': skel_json, 'body': body_def(sdef), 'stances': sorted(stances, key=lambda s: s['order']),
             'defaultStance': sdef['DefaultStance'], 'defaultSkinColor': sdef['DefaultSkinColor'],
@@ -354,15 +383,53 @@ def sub_skeleton_json(name, bones, sname, sdef):
 
 
 def npc_parts(cat, c):
-    """The parts of PlayerCostume c whose piece or material players can't use (weapon slots aside)."""
+    """The parts of PlayerCostume c whose piece, material or textures players can't use or the editor doesn't
+    show (weapon slots aside)."""
     out = []
     for p in c['Part']:
         if not p['Geometry'] or (cat['bones'].get(p['Bone']) or {}).get('region') == 'Weapons'                 or re.search(r'_Weapon_(Melee|Ranged)$', p['Bone'] or '', re.I):
             continue
         g, m = cat['geometries'].get(p['Geometry']), cat['materials'].get(p['Material']) if p['Material'] else None
-        if not g or g.get('availability') == 'npc' or (p['Material'] and (not m or m.get('availability') == 'npc')):
+        textures = [p[k] for k in ('PatternTexture', 'DetailTexture', 'DiffuseTexture', 'SpecularTexture') if p[k]]
+        if not g or g.get('availability') == 'npc' or (p['Material'] and (not m or m.get('availability') == 'npc')) \
+                or any(t not in cat['textures'] for t in textures):
             out.append(p['Geometry'])
     return out
+
+
+def keep_used_unlocks(cats, bundles):
+    """unlocks.json with only the bundles the catalogs name, their unlockedBy indices renumbered to match."""
+    used = sorted({i for cat in cats.values() for kind in ('geometries', 'materials', 'textures')
+                   for rec in cat[kind].values() for i in rec['unlockedBy']})
+    new = {old: i for i, old in enumerate(used)}
+    for cat in cats.values():
+        for kind in ('geometries', 'materials', 'textures'):
+            for rec in cat[kind].values():
+                rec['unlockedBy'] = [new[i] for i in rec['unlockedBy']]
+    return [{'name': b['name'], 'source': b['source'], 'detail': b['sourceDetail'], 'set': b['costumeSet'],
+             'type': b['costumeType'], 'account': b['accountUnlock']} for b in (bundles[i] for i in used)]
+
+
+def whats_new(cats):
+    """whats_new.json: new_parts.json's entries with the names each skeleton's catalog has for their keys:
+    {entries: [{id, date, title, pieces: {Male: [name]}, materials, textures}]} (viewer/js/whats-new.js)."""
+    kinds = (('pieces', 'geometries'), ('materials', 'materials'), ('textures', 'textures'))
+    names = {sk: {kind: {parts_list.key(kind, n): n for n in cat[key]} for kind, key in kinds} for sk, cat in cats.items()}
+    return {'entries': [{'id': e['id'], 'date': e['id'][:10], 'title': e.get('title') or '',
+                         **{kind: {sk: sorted(names[sk][kind][k] for k in e.get(kind) or [] if k in names[sk][kind]) for sk in cats}
+                            for kind, _ in kinds}} for e in parts_list.news()]}
+
+
+def asset_paths(cats, shaders):
+    """Every mesh and texture the catalogs and shaders name: all that serve.py sends from the archives."""
+    out = {GAME_REFLECTION}
+    for cat in cats.values():
+        out.update(g['mesh'] for g in cat['geometries'].values() if g['mesh'])
+        out.update(m['muscle'] for m in cat['materials'].values() if m['muscle'])
+        for t in cat['textures'].values():
+            out.update(x for x in [t['image'], *(e['image'] for e in t['extra'])] if x)
+    out.update(shaders['images'].values())
+    return sorted(out)
 
 
 def costume_state(c):
@@ -453,26 +520,32 @@ def main():
     os.makedirs(os.path.join(OUT, 'poses'), exist_ok=True)
     bundles = load('unlockBundles')
     unlock_index = {b['name']: i for i, b in enumerate(bundles)}
-    unlocks = [{'name': b['name'], 'source': b['source'], 'detail': b['sourceDetail'], 'set': b['costumeSet'],
-                'type': b['costumeType'], 'account': b['accountUnlock']} for b in bundles]
-    json.dump(unlocks, open(os.path.join(OUT, 'catalog', 'unlocks.json'), 'w'), separators=(',', ':'))
     tables = (load('geometries'), {m['name']: m for m in load('materials')}, {t['name']: t for t in load('textures')},
               {r['name']: r for r in load('regions')}, {c['name']: c for c in load('categories')},
               {b['Name']: b for b in load('bones')})
     cats = {}
     for s in each(SKELETONS, 0, 0.6):
-        cat = build_skeleton(s, tables, unlock_index)  # body_def() also exports the body scale tracks
-        cats[s] = cat
+        cats[s] = build_skeleton(s, tables, unlock_index)  # body_def() also exports the body scale tracks
+    # only the unlocks for what the editor shows, so the list names no store set or lockbox it leaves out
+    unlocks = keep_used_unlocks(cats, bundles)
+    json.dump(unlocks, open(os.path.join(OUT, 'catalog', 'unlocks.json'), 'w'), separators=(',', ':'))
+    for s, cat in cats.items():
         path = os.path.join(OUT, 'catalog', s + '.json')
         json.dump(cat, open(path, 'w'), separators=(',', ':'))
         print(f"{s}: {len(cat['geometries'])} geometries, {len(cat['materials'])} materials, "
               f"{len(cat['textures'])} textures, {os.path.getsize(path) >> 10} KB")
+    print(len(unlocks), 'unlocks')
     json.dump({'colorSets': load('colorSets'), 'colorQuadSets': load('colorQuadSets')},
               open(os.path.join(OUT, 'catalog', 'palettes.json'), 'w'), separators=(',', ':'))
     with span(0.6, 0.7):
-        shaders = shader_json({m['shader'] for s in SKELETONS
-                               for m in json.load(open(os.path.join(OUT, 'catalog', s + '.json')))['materials'].values()})
+        shaders = shader_json({m['shader'] for cat in cats.values() for m in cat['materials'].values()})
     json.dump(shaders, open(os.path.join(OUT, 'catalog', 'shaders.json'), 'w'), separators=(',', ':'))
+    assets = asset_paths(cats, shaders)
+    json.dump(assets, open(os.path.join(OUT, 'assets.json'), 'w'), separators=(',', ':'))
+    print(len(assets), 'meshes and textures')
+    news = whats_new(cats)
+    json.dump(news, open(os.path.join(OUT, 'whats_new.json'), 'w'), separators=(',', ':'))
+    print(len(news['entries']), "what's new entries")
     json.dump(lighting_json(), open(os.path.join(OUT, 'catalog', 'lighting.json'), 'w'), indent=1)
     print(f"shaders: {len(shaders['materials'])} materials, {len(shaders['templates'])} templates, "
           f"{len(shaders['ops'])} operation types, {len(shaders['images'])} images")

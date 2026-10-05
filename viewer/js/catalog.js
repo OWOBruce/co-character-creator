@@ -57,6 +57,20 @@ export function drawnTexture(cat, part, m, field) {
   return (m.textures || []).find(t => cat.textures[t]?.type.includes(KINDS[field])) || '';
 }
 
+// Of a costume's parts, the ones the catalogue lacks: {pieces}, a piece it doesn't have (not drawn), and {looks},
+// a piece it has with a material or texture it doesn't (drawn with the piece's default). Either way the part
+// stays in the costume as it was, so saving writes it back. The parts list (parts_list.py) gets what a game
+// update adds in a later version, so a costume from the game can have some.
+export function unshownParts(cat, parts) {
+  let pieces = 0, looks = 0;
+  for (const p of parts) {
+    if (!p.geometry) continue;
+    if (!cat.geometries[p.geometry]) pieces++;
+    else if ((p.material && !cat.materials[p.material]) || Object.keys(KINDS).some(k => p[k] && !cat.textures[p[k]])) looks++;
+  }
+  return { pieces, looks };
+}
+
 // The part's textures by the placeholder each replaces in its material's shader (lower case -> image):
 // the game swaps a material's Default_Color_Mm, Default_Detail_N, M_Chest_Tight_01_N ... for the costume's
 // chosen pattern / detail / diffuse / specular textures and their extra textures (CostumeTexture OrigTexture).
