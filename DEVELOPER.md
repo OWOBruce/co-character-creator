@@ -158,7 +158,7 @@ Nothing is converted per asset. The browser decodes `.mset` (`viewer/js/mset.js`
 - **Selected slot:** Material, then Pattern / Detail / Diffuse / Specular (the material's textures of each type, with "none" unless the material requires it), the colours, and child attachments. An attachment's row opens the same controls nested in its parent's slot (`this.child`: one at a time, since no attachment brings one of its own); the Unlocks list opens an attachment there too.
 - **Child pieces:** `CostumeGeometry.Options.ChildGeometryDef` (in the catalog as `childGeos`: bone, default, choices, required). Picking a piece puts its default children on their bones and clears child bones it doesn't define, e.g. the robotic chest brings robotic arms.
 - **Mirror left/right** (on by default) also puts the piece's `MirrorGeometry` on the bone's `MirrorBone`.
-- **Badges:** unlockable pieces, materials and patterns get the game's padlock (`CC_Costume_Locked`), or the C-Store coin (`CC_Costume_Purchased`) when every unlock source is a store item. The tooltip lists the unlock sources. "Hide locked" hides them; "Show unused/NPC" lists pieces the artists named NPC:/UNUSED:/DEPRECATED:.
+- **Badges:** unlockable pieces, materials and patterns get the game's padlock (`CC_Costume_Locked`), or the C-Store coin (`CC_Costume_Purchased`) when every unlock source is a store item. The tooltip lists the unlock sources. "Hide locked" hides them. Pieces, materials and patterns the artists named NPC:/UNUSED:/DEPRECATED: are never listed (`opts.showDev` stays off).
 
 ### Colours (`viewer/js/colors.js`)
 

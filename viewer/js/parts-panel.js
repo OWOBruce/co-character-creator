@@ -468,8 +468,7 @@ export class PartsPanel {
 
     const o = el('div', 'panelOpts');
     for (const [key, label, tip] of [['mirror', 'Mirror left/right', 'Picking a left or right piece also puts its mirror piece on the other side'],
-                                     ['hideLocked', 'Hide locked', 'Hide pieces, materials and patterns that need an unlock'],
-                                     ['showDev', 'Show unused/NPC', 'Also list pieces the artists marked NPC, UNUSED or DEPRECATED']]) {
+                                     ['hideLocked', 'Hide locked', 'Hide pieces, materials and patterns that need an unlock']]) {
       const l = el('label'); l.title = tip;
       const c = el('input'); c.type = 'checkbox'; c.checked = this.opts[key];
       c.onchange = () => { this.opts[key] = c.checked; this.render(); };
