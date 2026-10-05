@@ -6,12 +6,31 @@ The editor reads everything (pieces, materials, colours, animations) straight fr
 
 **[⬇ Download the installer for Windows](https://github.com/codexheroes/co-character-creator/releases/latest/download/CO-Costume-Editor-Setup.exe)** (always the newest version) · [All releases](https://github.com/codexheroes/co-character-creator/releases)
 
-## What you need
+## System requirements
 
-- **Windows**, with **Champions Online** installed (Steam or Arc).
-- About **320 MB** of free space: the editor itself, plus the data it builds from your game.
-- An **internet connection** while the editor is open: the page loads its 3D engine and fonts from the web (see [Dependencies](#dependencies)).
-- A modern web browser with WebGL; any up-to-date one works. With Google Chrome, Microsoft Edge (part of Windows), Brave or Vivaldi the editor opens in its own window, without tabs or an address bar: in your default browser when it's one of those, else in Edge or Chrome. Links in the editor open in your default browser. With no such browser it opens in a normal tab.
+The editor needs much less than the game does, but it reads your own copy of Champions Online, so the game must be installed.
+
+| | Minimum | Recommended | Champions Online, recommended (for comparison) |
+|---|---|---|---|
+| **Operating system** | Windows 10, 64-bit | Windows 10 or 11, 64-bit | Windows 10 / 11, 64-bit |
+| **Processor** | Any 64-bit processor that runs Windows 10 | 2.5 GHz dual-core or better | 2.5 GHz dual-core or better |
+| **Memory** | 4 GB RAM (the editor uses about 750 MB of it) | 8 GB RAM, to run the editor and the game at the same time | 3 GB RAM or better |
+| **Graphics** | Any graphics with WebGL in an up-to-date browser | DirectX 11 graphics with 256 MB of video memory or more | NVIDIA GeForce 8800 / ATI Radeon HD 3850 or better |
+| **DirectX** | Not needed | Not needed | DirectX 9.0c |
+| **Storage** | 320 MB free, plus the game | 320 MB free, plus the game | 10 GB free |
+| **Sound** | Not needed | Not needed | DirectX 9.0c compatible sound card |
+| **Browser** | Any up-to-date browser with WebGL | Google Chrome, Microsoft Edge, Brave or Vivaldi | Not needed |
+| **Internet** | Needed while the editor is open | Needed while the editor is open | Needed to play |
+| **Game** | Champions Online installed (Steam or Arc) | Champions Online installed (Steam or Arc) | |
+
+The editor's figures are recommendations from testing it, not official requirements. The game's figures are from its [Steam page](https://store.steampowered.com/app/9880/Champions_Online/).
+
+- **Memory:** measured with Chrome on Windows 11, the editor used about 620 MB when it opened and about 730 MB after loading five costumes and changing pieces 400 times. It levels off rather than growing. About 200–300 MB of that is the editor's own server; the rest is the browser window. If your browser is already open, the editor adds less, about 500–600 MB. Windows 11 itself needs 4 GB, so most PCs that run the game today have room for the editor too.
+- **Graphics:** the editor draws one character, using about 120 MB of video memory. To check that your browser has WebGL, open [get.webgl.org](https://get.webgl.org/): a spinning cube means it works.
+- **Processor:** a faster one mainly shortens the first start, when the editor builds its data from your game (about a minute and a half). After that it starts in seconds.
+- **Storage:** the 320 MB is the editor itself plus the data it builds from your game.
+- **Internet:** the page loads its 3D engine and fonts from the web (see [Dependencies](#dependencies)).
+- **Browser:** with Google Chrome, Microsoft Edge (part of Windows), Brave or Vivaldi the editor opens in its own window, without tabs or an address bar: in your default browser when it's one of those, else in Edge or Chrome. Links in the editor open in your default browser. With no such browser it opens in a normal tab.
 - Nothing else to install: the program carries everything else it needs.
 
 ## Starting it
