@@ -3,14 +3,17 @@
 //  * starting costumes: all of them load without errors and without a part far bigger than the body
 //  * materials: every costume shader compiles and links (with and without normal maps, skinned and rigid)
 //  * pose: the Costume pose / T-pose buttons change the pose, and picking a stance or mood switches back
+//  * what's new: it counts as offered exactly what the parts panel lists, and Show them narrows the panel to it
 // tests/run.py opens this page with ?auto=1 in a headless browser and collects the results the page posts
-// to /api/test/results; opened by hand, press Run.
+// to /api/test/results; opened by hand, press Run. ?only=whatsnew,pose runs just those sections.
 import * as THREE from 'three';
 import { readCostumeJpeg } from './costume-file.js';
 import { costumeText } from './file-ui.js';
 import { loadShaders } from './catalog.js';
 import { createGraphMaterial } from './shader-graph.js';
 import { createCostumeMaterial } from './costume-material.js';
+import { offeredNew } from './whats-new.js';
+import { slotsFor, piecesFor, visibleCategories, materialsFor, isDev } from './rules.js';
 
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -240,6 +243,61 @@ async function testPose() {
   return s;
 }
 
+// ---- what's new (whats-new.js) -----------------------------------------------------------------------
+async function testWhatsNew() {
+  const s = section("What's new: what counts as offered, and Show them");
+  const doc = win.document;
+  for (const name of ['Archetype_Freeform_Free_M_01', 'Archetype_Freeform_Free_F_01']) {
+    const c = ed.shared.costumes.find(x => x.name === name);
+    if (!c) { s.note(`${name} isn't a starting costume here; skipped`); continue; }
+    await open(c);
+    const cat = ed.ch.cat, sk = cat.name;
+    // everything as new: the offered pieces are the parts panel's (every slot of every visible category), plus attachments
+    const all = offeredNew(cat, { pieces: new Set(Object.keys(cat.geometries)), materials: new Set(Object.keys(cat.materials)),
+                                  textures: new Set(Object.keys(cat.textures)) });
+    const listed = new Set();
+    for (const r of cat.regions) {
+      if (!r.categories.length || r.name === 'Weapons') continue;
+      for (const cg of visibleCategories(r)) for (const sl of slotsFor(cat, r, cg.name)) for (const [n] of piecesFor(cat, sl.bone, cg.name)) listed.add(n);
+    }
+    s.checked += listed.size;
+    for (const n of listed) if (!all.sets.pieces.has(n)) s.fail(`${sk}: ${n} is in the parts panel but not counted as offered`);
+    let shown = 0;
+    for (const n of all.sets.pieces) {
+      const g = cat.geometries[n];
+      if (!listed.has(n) && !cat.bones[g.bone]?.isChild) s.fail(`${sk}: ${n} is counted as offered but the parts panel doesn't list it`);
+      // (an attachment the game marks NPC is still offered on its piece, as the parts panel does: childSlots)
+      if ((listed.has(n) && g.availability === 'npc') || isDev(g)) s.fail(`${sk}: ${n} (NPC or unused) is counted as offered`);
+      shown++;
+    }
+    for (const m of all.sets.materials) if (isDev(cat.materials[m])) s.fail(`${sk}: unused material ${m} is counted as offered`);
+    const sample = [...listed][0];
+    for (const [m] of materialsFor(cat, sample)) if (!all.sets.materials.has(m)) s.fail(`${sk}: ${sample}'s material ${m} isn't counted`);
+    s.note(`${sk}: ${listed.size} listed pieces, ${shown - listed.size} attachments, ${all.sets.materials.size} materials, ${all.sets.textures.size} textures offered`);
+
+    // Show them with one new piece: the panel keeps just that piece, tagged, on its tab; then everything again
+    const one = [...listed].find(n => cat.geometries[n].availability === 'initial') || sample;
+    const news = offeredNew(cat, { pieces: new Set([one]), materials: new Set(), textures: new Set() });
+    ed.panel.showNew({ [sk]: { sets: news.sets, holders: news.holders } });
+    await sleep(50);
+    s.checked++;
+    const hits = ed.panel.filterHits([]).map(([n]) => n);
+    if (hits.join() !== one) s.fail(`${sk}: Show them with ${one} new keeps ${hits.length} pieces (${hits.slice(0, 3).join(', ')})`);
+    if (ed.panel.region !== cat.bones[cat.geometries[one].bone]?.region) s.fail(`${sk}: Show them didn't open ${one}'s tab`);
+    if (doc.querySelector('.filterBar .newOnly')?.hidden !== false) s.fail(`${sk}: Show them's New tag isn't in the filter bar`);
+    if (ed.panel.fresh('pieces', one) !== 'new') s.fail(`${sk}: ${one} isn't tagged New`);
+    // the other body's news: this one says there's nothing new for it
+    const other = sk === 'Male' ? 'Female' : 'Male';
+    ed.panel.showNew({ [other]: { sets: news.sets, holders: news.holders } });
+    await sleep(50);
+    if (!/Nothing new for/.test(doc.querySelector('#parts .filterNote')?.textContent || '')) s.fail(`${sk}: no note that the update's new parts are for the other body`);
+    ed.panel.showNew(null);
+    await sleep(50);
+    if (doc.querySelector('.filterBar .newOnly')?.hidden !== true || ed.panel.root.querySelector('.freshTag')) s.fail(`${sk}: Show them didn't turn off`);
+  }
+  return s;
+}
+
 // ---- run ------------------------------------------------------------------------------------------
 async function run() {
   $('run').disabled = true;
@@ -250,7 +308,9 @@ async function run() {
     known = await fetch('api/test/known').then(r => (r.ok ? r.json() : {}));
     state('Starting the editor…');
     await startEditor();
-    for (const t of [testMaterials, testPose, testSavedCostumes, testStartingCostumes]) {
+    const only = new URLSearchParams(location.search).get('only')?.toLowerCase().split(',');
+    for (const t of [testMaterials, testPose, testWhatsNew, testSavedCostumes, testStartingCostumes]) {
+      if (only && !only.some(o => t.name.toLowerCase() === 'test' + o)) continue;
       const t1 = performance.now();
       const s = await t();
       s.seconds = (performance.now() - t1) / 1000;

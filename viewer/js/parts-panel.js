@@ -3,7 +3,8 @@
 // character; leaving the list puts the old piece back. The selected slot shows its material,
 // pattern/detail/diffuse textures, colours and child attachments; an attachment opens the same way inside it.
 // The filter bar under the region tabs keeps only the slots with a piece whose name has all its words, and
-// narrows their lists to those pieces.
+// narrows their lists to those pieces. What's new's Show them (whats-new.js) narrows them the same way, to the
+// pieces with something a game update added, and tags what's new.
 import {
   isDev, regionCategory, visibleCategories, slotsFor, piecesFor, childSlots, pickPiece, pickCategory,
   materialsFor, texturesFor, partOn, isLeftOutBone, offered, slotAllowed,
@@ -50,6 +51,7 @@ function prettyUnlock(u) {
 // The filter bar's words, and whether a piece's name has them all (any order, any case)
 const filterWords = q => q.toLowerCase().split(/\s+/).filter(Boolean);
 const nameMatches = (name, words) => { const n = name.toLowerCase(); return words.every(w => n.includes(w)); };
+const BODY_WORD = { Male: 'masculine', Female: 'feminine' };
 
 const hex = c => '#' + c.slice(0, 3).map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -60,6 +62,7 @@ export class PartsPanel {
     this.opts = { mirror: true, hideLocked: false, showDev: false };
     this.region = null; this.selected = null; this.child = null;  // the open slot's bone, and its open attachment's
     this.filter = '';  // the filter bar's text (kept across region tabs and costumes)
+    this.news = null;  // Show them: {skeleton: {sets: {pieces, materials, textures}, holders}} (whats-new.js), or null
     this.picker = null;
     addEventListener('keydown', e => this.picker?.key(e));
     addEventListener('mousedown', e => { if (this.picker && !this.picker.el.contains(e.target)) this.picker.cancel(); });
@@ -93,6 +96,14 @@ export class PartsPanel {
     const groups = new Map();
     for (const u of us) { const k = sourceLabel(u); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(prettyUnlock(u)); }
     return 'Unlocked by:\n' + [...groups].map(([k, v]) => `${k}: ${v.slice(0, 4).join(', ')}${v.length > 4 ? ` (+${v.length - 4} more)` : ''}`).join('\n');
+  }
+  // While Show them is on: "New" on what a game update added, "+new" on a piece that has a new material,
+  // pattern or attachment. An item's `fresh` is 'new', 'holds' or null.
+  freshTag(fresh) {
+    if (!fresh || !this.news) return null;
+    const t = el('span', 'freshTag' + (fresh === 'holds' ? ' holds' : ''), fresh === 'holds' ? '+new' : 'New');
+    t.title = fresh === 'holds' ? 'Has a new material, pattern or attachment from the game update' : 'New in the game update';
+    return t;
   }
 
   // ---- applying edits (with hover preview) ----------------------------------------------------
@@ -276,6 +287,7 @@ export class PartsPanel {
         const row = el('div', 'item' + (it.value === current ? ' current' : '') + (it.data && !it.data.mesh && it.data.mesh !== undefined ? ' missing' : ''));
         const b = this.badge(it.data); if (b) row.append(b);
         row.append(el('span', 'nm', it.label));
+        const f = this.freshTag(it.fresh); if (f) row.append(f);
         row.title = `${it.value || 'none'}\n${this.unlockText(it.data)}${it.data && it.data.mesh === null ? '\n(mesh not installed locally)' : ''}`;
         row.onmouseenter = () => { active = rows.indexOf(row); mark(); preview(it.value); };
         row.onclick = () => done(it.value);
@@ -325,6 +337,7 @@ export class PartsPanel {
     const name = el('button', 'name');
     const b = this.badge(cur?.data); if (b) name.append(b);
     name.append(el('span', 'nm', cur ? cur.label : opts.emptyLabel || '— none —'));
+    const f = this.freshTag(cur?.fresh); if (f) name.append(f);
     name.title = `${current || 'none'}\n${this.unlockText(cur?.data)}${cur?.data?.mesh === null ? '\n(mesh not installed locally)' : ''}`;
     name.onclick = e => { e.stopPropagation(); opts.onOpen?.(); this.openPicker(name, items, current, { changes, title: opts.title }); };
     row.append(lab, left, name, right);
@@ -341,23 +354,59 @@ export class PartsPanel {
       input.setAttribute('aria-label', 'Filter parts by name');
       input.title = 'Show only the slots with a piece whose name has all these words';
       const clear = el('button', 'clear', '×'); clear.type = 'button'; clear.title = 'Clear the filter (Esc)';
+      // Show them's tag: only what's new (whats-new.js); a click shows everything again
+      const fresh = el('button', 'newOnly'); fresh.type = 'button';
+      fresh.append('New', el('span', null, '×'));
+      fresh.title = 'Showing only the parts with something new from the game update. Click to show everything';
       input.oninput = () => this.setFilter(input.value);
       input.onkeydown = e => { if (e.key === 'Escape' && input.value) { e.preventDefault(); this.setFilter(''); } };
       clear.onclick = () => { this.setFilter(''); input.focus(); };
-      bar.append(input, clear);
-      this.filterEl = { bar, input, clear };
+      fresh.onclick = () => this.showNew(null);
+      bar.append(fresh, input, clear);
+      this.filterEl = { bar, input, clear, fresh };
     }
-    const { bar, input, clear } = this.filterEl;
+    const { bar, input, clear, fresh } = this.filterEl;
     if (input.value !== this.filter) input.value = this.filter;
     clear.hidden = !this.filter;
-    bar.classList.toggle('active', !!this.filter.trim());
+    fresh.hidden = !this.news;
+    input.placeholder = this.news ? 'Filter the new parts…' : 'Filter parts…';
+    bar.classList.toggle('active', !!this.filter.trim() || !!this.news);
     return bar;
   }
   setFilter(text) { this.filter = text; this.render(); }
 
-  // Offered pieces whose names have all the words: [[name, geo]] (one pass over the catalogue per redraw)
+  // Show them (whats-new.js): only the slots and pieces with something new from a game update, starting on a tab
+  // that has some. news: {skeleton: {sets: {pieces, materials, textures}, holders}}; null shows everything again.
+  showNew(news) {
+    this.news = news;
+    if (news && this.cat) {
+      const hits = this.filterHits(filterWords(this.filter)), tabs = this.cat.regions.filter(r => r.categories.length && r.name !== 'Weapons');
+      const r = tabs.find(r => this.hitsIn(hits, r, regionCategory(this.cat, this.doc, r)).length)
+        || tabs.find(r => visibleCategories(r).some(c => this.hitsIn(hits, r, c.name).length));
+      if (r) { this.region = r.name; this.selected = this.child = null; }
+    }
+    this.render();
+  }
+  get newHere() { return this.news?.[this.cat?.name] || null; }
+  // the item's tag while Show them is on: what kind of new it is (see freshTag)
+  fresh(kind, name) {
+    const nw = this.newHere;
+    return !nw ? null : nw.sets[kind].has(name) ? 'new' : kind === 'pieces' && nw.holders.has(name) ? 'holds' : null;
+  }
+
+  // Whether a piece passes the filter bar: its name has all the words, and with Show them on, it has something new
+  matches(name, label, words) {
+    return (!words.length || nameMatches(label, words)) && (!this.news || !!this.newHere?.holders.has(name));
+  }
+  // What the filter keeps, for its messages: 'match "red"', 'have something new', or both ('matches', 'has' for one)
+  filterWhat(one = false) {
+    const t = this.filter.trim();
+    return [t && `match${one ? 'es' : ''} "${t}"`, this.news && `ha${one ? 's' : 've'} something new`].filter(Boolean).join(' and ');
+  }
+
+  // Offered pieces that pass the filter: [[name, geo]] (one pass over the catalogue per redraw)
   filterHits(words) {
-    return Object.entries(this.cat.geometries).filter(([n, g]) => offered(g, this.opts) && nameMatches(g.displayName || n, words));
+    return Object.entries(this.cat.geometries).filter(([n, g]) => offered(g, this.opts) && this.matches(n, g.displayName || n, words));
   }
   // Of those, the ones a region's category offers
   hitsIn(hits, region, category) {
@@ -374,16 +423,16 @@ export class PartsPanel {
     root.innerHTML = '';
     this.pal = palettes(cat, this.shared);
     root.append(this.colorsBox());
-    const words = filterWords(this.filter), hits = words.length ? this.filterHits(words) : null;
+    const words = filterWords(this.filter), hits = words.length || this.news ? this.filterHits(words) : null;
     const tabs = el('div', 'tabs');
     for (const r of cat.regions) {
       if (!r.categories.length || r.name === 'Weapons') continue;
       const t = el('button', 'tab' + (r.name === this.region ? ' on' : ''), r.displayName);
       t.onclick = () => { this.region = r.name; this.selected = this.child = null; this.render(); };
-      if (hits) {  // how many pieces match in the tab's category
+      if (hits) {  // how many pieces pass the filter in the tab's category
         const n = this.hitsIn(hits, r, regionCategory(cat, doc, r)).length;
         t.classList.toggle('nomatch', !n);
-        t.title = n ? `${n} matching piece${n > 1 ? 's' : ''}` : `No pieces match "${this.filter.trim()}" here`;
+        t.title = n ? `${n} piece${n > 1 ? 's' : ''} that ${this.filterWhat(n === 1)}` : `No pieces here ${this.filterWhat()}`;
       }
       tabs.append(t);
     }
@@ -407,7 +456,11 @@ export class PartsPanel {
       const others = visibleCategories(region, category).filter(c => c.name !== category)
         .map(c => [c.displayName, this.hitsIn(hits, region, c.name).filter(([n]) => !hereNames.has(n)).length]).filter(([, n]) => n);
       const msg = [];
-      if (!here.length) msg.push(`No ${curName} parts match "${this.filter.trim()}".`);
+      if (this.news && !this.newHere?.holders.size) {  // Show them, on the other body than the update's new parts
+        const others = Object.entries(this.news).filter(([sk, n]) => sk !== cat.name && n?.holders.size).map(([sk]) => BODY_WORD[sk] || sk);
+        msg.push(`Nothing new for ${BODY_WORD[cat.name] || cat.name} characters.`
+          + (others.length ? ` The update added parts for ${others.join(' and ')} ones: use New ${others[0]}, or load a ${others[0]} costume.` : ''));
+      } else if (!here.length) msg.push(`No ${curName} parts ${this.filterWhat()}.`);
       if (others.length) msg.push(`${here.length ? 'More' : 'Matches'} in other categories: ${others.map(([c, n]) => `${c} (${n})`).join(', ')}. Switch the category to see them.`);
       if (msg.length) slots.append(el('div', 'filterNote', msg.join(' ')));
     }
@@ -489,7 +542,7 @@ export class PartsPanel {
         const region = this.cat.regions.find(r => r.name === this.cat.bones[bone]?.region);
         if (region) this.region = region.name;
         this.selected = bone; this.child = parent ? it.bone : null; this.render();
-        if (this.filter && !this.root.querySelector('.slot.selected')) this.setFilter('');  // the filter hid it
+        if ((this.filter || this.news) && !this.root.querySelector('.slot.selected')) { this.filter = ''; this.showNew(null); }  // the filter hid it
         (this.root.querySelector('.childSlot.selected') || this.root.querySelector('.slot.selected'))?.scrollIntoView({ block: 'nearest' });
       };
       list.append(row);
@@ -519,8 +572,8 @@ export class PartsPanel {
     const part = partOn(doc, s.bone);
     // while filtering: the matching pieces, and the one worn (so the row still names it)
     const items = piecesFor(cat, s.bone, category, { ...this.opts, keep: part?.geometry })
-      .map(([n, g]) => ({ value: n, label: g.displayName || n, data: g }))
-      .filter(it => !words.length || it.value === part?.geometry || nameMatches(it.label, words));
+      .map(([n, g]) => ({ value: n, label: g.displayName || n, data: g, fresh: this.fresh('pieces', n) }))
+      .filter(it => it.value === part?.geometry || this.matches(it.value, it.label, words));
     if (!s.required) items.unshift({ value: '', label: '— none —', data: null });
     // by what's drawn, not this.selected: opening the piece list selects the slot without redrawing, so after
     // closing the list unchanged the slot is still drawn closed. On an open slot it closes an open attachment.
@@ -528,7 +581,7 @@ export class PartsPanel {
     const row = this.cycler((s.def.displayName || s.bone).trim(), items, part?.geometry || '',
       v => pickPiece(cat, doc, s.bone, v || null, { mirror: this.opts.mirror }),
       { onOpen: () => { if (this.selected !== s.bone) { this.selected = s.bone; this.child = null; } },
-        title: words.length ? `pieces matching "${this.filter.trim()}"` : 'pieces' });
+        title: words.length ? `pieces matching "${this.filter.trim()}"` : this.news ? 'pieces with something new' : 'pieces' });
     row.querySelector('.lab').onclick = select;
     wrap.append(row);
     const state = this.ch.parts.get(s.bone);
@@ -552,12 +605,12 @@ export class PartsPanel {
     const box = el('div', 'details');
     const setField = patch => [{ bone, part: { ...partOn(doc, bone), ...patch } }];
     const mat = partMaterial(cat, part);
-    const mats = materialsFor(cat, part.geometry, { ...this.opts }).map(([n, m]) => ({ value: n, label: m.displayName || n, data: m }));
+    const mats = materialsFor(cat, part.geometry, { ...this.opts }).map(([n, m]) => ({ value: n, label: m.displayName || n, data: m, fresh: this.fresh('materials', n) }));
     if (mat && !mats.some(m => m.value === mat.name)) mats.unshift({ value: mat.name, label: mat.displayName || mat.name, data: mat });
     if (mats.length > 1) box.append(this.cycler('Material', mats, mat?.name, v => setField({ material: v, pattern: '', detail: '', diffuse: '', specular: '' }), { cls: 'sub', title: 'materials' }));
     if (mat) {
       for (const [kind, field] of [['Pattern', 'pattern'], ['Detail', 'detail'], ['Diffuse', 'diffuse'], ['Specular', 'specular']]) {
-        const list = texturesFor(cat, mat.name, kind, this.opts).map(([n, t]) => ({ value: n, label: t.displayName || n, data: t }));
+        const list = texturesFor(cat, mat.name, kind, this.opts).map(([n, t]) => ({ value: n, label: t.displayName || n, data: t, fresh: this.fresh('textures', n) }));
         if (!list.length) continue;
         const cur = drawnTexture(cat, part, mat, field);  // what's drawn, also for a required texture left empty
         if (cur && !list.some(t => t.value === cur) && cat.textures[cur]) list.unshift({ value: cur, label: cat.textures[cur].displayName || cur, data: cat.textures[cur] });
@@ -569,7 +622,7 @@ export class PartsPanel {
     box.append(this.partColors(bone, part, mat));
     for (const c of childSlots(cat, part.geometry, this.opts)) {
       const cur = partOn(doc, c.bone);
-      const items = c.options.map(([n, g]) => ({ value: n, label: g.displayName || n, data: g }));
+      const items = c.options.map(([n, g]) => ({ value: n, label: g.displayName || n, data: g, fresh: this.fresh('pieces', n) }));
       if (cur && !items.some(i => i.value === cur.geometry) && cat.geometries[cur.geometry])
         items.unshift({ value: cur.geometry, label: cat.geometries[cur.geometry].displayName, data: cat.geometries[cur.geometry] });
       if (!c.required) items.unshift({ value: '', label: '— none —', data: null });

@@ -48,7 +48,8 @@ The editor's figures are recommendations from testing it, not official requireme
    - While it's open you can also use it in any browser at `http://localhost:8765`.
    - If it can't find your game, the **Settings** box opens. Pick your Champions Online folder (for example `C:\Program Files (x86)\Steam\steamapps\common\Champions Online`) with **Browse…**, or paste the path and press Enter.
 4. **The first start takes about a minute and a half.** The editor reads your game and builds its data, showing progress on the page. After that it starts in seconds.
-   - When the game is patched, the editor notices and rebuilds by itself.
+   - When the game is patched, the editor notices and rebuilds by itself the next time it starts. Restart it after a patch to get the new parts.
+   - **What's new:** after a patch that added pieces, materials or patterns, the editor lists them once when it opens, for masculine and feminine characters. **Show them** narrows the Costume tab to the slots with something new, marked **New** (a piece with a new material, pattern or attachment is marked **+new**); the gold **New ×** tag in the filter box shows everything again. **About** opens the latest list again. The editor only tracks what's new from the first time it starts with this feature, so it never lists what was already in the game. A game update sometimes adds pieces before they're released in-game, so some of the listed parts may not be available yet, and may not be in their final state.
 
 Starting it again while the editor is already open just opens another editor window. The editor stops about 10 seconds after its last window closes.
 

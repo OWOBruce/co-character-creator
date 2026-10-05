@@ -4,7 +4,7 @@
 // with Update now in the installed editor: serve.py downloads the installer, checks it and starts it
 // (/api/update/install), so the update doesn't go through the browser's download checks.
 // Links open in the default browser through serve.py (/api/open): the editor's own window may be Edge while the
-// player's browser is another.
+// player's browser is another. Other modules can add a section (aboutSection): what's new in the game does.
 import { VERSION } from './version.js';
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
@@ -15,6 +15,8 @@ let aboutButton = null, versionLabel = null, newer = null;
 let update = { state: 'idle' };   // Update now (serve.py's UPDATE): idle, downloading, checking, starting, started, error
 let updateUI = null;              // { button, state } in the open About box
 const updating = () => ['downloading', 'checking', 'starting'].includes(update.state);
+const sections = [];              // more for the About box: make(close) -> {el, stops} or null (whats-new.js)
+export function aboutSection(make) { sections.push(make); }
 
 // is version a (0.6.10) newer than b (0.6.4)?
 function isNewer(a, b) {
@@ -168,7 +170,9 @@ export function setupAbout(button, label) {
 
     const row = el('div', 'row'), close = el('button', null, 'Close'); close.type = 'button';
     row.append(close);
-    box.append(head, ...(updateBox ? [updateBox] : []), made, bugs, thanks, legal, row);
+    const extra = sections.map(make => make(() => back.remove())).filter(Boolean);
+    for (const x of extra) stops.push(...x.stops);
+    box.append(head, ...(updateBox ? [updateBox] : []), ...extra.map(x => x.el), made, bugs, thanks, legal, row);
     back.append(box);
     document.body.append(back);
     showUpdate();  // an update already under way

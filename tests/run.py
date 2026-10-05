@@ -8,6 +8,7 @@ Checks the editor's data and code against the game install it was built from:
   stances      every player stance, mode and mood, sub-skeleton animation and body-scale track has its pose file
   checker      costume_check.py accepts every starting costume and the example costume
   index        each piece appears once, no deprecated categories, the counts in the file headers are right
+  what's new   a patch's new pieces, materials and patterns are logged; the first build and other rebuilds log nothing
   browser      viewer/test.html in headless Edge: saved costumes round-trip, starting costumes load, materials
                compile, pose buttons (--no-browser skips; --show opens a visible window instead)
 
@@ -404,6 +405,44 @@ def t_index(fail, note):
     return checked
 
 
+def t_whats_new(fail, note):
+    """What's new logs a patch's new pieces, materials and patterns, and nothing else"""
+    import whatsnew
+    tmp = tempfile.mkdtemp()
+    try:
+        known, log = os.path.join(tmp, 'known_names.json'), os.path.join(tmp, 'whats_new.json')
+        checked = 1
+        if whatsnew.record(True, known=known, log=log) is not None or not os.path.isfile(known):
+            fail('the first build logged something, or noted nothing')
+        full = whatsnew.load(known)
+        # the build before the patch: as this one, without the first three names of each kind
+        gone = {kind: {sk: full[sk][kind][:3] for sk in whatsnew.SKELETONS} for kind, _ in whatsnew.KINDS}
+        before = {sk: {kind: full[sk][kind][3:] for kind, _ in whatsnew.KINDS} for sk in whatsnew.SKELETONS}
+        whatsnew.save(known, before)
+        checked += 1
+        if whatsnew.record(False, known=known, log=log) is not None or os.path.isfile(log):
+            fail('a rebuild without a patch (a newer build.py, another folder) logged something')
+        if whatsnew.load(known) != full:
+            fail('a rebuild without a patch didn\'t note the new names')
+        whatsnew.save(known, before)
+        checked += 1
+        entry = whatsnew.record(True, known=known, log=log)
+        if not entry:
+            fail('a patch with new names logged nothing')
+        else:
+            for kind, _ in whatsnew.KINDS:
+                if entry.get(kind) != gone[kind]:
+                    fail(f'{kind}: logged {entry.get(kind)}, expected {gone[kind]}')
+        checked += 1
+        if whatsnew.record(True, known=known, log=log) is not None:
+            fail('a second patch logged the same names again')
+        if len((whatsnew.load(log) or {}).get('entries') or []) != 1:
+            fail(f'the log has {len((whatsnew.load(log) or {}).get("entries") or [])} entries, expected 1')
+        return checked
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 # ---- browser --------------------------------------------------------------------------------------
 def edge_path():
     for p in (r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe', r'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
@@ -484,7 +523,7 @@ def main():
         print('\nStopping: the other checks need a current build.')
         sys.exit(1)
     checks = [] if '--browser-only' in ARGS else (
-        [t_bins, t_mset_headers] + ([] if QUICK else [t_tracks]) + [t_models, t_placement, t_mset_js, t_stances, t_checker, t_index])
+        [t_bins, t_mset_headers] + ([] if QUICK else [t_tracks]) + [t_models, t_placement, t_mset_js, t_stances, t_checker, t_index, t_whats_new])
     for c in checks:
         test(c)
     if '--no-browser' not in ARGS:

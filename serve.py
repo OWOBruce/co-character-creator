@@ -161,6 +161,7 @@ def _build_loop():
             import build
             if build.up_to_date(folder):
                 BUILD.update(state='ready', step='', error=None)
+                note_known_names()
                 continue
         except Exception as e:  # unreadable install: report it
             BUILD.update(state='error', step='', error=f'{type(e).__name__}: {e}')
@@ -192,6 +193,15 @@ def _build_loop():
         else:
             BUILD.update(state='error', step='', error='The build failed:\n' + '\n'.join(tail))
             print('Build failed:\n' + '\n'.join(tail), flush=True)
+
+
+def note_known_names():
+    """What's new is tracked from the first start with a build (whatsnew.py): with nothing noted yet, note
+    what's in the current one. In its own process, so reading the two big catalogues doesn't grow this one."""
+    import whatsnew
+    if not os.path.isfile(whatsnew.KNOWN):
+        subprocess.Popen([sys.executable, os.path.join(HERE, 'whatsnew.py'), '--baseline'], cwd=HERE,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def use_folder(folder, save=False):
@@ -474,7 +484,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if clean == '/api/source':
             settings = load_settings()
             self.send_json({**SOURCE.info(), 'found': candidates(), 'saved': settings.get('gameFolder'),
-                            'account': settings.get('account', ''), 'checkUpdates': settings.get('checkUpdates') is not False})
+                            'account': settings.get('account', ''), 'checkUpdates': settings.get('checkUpdates') is not False,
+                            'whatsNewSeen': settings.get('whatsNewSeen', '')})
             return None
         if clean == '/api/update':  # ?force=1: Settings' Check now
             query = http.server.urllib.parse.parse_qs(self.path.split('?', 1)[1] if '?' in self.path else '')
@@ -523,6 +534,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_bytes(data, 'application/octet-stream')
             return None
         path = self.translate_path(self.path)
+        if clean == '/data/whats_new.json' and not os.path.isfile(path):  # no game update logged yet (whatsnew.py)
+            self.send_json({'entries': []})
+            return None
         if path.endswith('.json') and os.path.isfile(path) and 'gzip' in self.headers.get('Accept-Encoding', ''):
             body = gzipped(path, os.path.getmtime(path))
             self.send_response(200)
@@ -647,13 +661,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_json({'ok': True})
             self.wfile.write(self._body)
             return
-        if path == '/api/settings':  # {"account"}, {"checkUpdates"}: kept in settings.json, so every browser and window gets them
+        if path == '/api/settings':  # {"account"}, {"checkUpdates"}, {"whatsNewSeen"}: kept in settings.json, so every browser and window gets them
             s, out = load_settings(), {'ok': True}
             if 'account' in req:
                 out['account'] = str(req.get('account') or '').strip().lstrip('@')[:64]
             if 'checkUpdates' in req:
                 out['checkUpdates'] = bool(req['checkUpdates'])
-            changed = {k: v for k, v in out.items() if k != 'ok' and s.get(k, '' if k == 'account' else True) != v}
+            if 'whatsNewSeen' in req:  # the newest what's-new entry shown (whatsnew.py's id, 20261012-153000)
+                seen = str(req.get('whatsNewSeen') or '')
+                if re.fullmatch(r'\d{8}-\d{6}', seen):
+                    out['whatsNewSeen'] = seen
+            changed = {k: v for k, v in out.items() if k != 'ok' and s.get(k, True if k == 'checkUpdates' else '') != v}
             if changed:
                 s.update(changed)
                 save_settings(s)

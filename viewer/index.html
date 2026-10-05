@@ -133,6 +133,24 @@
   .aboutDialog .aboutUpdateRow button { font-size:15px; padding:2px 10px; }
   .aboutDialog .aboutUpdateState { color:var(--muted); } .aboutDialog .aboutUpdateState.bad { color:#ff9a7a; }
   .aboutDialog .row { justify-content:flex-end; margin-top:6px; }
+  .aboutWhatsNew button { font-size:14px; padding:1px 8px; margin-left:2px; }
+  /* what's new in the game (whats-new.js) */
+  .whatsNewDialog { position:static; width:min(440px, 100%); max-height:calc(100vh - 32px); box-sizing:border-box;
+                    display:flex; flex-direction:column; padding:8px 10px; }
+  .whatsNewDialog p { margin:0 2px 6px; font:400 14px/1.4 var(--body); color:var(--text); }
+  .whatsNewDialog .wnWhen { font-size:13px; color:var(--muted); }
+  .whatsNewDialog .wnCounts { font-weight:700; }
+  .wnList { overflow:auto; min-height:0; display:flex; flex-direction:column; gap:3px; margin:0 0 8px; padding-right:2px; scrollbar-color:#3d7fdc #0c2046; }
+  .wnHead { font:16px var(--title); letter-spacing:.6px; color:var(--gold); margin:6px 2px 1px;
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+  .wnItem { padding:4px 8px; border-radius:4px; background:#0006; }
+  .wnTop { display:flex; align-items:center; gap:6px; }
+  .wnName { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:700 13px var(--body); color:var(--text); }
+  .wnBody { flex:none; margin-left:auto; font:400 11px var(--body); color:var(--muted); }
+  .wnSub { font:400 11px/1.3 var(--body); color:var(--muted); }
+  .whatsNewDialog .wnNote { font-size:12px; color:var(--muted); padding:6px 8px; border-left:3px solid var(--gold); border-radius:4px; background:#0004; }
+  .whatsNewDialog .row { justify-content:flex-end; margin-top:2px; }
+  .whatsNewDialog .row button:disabled { opacity:.45; cursor:default; }
   .modalBackdrop { position:fixed; inset:0; z-index:30; display:flex; align-items:center; justify-content:center;
                    padding:16px; background:#000a; }
   .modalBackdrop .noticeDialog { position:static; width:min(400px, 100%); padding:8px 10px; }
@@ -269,6 +287,17 @@
   .filterBar input::placeholder { color:var(--muted); opacity:.75; font-weight:400; }
   .filterBar .clear { flex:none; padding:0 5px; border:0; border-image:none; background:none; font:700 17px/1 var(--body); color:var(--muted); text-shadow:none; }
   .filterBar .clear:hover { filter:none; color:var(--gold); }
+  /* Show them (whats-new.js): the filter bar's New tag (a click shows everything), and New / +new beside names */
+  .filterBar .newOnly { flex:none; display:flex; align-items:center; gap:3px; margin-left:1px; padding:1px 4px 1px 6px; border:0;
+                        border-image:none; border-radius:4px; background:var(--gold); color:#231500; text-shadow:none; font:14px/1.1 var(--title); }
+  .filterBar .newOnly[hidden] { display:none; }
+  .filterBar .newOnly span { font:700 14px/1 var(--body); }
+  .filterBar .newOnly:hover { filter:brightness(1.12); color:#000; }
+  .freshTag { flex:none; margin-left:auto; padding:0 4px; border-radius:3px; background:var(--gold); color:#231500; text-shadow:none;
+              font:12px/1.3 var(--title); letter-spacing:.4px; }
+  .freshTag.holds { background:none; color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold2); }
+  .picker .item.active .freshTag { background:#231500; color:var(--gold); }
+  .picker .item.active .freshTag.holds { background:none; color:#231500; box-shadow:inset 0 0 0 1px #231500; }
   .filterNote { font:400 12px/1.4 var(--body); color:var(--muted); padding:6px 2px; }
   .cycler { display:grid; grid-template-columns: 100px 18px 1fr 18px; align-items:center; gap:2px; margin:2px 0; }
   .cycler .lab { font:700 12px var(--body); color:var(--muted); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -454,6 +483,7 @@ import { gameSlider, editableValue, numberParser } from './js/ui.js';
 import { setupSettings, waitForBuild } from './js/source-ui.js';
 import { openSheetDialog } from './js/sheet.js';
 import { setupAbout } from './js/about.js';
+import { setupWhatsNew } from './js/whats-new.js';
 import { HeightRuler } from './js/ruler.js';
 import { CompareFigure } from './js/compare.js';
 import { setColourDropper, DROPPER_CURSOR } from './js/colors.js';
@@ -781,7 +811,7 @@ window.editor = { THREE, scene, camera, controls, ch, compare, ruler, open, shar
 const first = ['Archetype_Freeform_Free_F_01', 'Archetype_Freeform_Free_M_01'].map(n => shared.costumes.findIndex(c => c.name === n))
   .find(i => i >= 0) ?? shared.costumes.findIndex(c => /Freeform/i.test(c.name));
 sel.value = shown = String(Math.max(first, 0));
-open(shared.costumes[sel.value]);
+open(shared.costumes[sel.value]).then(() => setupWhatsNew(panel, ch));  // after a game update: what it added
 </script>
 </body>
 </html>

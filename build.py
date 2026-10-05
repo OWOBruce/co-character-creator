@@ -9,6 +9,8 @@ Reads the install's .hogg archives (gamefs.py / gamedata.py) and GameClient.exe,
   index/                       the costume index: every piece, material, pattern and colour, for people and AI
                                (build_index.py; guide in index_guide.md)
   viewer/data/build.json       which install and game version this was built from
+  viewer/data/whats_new.json   the pieces, materials and patterns each game patch added, and known_names.json,
+                               every name seen so far (whatsnew.py)
 
 It skips the work when build.json matches the install (same archives, same sizes and dates); --force
 rebuilds anyway. serve.py runs this by itself when the build is missing or the game has been patched.
@@ -86,8 +88,16 @@ def run(folder=None, force=False):
     info = current(folder)
     step(f'Reading {info["folder"]}')
     import importlib
+    import whatsnew
     from buildprogress import span, timed
-    last = (built() or {}).get('stageSeconds') or {}
+    before = built() or {}
+    last = before.get('stageSeconds') or {}
+    # what's new is what this build has and the last one didn't: note the last one's names first, if there's
+    # nothing noted yet (the first patch after an editor update that brought this)
+    try:
+        whatsnew.baseline()
+    except Exception as e:  # never stops the build
+        print(f"Could not note what's in the game for what's new: {e!r}", flush=True)
     weights = [max(1, last.get(name, typical)) for name, typical, _ in STAGES]
     edges = [sum(weights[:i]) / sum(weights) for i in range(len(weights) + 1)]
     seconds = {}
@@ -98,6 +108,14 @@ def run(folder=None, force=False):
             # imported only now: a stage's modules read what the stages before it wrote (e.g. schema.json)
             importlib.import_module(module).main()
         seconds[name] = round(time.time() - t, 1)
+    # a patch: the same install with other archives (not another folder, nor only a newer build.py)
+    patched = before.get('folder') == info['folder'] and before.get('stamp') not in (None, info['stamp'])
+    try:
+        entry = whatsnew.record(patched)
+        if entry:
+            print("What's new: " + ', '.join(f'{sum(map(len, entry[k].values()))} {k}' for k, _ in whatsnew.KINDS), flush=True)
+    except Exception as e:
+        print(f"Could not work out what's new in the game: {e!r}", flush=True)
     json.dump({**info, 'builtAt': time.strftime('%Y-%m-%d %H:%M:%S'), 'seconds': round(time.time() - t0),
                'stageSeconds': seconds}, open(BUILD_INFO, 'w', encoding='utf-8'), indent=1)
     step(f'Done in {time.time() - t0:.0f} s')
