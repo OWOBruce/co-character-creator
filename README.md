@@ -64,7 +64,7 @@ If you'd rather not run an unsigned installer, run the editor straight from this
 3. Open **PowerShell** from the Start menu. It starts in `C:\Users\<you>`, so this puts the editor in the suggested folder:
 
    ```
-   git clone https://github.com/codexheroes/co-character-creator.git "CO Costume Editor"
+   git clone https://github.com/OWOBruce/co-character-creator.git "CO Costume Editor"
    ```
 
 4. Open the new **CO Costume Editor** folder and double-click **`start.bat`**. The first time, it installs the two Python packages the editor needs (Pillow and NumPy), and the editor builds its data from your game, which takes about a minute and a half, as above. A black window stays open and shows what the editor is doing; closing it stops the editor. For a desktop shortcut, right-click `start.bat` → **Show more options** → **Send to** → **Desktop (create shortcut)**.
